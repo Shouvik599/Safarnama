@@ -377,6 +377,29 @@ Every fallback estimate must be explicitly marked:
 
 > **Estimated — live data unavailable**
 
+### 7.1 Forex Tool Multi-Tier Fallback Cascade
+
+The currency conversion tool (`src/tools/forex.py`) implements a 7-tier resilience chain ensuring all foreign amounts convert to INR deterministically:
+
+1. **Test Fixture**: `data/fixtures/mock_forex.json` (active when `use_fixture=True` or `SAFARNAMA_TEST_MODE=1`).
+2. **In-Memory Cache**: 24-hour TTL per currency pair, avoiding redundant external network calls.
+3. **Live Tier 1 (Open Access)**: ExchangeRate-API open access (`https://open.er-api.com/v6/latest/USD`, keyless).
+4. **Live Tier 2 (CDN Mirror)**: FawazAhmed Currency API (`@fawazahmed0/currency-api` via jsDelivr CDN and Cloudflare Pages mirror, keyless, 340+ currencies).
+5. **Live Tier 3 (ECB Rates)**: Frankfurter API (`https://api.frankfurter.dev/v1/latest?base=USD`, keyless European Central Bank reference rates).
+6. **Live Tier 4 (Authenticated API)**: ExchangeRate-API authenticated endpoint (`https://v6.exchangerate-api.com/v6/{KEY}/latest/USD` when `EXCHANGERATE_API_KEY` is configured).
+7. **Tier 5 (Offline Baseline)**: Built-in `OFFLINE_BASELINE_RATES` table for ~40 major travel currencies, guaranteeing the application never crashes during complete internet blackouts.
+
+### 7.2 Weather Tool Multi-Tier Fallback Cascade
+
+The weather forecasting tool (`src/tools/weather.py`) implements a 6-tier resilience chain providing structured meteorological forecasts and outdoor friendliness ratings:
+
+1. **Test Fixture**: `data/fixtures/mock_weather.json` (active when `use_fixture=True` or `SAFARNAMA_TEST_MODE=1`).
+2. **In-Memory Cache**: 3-hour TTL per coordinate/date pair.
+3. **Live Tier 1 (Primary)**: Open-Meteo Forecast API (`https://api.open-meteo.com/v1/forecast`, keyless, up to 16 days daily forecast).
+4. **Live Tier 2 (Fallback 1)**: wttr.in JSON API (`https://wttr.in/{lat},{lon}?format=j1`, keyless global fallback).
+5. **Live Tier 3 (Fallback 2)**: OpenWeatherMap 5-Day/3-Hour Forecast API (`https://api.openweathermap.org/data/2.5/forecast` using `OPENWEATHERMAP_API_KEY`).
+6. **Tier 4 (Offline Baseline)**: Deterministic seasonal climate baseline heuristic based on destination latitude, hemisphere, and calendar month solar cycles.
+
 ---
 
 # 8. Fixture-First Offline Architecture

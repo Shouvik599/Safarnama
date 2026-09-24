@@ -393,7 +393,9 @@ When significant weather risk exists, the planner can replace or adjust outdoor 
 
 The final itinerary explains weather-driven changes.
 
-Long-range forecasts should be treated according to their confidence; weak forecasts should not cause disproportionate itinerary changes.
+Weather forecast retrieval uses a multi-tier fallback strategy (Open-Meteo primary forecast, wttr.in fallback, OpenWeatherMap fallback, and offline seasonal climate heuristics) to guarantee forecast availability without failing.
+
+Long-range forecasts should be treated according to their confidence; weak forecasts or seasonal climate estimates should be clearly flagged (`is_estimated=True`) and not cause disproportionate itinerary changes.
 
 ### 6.7 International visa planning
 
@@ -442,6 +444,8 @@ The budget engine produces an itemized trip estimate covering:
 - Contingency
 
 All arithmetic is deterministic and performed outside the LLM.
+
+For international destinations, all costs quoted in foreign currencies (USD, EUR, GBP, JPY, THB, AED, etc.) are converted to INR deterministically using a multi-tier forex fallback cascade (in-memory cache, ExchangeRate-API open access, FawazAhmed CDN, Frankfurter ECB rates, authenticated API, and offline baseline table).
 
 ### 6.9 Dynamic contingency
 

@@ -644,10 +644,10 @@ Live hotel pricing unavailable
 
 The design should make the distinction between:
 
-- Live data
-- Static baseline
-- Estimated data
-- User-provided information
+- Live data (e.g. live Open-Meteo/wttr.in/OWM weather, live forex exchange rates)
+- Static baseline (e.g. static airport directory, visa rules)
+- Estimated data (explicit `is_estimated=True`, e.g. offline forex baseline rates, seasonal climate baseline heuristics, or fallback cost estimates)
+- User-provided information (budget, dates, traveler counts, preferences)
 
 clear without overwhelming the interface.
 

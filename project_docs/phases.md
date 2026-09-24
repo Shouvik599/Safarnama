@@ -364,13 +364,20 @@ src/tools/weather.py
 
 Responsibilities:
 
-- Accept coordinates
-- Accept requested dates
-- Query weather provider
-- Return structured weather data
-- Support fixture mode
-- Handle API failure
-- Respect timeouts
+- Accept coordinates (latitude, longitude)
+- Accept requested dates (start date, end date, or duration in days)
+- Query weather providers with multi-tier fallback cascade:
+  1. Test Fixture: `data/fixtures/mock_weather.json` (offline testing)
+  2. In-Memory Cache: 3-hour TTL per coordinate/date pair
+  3. Live Tier 1: Open-Meteo Forecast API (`https://api.open-meteo.com/v1/forecast`, zero auth, up to 16 days daily forecast)
+  4. Live Tier 2: wttr.in JSON API (`https://wttr.in/{lat},{lon}?format=j1`, zero auth, global fallback)
+  5. Live Tier 3: OpenWeatherMap 5-Day/3-Hour Forecast API (`https://api.openweathermap.org/data/2.5/forecast` using `OPENWEATHERMAP_API_KEY`)
+  6. Tier 4: Offline Climate Baseline Heuristic (latitude + seasonal monthly solar physics ensuring Safarnama never crashes)
+- Return structured weather data (`DailyWeatherForecast`, `WeatherForecastResult`)
+- Compute outdoor friendliness (`is_outdoor_friendly`) and summary string
+- Support fixture mode: `data/fixtures/mock_weather.json`
+- Respect network timeouts (default: 6.0s)
+- Provide cache management (`clear_weather_cache`)
 
 Test with:
 
@@ -380,12 +387,14 @@ data/fixtures/mock_weather.json
 
 Verify:
 
-- Rain probability
-- Temperature
-- Weather code
-- Date handling
-- Fixture fallback
-- Failure handling
+- Rain probability and precipitation mm
+- Maximum, minimum, and average temperatures
+- Standard meteorological WMO weather codes (0-99)
+- Date handling (ISO strings and date objects)
+- Fixture fallback and environment variable trigger (`SAFARNAMA_TEST_MODE`)
+- Multi-tier live provider fallback cascade
+- Offline climate baseline heuristic
+- Coordinates and date validation error handling
 
 ---
 
@@ -471,10 +480,17 @@ Responsibilities:
 
 - Convert amounts between foreign currencies and Indian Rupee (INR)
 - Ensure all downstream costs presented to travelers are expressed in INR
-- Provide offline baseline exchange rates fallback for resilience
-- Support optional live exchange rate provider with graceful offline fallback
+- Query forex providers with multi-tier fallback cascade:
+  1. Test Fixture: `data/fixtures/mock_forex.json` (offline testing)
+  2. In-Memory Cache: 24-hour TTL
+  3. Live Tier 1: ExchangeRate-API Open Access (`https://open.er-api.com/v6/latest/USD`, zero auth)
+  4. Live Tier 2: FawazAhmed Currency API (`@fawazahmed0/currency-api` via jsDelivr CDN and Cloudflare Pages mirror, 340+ currencies, zero auth)
+  5. Live Tier 3: Frankfurter API (`https://api.frankfurter.dev/v1/latest?base=USD`, ECB reference rates, zero auth)
+  6. Live Tier 4: ExchangeRate-API Authenticated (`https://v6.exchangerate-api.com/v6/{KEY}/latest/USD` if `EXCHANGERATE_API_KEY` present)
+  7. Tier 5: Built-in Offline Baseline Rates Table (`OFFLINE_BASELINE_RATES` for ~40 global currencies)
 - Support fixture mode: `data/fixtures/mock_forex.json`
-- Preserve conversion rate and timestamp metadata for pricing auditability
+- Preserve conversion rate, provider, `is_estimated` flag, and timestamp metadata for pricing auditability
+- Provide cache management (`clear_forex_cache`)
 
 ---
 

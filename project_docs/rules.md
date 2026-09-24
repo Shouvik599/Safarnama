@@ -180,7 +180,8 @@ The architecture is based around:
 - **pytest** — testing
 - **Ruff** — linting/formatting
 - **Google Gemini integration** — structured LLM reasoning where required
-- **Open-Meteo** — weather data
+- **Open-Meteo, wttr.in, and OpenWeatherMap** — multi-tier weather data
+- **ExchangeRate-API, FawazAhmed CDN, and Frankfurter** — multi-tier currency conversion
 - **Tavily or configured search provider** — live search/verification where required
 
 Provider-specific libraries should only be added when the corresponding integration is actually being implemented.
@@ -448,6 +449,7 @@ Examples:
 
 ```text
 mock_flights.json
+mock_forex.json
 mock_hotels.json
 mock_tavily_search.json
 mock_weather.json

@@ -421,11 +421,12 @@ uv run python
 
 ```python
 from src.tools import (
+    calculate_budget_breakdown,
+    convert_to_inr,
     get_airport,
     get_country,
     get_visa_rule,
-    calculate_budget_breakdown,
-    convert_to_inr,
+    get_weather_forecast,
 )
 
 # 1. Airport Lookup
@@ -453,8 +454,12 @@ print(f"Total: ₹{breakdown.total_with_buffer}, Status: {breakdown.variance.sta
 # 5. Deterministic Forex Conversion
 inr_cost = convert_to_inr(120.0, "USD")
 print(
-    f"Converted: ₹{inr_cost.amount_inr} (Rate: {inr_cost.rate_used}, Estimated: {inr_cost.is_estimated})"
+    f"Converted: ₹{inr_cost.converted_amount} (Rate: {inr_cost.exchange_rate}, Estimated: {inr_cost.is_estimated})"
 )
+
+# 6. Multi-Tier Weather Forecast
+weather = get_weather_forecast(latitude=35.6762, longitude=139.6503, days=5, destination="Tokyo")
+print(f"Weather: {weather.summary} (Provider: {weather.provider})")
 ```
 
 ---
@@ -475,6 +480,7 @@ uv run pytest tests/ -v
 # Run specific tool test suites
 uv run pytest tests/unit/test_calculator.py
 uv run pytest tests/unit/test_forex.py
+uv run pytest tests/unit/test_weather.py
 uv run pytest tests/unit/test_static_data.py
 ```
 
@@ -518,7 +524,8 @@ Safarnama accesses external services through strict tool interfaces with fallbac
 
 | Provider | Purpose | Tool File | Fallback & Resilience Strategy |
 |---|---|---|---|
-| **ExchangeRate-API** | Forex conversion | `src/tools/forex.py` | 24h cache $\rightarrow$ fixture mode $\rightarrow$ open tier (`open.er-api.com`) $\rightarrow$ authenticated tier $\rightarrow$ offline table of ~40 currencies. |
+| **Forex Providers** | Forex conversion | `src/tools/forex.py` | 24h cache $\rightarrow$ fixture mode $\rightarrow$ Open Access (`open.er-api.com`) $\rightarrow$ FawazAhmed CDN mirror $\rightarrow$ Frankfurter ECB rates $\rightarrow$ authenticated tier $\rightarrow$ offline table of ~40 currencies. |
+| **Weather Providers** | Meteorological forecast | `src/tools/weather.py` | 3h cache $\rightarrow$ fixture mode $\rightarrow$ Open-Meteo 16-day forecast $\rightarrow$ wttr.in fallback $\rightarrow$ OpenWeatherMap 5-day fallback $\rightarrow$ offline seasonal climate baseline heuristic. |
 | **REST Countries v5** | Country metadata | `scripts/fetch_country_profiles.py` | On-demand script; outputs preserved in `data/static/countries.json`. |
 | **OurAirports** | Airport directory | `scripts/fetch_airports.py` | Source CSV fetched and saved to `data/static/airports.json`. |
 | **Passport Index** | Visa baseline | `scripts/fetch_visa_rules.py` | Positional join of dual CSVs saved to `data/static/visa_rules.json`. |

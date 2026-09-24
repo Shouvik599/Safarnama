@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 3 in progress.** Tool 1: Deterministic Calculator & Tool 2: Forex Currency Converter complete.
+**Phase 3 in progress.** Tool 1: Deterministic Calculator, Tool 2: Forex Currency Converter, and Tool 3: Weather Forecaster complete.
 
 Do not start subsequent tools until explicitly requested.
 
 ## Current implementation phase
 
-Phase 3 — External Tool Layer (Calculator & Forex Tools complete)
+Phase 3 — External Tool Layer (Calculator, Forex, and Weather Tools complete)
 
 ## Completed functionality
 
