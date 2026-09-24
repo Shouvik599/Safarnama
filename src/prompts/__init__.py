@@ -1,0 +1,1 @@
+"""Isolated LLM prompt definitions."""

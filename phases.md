@@ -1,0 +1,1419 @@
+# Implementation Phases
+# Safarnama
+
+**Document status:** V1 Incremental Delivery Plan  
+**Purpose:** Break Safarnama into small, verifiable implementation phases so the project is built deliberately rather than attempting the complete application in one pass.
+
+---
+
+## 1. Why We Are Building in Phases
+
+Safarnama is a multi-component system involving:
+
+- Static datasets
+- Data ingestion
+- External APIs
+- Tool wrappers
+- Pydantic models
+- LLMs
+- LangGraph
+- Budget calculation
+- Optimization
+- FastAPI
+- Streaming
+- Frontend
+- Tests
+
+Trying to implement all of these simultaneously would make it difficult to determine:
+
+- Which component is broken.
+- Whether an API integration is reliable.
+- Whether data contracts are correct.
+- Whether the LangGraph state is correct.
+- Whether budget calculations are trustworthy.
+- Whether the final itinerary is actually complete.
+
+Therefore, the project will be built as a sequence of **small, independently verifiable milestones**.
+
+The guiding principle is:
+
+> **Build one capability → test it completely → verify its output → only then build on top of it.**
+
+The objective is not to reach a full-looking application quickly.
+
+The objective is to reach a **working application with reliable foundations**.
+
+---
+
+# 2. Phase Completion Rule
+
+A phase is not considered complete merely because its code exists.
+
+Each phase must have:
+
+1. Implementation
+2. Unit tests where applicable
+3. Integration tests where applicable
+4. Manual verification where useful
+5. Clear inputs and outputs
+6. Error handling
+7. Documentation of important behavior
+8. A working result that the next phase can safely depend on
+
+Do not proceed to the next major phase if the current foundation is unstable.
+
+---
+
+# 3. Development Strategy
+
+The project will follow this progression:
+
+```text
+PHASE 0
+Project Foundation
+      ↓
+PHASE 1
+Static Data Ingestion
+      ↓
+PHASE 2
+Static Data Tools
+      ↓
+PHASE 3
+External Tool Layer
+      ↓
+PHASE 4
+API Layer
+      ↓
+PHASE 5
+Domain Models
+      ↓
+PHASE 6
+Individual Planning Functions
+      ↓
+PHASE 7
+LangGraph Orchestration
+      ↓
+PHASE 8
+Budget + Optimization
+      ↓
+PHASE 9
+Complete Planning Workflow
+      ↓
+PHASE 10
+Frontend
+      ↓
+PHASE 11
+End-to-End Hardening
+```
+
+The order may be adjusted if implementation experience shows a better dependency order, but the principle of incremental verification remains mandatory.
+
+---
+
+# 4. Phase 0 — Project Foundation
+
+## Objective
+
+Create the smallest valid Python project and development environment.
+
+## Build
+
+- Repository structure
+- `pyproject.toml`
+- Python 3.11+
+- `uv` configuration
+- Ruff configuration
+- pytest configuration
+- `.gitignore`
+- `.env.example`
+- Basic package initialization
+
+Do not implement travel-planning logic yet.
+
+## Verification
+
+Confirm:
+
+```bash
+uv run python --version
+uv run pytest
+```
+
+and basic imports work.
+
+## Exit criteria
+
+- Project can be installed with `uv`.
+- Tests execute.
+- Ruff executes.
+- No dependency requires `pip`.
+- Repository structure is ready for Phase 1.
+
+---
+
+# 5. Phase 1 — Static Data Ingestion
+
+## Objective
+
+Make the two foundational ingestion scripts work correctly before building agents or the application workflow.
+
+This is the **first major implementation target**.
+
+## 5.1 Airport ingestion
+
+Implement:
+
+```text
+scripts/fetch_airports.py
+```
+
+Source:
+
+`davidmegginson/ourairports-data`
+
+Input:
+
+`airports.csv`
+
+Output:
+
+```text
+data/static/airports.json
+```
+
+Extract relevant:
+
+- IATA code
+- Airport type
+- Municipality/city
+- ISO country
+- Latitude
+- Longitude
+
+Filter according to the project requirements.
+
+## 5.2 Visa ingestion
+
+Implement:
+
+```text
+scripts/fetch_visa_rules.py
+```
+
+Source:
+
+`ilyankou/passport-index-dataset`
+
+Input:
+
+Passport Index CSV dataset.
+
+Output:
+
+```text
+data/static/visa_rules.json
+```
+
+Filter for Indian passport (`IND`) and normalize baseline destination entry rules.
+
+## 5.3 Country profile ingestion
+
+Implement:
+
+```text
+scripts/fetch_country_profiles.py
+```
+
+Source:
+
+`REST Countries v5 API` (https://restcountries.com)
+
+Output:
+
+```text
+data/static/countries.json
+```
+
+Extract and normalize:
+- ISO-2 and ISO-3 country codes
+- Common and official English names
+- Capital cities and geographic coordinates
+- Currencies (code, name, symbol)
+- Languages
+- Timezones (UTC offsets)
+- Driving side (left/right)
+- Dialing calling code
+- Flag emojis
+- Schengen Area & EU membership status
+- Border countries
+
+## 5.4 Ingestion behavior
+
+The scripts are **on-demand** in V1.
+
+Run with:
+
+```bash
+uv run python scripts/fetch_airports.py
+uv run python scripts/fetch_visa_rules.py
+uv run python scripts/fetch_country_profiles.py
+```
+
+Do not depend on a scheduled runtime ingestion process.
+
+## Verification
+
+Test:
+
+- Source retrieval
+- CSV / API payload parsing
+- Required columns / fields
+- Filtering
+- Transformation
+- JSON output
+- JSON validity
+- Required records
+- Re-running ingestion safely
+- Existing output preservation when refresh cannot be completed
+
+## Exit criteria
+
+We can reliably produce valid:
+
+```text
+data/static/airports.json
+data/static/visa_rules.json
+data/static/visa_rules_enriched.json
+data/static/countries.json
+```
+
+and tests confirm that expected records resolve.
+
+---
+
+# 6. Phase 2 — Static Data Access Layer
+
+## Objective
+
+Create the runtime interface through which application components consume static datasets.
+
+Implement:
+
+```text
+src/tools/static_data.py
+```
+
+Responsibilities:
+
+- Load static JSON
+- Build in-memory indexes
+- Resolve IATA codes
+- Resolve cities
+- Resolve countries
+- Retrieve coordinates
+- Retrieve visa baseline rules
+- Provide predictable errors for missing records
+
+The application should not repeatedly open JSON files for every lookup.
+
+## Tests
+
+Test examples such as:
+
+- `DEL`
+- `CCU`
+- `BGO`
+- `TAS`
+- `FRU`
+
+and representative visa destinations.
+
+Test:
+
+- Valid lookup
+- Missing lookup
+- Invalid input
+- Dataset loading
+- Dataset structure
+
+## Exit criteria
+
+The application can reliably query the static datasets through one tested interface.
+
+---
+
+# 7. Phase 3 — External Tool Layer
+
+## Objective
+
+Build and validate external integrations **before connecting them to LangGraph agents**.
+
+This phase is intentionally tool-first.
+
+Each tool should work independently.
+
+---
+
+## 7.1 Weather Tool
+
+Implement:
+
+```text
+src/tools/weather.py
+```
+
+Responsibilities:
+
+- Accept coordinates
+- Accept requested dates
+- Query weather provider
+- Return structured weather data
+- Support fixture mode
+- Handle API failure
+- Respect timeouts
+
+Test with:
+
+```text
+data/fixtures/mock_weather.json
+```
+
+Verify:
+
+- Rain probability
+- Temperature
+- Weather code
+- Date handling
+- Fixture fallback
+- Failure handling
+
+---
+
+## 7.2 Web Search Tool
+
+Implement:
+
+```text
+src/tools/web_search.py
+```
+
+Responsibilities:
+
+- Search configured provider
+- Support fixture mode
+- Handle failures
+- Return structured search results
+
+Test using:
+
+```text
+data/fixtures/mock_tavily_search.json
+```
+
+---
+
+## 7.3 Transport/Flight Tool
+
+Create the provider-independent interface first.
+
+Responsibilities:
+
+- Search transport options
+- Normalize provider response
+- Return validated transport data
+- Support fixtures
+- Preserve source/provenance
+
+Do not tightly couple planning logic to a single provider.
+
+---
+
+## 7.4 Hotel Tool
+
+Responsibilities:
+
+- Search hotel/place data
+- Normalize results
+- Return validated hotel options
+- Provide booking link when available
+- Return pricing when available
+- Support fixture mode
+
+The tool discovers real hotels.
+
+The fallback LLM may estimate a price when allowed, but must not invent a hotel.
+
+---
+
+## 7.5 Places/Restaurant Tool
+
+Responsibilities:
+
+- Find attractions
+- Find restaurants/food places
+- Return real place information
+- Preserve location/rating/category data where available
+- Support fixture mode
+
+Food recommendations should use this tool for actual restaurants.
+
+---
+
+## 7.6 Forex / Currency Converter Tool
+
+Implement:
+
+```text
+src/tools/forex.py
+```
+
+Responsibilities:
+
+- Convert amounts between foreign currencies and Indian Rupee (INR)
+- Ensure all downstream costs presented to travelers are expressed in INR
+- Provide offline baseline exchange rates fallback for resilience
+- Support optional live exchange rate provider with graceful offline fallback
+- Support fixture mode: `data/fixtures/mock_forex.json`
+- Preserve conversion rate and timestamp metadata for pricing auditability
+
+---
+
+## 7.7 Deterministic Calculator Tool
+
+Implement:
+
+```text
+src/tools/calculator.py
+```
+
+Responsibilities:
+
+- Provide deterministic arithmetic for travel budget aggregation
+- Strictly enforce the architectural rule prohibiting LLM-based arithmetic
+- Calculate total expenses, per-person allocations, daily averages, and contingency buffers
+- Ensure rounding consistency (e.g. 2 decimal places for financial calculations)
+- Test edge cases (zero values, single vs multi-traveler splits, buffer percentages)
+
+---
+
+## 7.8 Fallback Estimator
+
+Implement a dedicated fallback component for estimation-only behavior.
+
+It may estimate:
+
+- Hotel cost
+- Transport cost
+- Food cost
+- Activity cost
+- Miscellaneous travel costs
+
+It may not invent:
+
+- Hotels
+- Restaurants
+- Flights
+- Attractions
+- Booking links
+- Visa requirements
+
+Every estimate must carry a clear estimated status.
+
+---
+
+## 7.9 Tool Exit Criteria
+
+Before moving to planning nodes, every required tool must:
+
+- Have a defined interface.
+- Return validated structured data.
+- Handle failure.
+- Support fixture testing.
+- Have appropriate tests.
+- Respect provider boundaries.
+- Preserve provenance.
+
+---
+
+# 8. Phase 4 — API Foundation
+
+## Objective
+
+Create a working FastAPI service **before connecting the complete planning workflow**.
+
+Implement:
+
+```text
+src/api/app.py
+src/api/routes.py
+```
+
+Initially expose a simple planning/test endpoint.
+
+The API should prove:
+
+```text
+HTTP request
+   ↓
+Pydantic validation
+   ↓
+Application service
+   ↓
+Structured response
+```
+
+Do not immediately connect every agent.
+
+## Test
+
+Verify:
+
+- Valid request
+- Invalid request
+- Validation errors
+- API response schema
+- Error responses
+- CORS configuration
+- Basic streaming mechanism if selected for the endpoint
+
+## Exit criteria
+
+A client can call the API and receive a valid structured response without requiring the full planner.
+
+---
+
+# 9. Phase 5 — Domain Models
+
+## Objective
+
+Create reliable domain contracts before building complex planning nodes.
+
+Implement:
+
+```text
+src/models/
+├── trip.py
+├── itinerary.py
+├── logistics.py
+├── visa.py
+└── budget.py
+```
+
+Define and test:
+
+- Trip context
+- Party details
+- Travel scope
+- Date modes
+- Duration
+- Budget modes
+- Travel style
+- Pace
+- Activity preferences
+- Food preferences
+- Must-visits
+- Visa information
+- Logistics
+- Hotels
+- Activities
+- Day plans
+- Budget breakdown
+
+## Important
+
+Do not attempt to solve orchestration in the models.
+
+Models define contracts.
+
+## Exit criteria
+
+Invalid states are rejected and valid domain objects can be created reliably.
+
+---
+
+# 10. Phase 6 — Intake Functionality
+
+## Objective
+
+Build the first real planning capability.
+
+Implement:
+
+```text
+src/nodes/intake_node.py
+```
+
+Responsibilities:
+
+- Validate/sanitize user input
+- Resolve scope
+- Resolve origin
+- Resolve destinations
+- Resolve gateway information
+- Load coordinates
+- Create initial state
+
+Do not yet build the complete itinerary.
+
+## Test scenarios
+
+At minimum:
+
+- Domestic single destination
+- Domestic multiple states
+- International single country
+- International multiple countries
+- Invalid origin
+- Invalid destination
+- Invalid traveler count
+- Invalid budget
+
+## Exit criteria
+
+A valid user request can be converted into a reliable planning state.
+
+---
+
+# 11. Phase 7 — Visa Functionality
+
+## Objective
+
+Build and verify international visa planning independently.
+
+Implement:
+
+```text
+src/nodes/visa_node.py
+```
+
+Workflow:
+
+```text
+Static baseline
+      +
+Live verification/search
+      ↓
+Structured policy interpretation
+      ↓
+Validated visa verdict
+```
+
+Test:
+
+- Domestic bypass
+- International invocation
+- Static baseline
+- Live policy override
+- Multiple countries
+- Structured output validation
+- Failure/warning behavior
+
+The fallback LLM must not fabricate visa requirements.
+
+## Exit criteria
+
+International trips can produce a reliable visa result before being connected to the complete planner.
+
+---
+
+# 12. Phase 8 — Logistics Functionality
+
+## Objective
+
+Build transportation and accommodation planning independently.
+
+Implement:
+
+```text
+src/nodes/logistics_node.py
+```
+
+Responsibilities:
+
+- Determine appropriate transport
+- Search available options
+- Select suitable hotel
+- Estimate room requirements
+- Produce structured logistics data
+
+The node must consider:
+
+- Budget
+- Travel style
+- Travelers
+- Route
+- Availability
+- Practicality
+
+## Verification
+
+Test:
+
+- Single destination
+- Multi-destination
+- Adults + children
+- Different travel styles
+- Provider failure
+- Fallback estimates
+- Hotel booking links
+- Budget-sensitive alternatives
+
+## Exit criteria
+
+The logistics node can independently produce valid structured logistics.
+
+---
+
+# 13. Phase 9 — Experience Functionality
+
+## Objective
+
+Build attractions, food, and weather-aware itinerary planning.
+
+Implement:
+
+```text
+src/nodes/experience_node.py
+```
+
+Responsibilities:
+
+- Select attractions
+- Respect activity preferences
+- Respect must-visits
+- Select local food experiences
+- Find real restaurants
+- Apply weather adjustments
+- Group activities geographically
+- Respect pace
+- Produce day-level experiences
+
+## Weather behavior
+
+If weather makes an outdoor activity unsuitable:
+
+```text
+Original activity
+      ↓
+Weather evaluation
+      ↓
+Alternative activity
+      ↓
+Updated itinerary
+      ↓
+User-visible explanation
+```
+
+## Exit criteria
+
+The experience node can independently produce a coherent experience plan.
+
+---
+
+# 14. Phase 10 — Deterministic Budget Engine
+
+## Objective
+
+Build the financial engine before connecting optimization loops.
+
+Implement:
+
+```text
+src/tools/calculator.py
+```
+
+and:
+
+```text
+src/models/budget.py
+```
+
+The calculator handles:
+
+- Transportation
+- Lodging
+- Activities
+- Visa fees
+- Food
+- Miscellaneous
+- Dynamic contingency
+- Total
+- Variance
+- Budget status
+
+The LLM must never perform these calculations.
+
+## Tests
+
+Test:
+
+- Total trip budget
+- Per-person budget
+- Adults + children
+- Visa fee multiplication
+- Food daily estimate
+- Miscellaneous
+- Contingency
+- Under budget
+- ≤5% over
+- 5–15% over
+- >15% over
+- Floating-point/rounding behavior
+
+## Exit criteria
+
+The budget engine is independently trusted before optimization is added.
+
+---
+
+# 15. Phase 11 — Optimizer Functionality
+
+## Objective
+
+Implement budget-aware optimization without yet building the complete graph.
+
+Responsibilities:
+
+- Detect budget conflict
+- Perform permitted minor optimizations
+- Preserve hard quality guardrails
+- Generate meaningful alternatives
+- Determine when user intervention is required
+- Support re-planning of affected components
+
+Optimization rules:
+
+```text
+≤5% over
+    ↓
+Automatic minor optimization
+
+5–15% over
+    ↓
+User-visible trade-off
+
+>15% over
+    ↓
+Explain infeasibility + alternatives
+```
+
+## Exit criteria
+
+The optimizer can be tested using fixed logistics/experience inputs without requiring the complete LangGraph workflow.
+
+---
+
+# 16. Phase 12 — LangGraph Orchestration
+
+## Objective
+
+Only after individual components work should they be connected into the main graph.
+
+Implement:
+
+```text
+src/graph/
+├── state.py
+├── edges.py
+└── workflow.py
+```
+
+Connect:
+
+```text
+START
+  ↓
+Intake
+  ↓
+Scope routing
+  ├── Domestic ─────────────┐
+  │                         │
+  └── International → Visa │
+                            │
+                            ▼
+                    Parallel planning
+                    ┌───────────────┐
+                    │               │
+                    ▼               ▼
+                Logistics       Experience
+                    │               │
+                    └───────┬───────┘
+                            ▼
+                        Optimizer
+                            │
+                            ▼
+                      Final result /
+                       re-planning
+```
+
+## Verification
+
+Test:
+
+- Domestic routing
+- International routing
+- Parallel branch behavior
+- State aggregation
+- Warnings
+- Errors
+- Budget optimization
+- Re-planning
+- Reuse of unaffected work
+
+---
+
+# 17. Phase 13 — First Complete Vertical Slice
+
+## Objective
+
+Build one complete, reliable end-to-end scenario.
+
+Do **not** attempt every possible travel scenario yet.
+
+Start with one controlled scenario such as:
+
+> Indian traveler → one domestic destination → fixed dates → fixed budget → balanced pace.
+
+The complete path should work:
+
+```text
+API
+ ↓
+Intake
+ ↓
+Logistics
+ ↓
+Experience
+ ↓
+Budget
+ ↓
+Final itinerary
+```
+
+Verify the complete response.
+
+## Exit criteria
+
+A real end-to-end trip can be planned successfully without relying on untested components.
+
+---
+
+# 18. Phase 14 — International Vertical Slice
+
+Add:
+
+- Indian passport context
+- Visa node
+- Live visa verification
+- Multi-country support
+- International logistics
+- International food/activity planning
+- Visa budget
+
+Start with one country before expanding to multi-country complexity.
+
+Then test:
+
+```text
+India → International destination
+```
+
+followed by:
+
+```text
+India → Country A → Country B
+```
+
+---
+
+# 19. Phase 15 — Flexible Dates
+
+Add support for:
+
+- Exact dates
+- Flexible date window
+- Best dates within a window
+
+For optimized date selection, evaluate:
+
+- Live pricing
+- Availability
+- Weather
+- Route feasibility
+- Overall experience quality
+
+Return:
+
+- Recommended dates
+- 2–3 alternatives
+- Trade-offs
+
+This phase should be added after the basic itinerary workflow is reliable.
+
+---
+
+# 20. Phase 16 — Budget Conflict and Human Decision Flow
+
+Add the complete human-in-the-loop behavior.
+
+Test scenarios such as:
+
+```text
+Budget sufficient
+       ↓
+Normal plan
+```
+
+```text
+≤5% over
+       ↓
+Automatic minor optimization
+```
+
+```text
+5–15% over
+       ↓
+Present trade-offs
+       ↓
+User decision
+```
+
+```text
+>15% over
+       ↓
+Realistic budget
++
+Alternative paths
+       ↓
+User decision
+```
+
+Also test changing the budget and ensuring unaffected work is reused.
+
+---
+
+# 21. Phase 17 — API Streaming
+
+Once the workflow is reliable, expose useful progress through the API.
+
+Potential events:
+
+```text
+planning_started
+intake_completed
+visa_started
+visa_completed
+logistics_started
+logistics_completed
+experience_started
+experience_completed
+budget_calculated
+optimization_started
+optimization_completed
+planning_completed
+warning
+error
+```
+
+Do not expose internal implementation details unnecessarily.
+
+The client should receive meaningful planning progress.
+
+---
+
+# 22. Phase 18 — Frontend
+
+Only after the backend workflow is stable should the frontend become a major focus.
+
+The frontend should support:
+
+- Trip input
+- Destination selection
+- Date selection
+- Duration
+- Budget
+- Traveler details
+- Travel style
+- Pace
+- Activities
+- Food preferences
+- Must-visits
+- Planning progress
+- Itinerary display
+- Budget summary
+- Visa information
+- Warnings/estimates
+
+Frontend dependencies must use:
+
+```bash
+pnpm
+```
+
+not npm.
+
+---
+
+# 23. Phase 19 — End-to-End Test Matrix
+
+After the main workflow exists, expand testing systematically.
+
+## Domestic
+
+- Single city
+- Multiple cities
+- Multiple states
+- Different budgets
+- Different travel styles
+- Different paces
+
+## International
+
+- Single country
+- Multiple countries
+- Visa required
+- Visa-free baseline
+- Recent policy change
+- Multiple visa options
+
+## Budget
+
+- Under budget
+- ≤5% over
+- 5–15% over
+- >15% over
+- Impossible budget
+- User budget change
+
+## Dates
+
+- Exact
+- Flexible duration
+- Flexible date window
+- Date optimization
+
+## Weather
+
+- Good weather
+- High rain probability
+- Low-confidence long-range forecast
+- Weather substitution
+
+## Data failures
+
+- Primary API unavailable
+- Alternate provider unavailable
+- Fallback LLM estimation
+- Static dataset usage
+- Missing optional information
+
+---
+
+# 24. Phase 20 — Production Hardening
+
+Only after functional behavior is established.
+
+Focus on:
+
+- Configuration
+- Logging
+- Error reporting
+- Timeouts
+- Retry strategy
+- API rate limits
+- Security
+- Secret management
+- Performance
+- Observability
+- Documentation
+- Deployment
+
+Do not prematurely optimize production infrastructure before the core planning workflow is reliable.
+
+---
+
+# 25. Phase Dependency Map
+
+```text
+Foundation
+    │
+    ▼
+Static Data
+    │
+    ▼
+Static Data Tools
+    │
+    ├───────────────┐
+    ▼               ▼
+External Tools   Domain Models
+    │               │
+    └───────┬───────┘
+            ▼
+       Individual Nodes
+            │
+            ▼
+       LangGraph
+            │
+            ▼
+     Budget + Optimizer
+            │
+            ▼
+   Complete Backend Flow
+            │
+      ┌─────┴─────┐
+      ▼           ▼
+ International   Flexible Dates
+      │           │
+      └─────┬─────┘
+            ▼
+       API Streaming
+            │
+            ▼
+         Frontend
+            │
+            ▼
+       End-to-End Tests
+            │
+            ▼
+     Production Hardening
+```
+
+---
+
+# 26. Definition of Done
+
+A feature is considered done only when:
+
+- The implementation works.
+- Its interface is defined.
+- Inputs are validated.
+- Outputs are validated.
+- Errors are handled.
+- Tests exist.
+- Fixture behavior exists where external APIs are involved.
+- The feature does not violate `rules.md`.
+- Documentation remains consistent.
+- Existing functionality continues to work.
+
+A feature is **not done** merely because the code compiles.
+
+---
+
+# 27. AI Agent Working Rules for Phases
+
+When an AI agent is asked to implement a phase:
+
+### It should
+
+1. Read `prd.md`.
+2. Read `architecture.md`.
+3. Read `rules.md`.
+4. Read this `phases.md`.
+5. Identify the current phase.
+6. Inspect existing implementation.
+7. Implement only the requested phase.
+8. Run relevant tests.
+9. Fix failures caused by its changes.
+10. Report what was implemented and verified.
+
+### It should not
+
+- Implement later phases automatically.
+- Rewrite unrelated files.
+- Add speculative features.
+- Replace working components without reason.
+- Skip tests to save time.
+- Hide errors.
+- Claim functionality works without verification.
+- Build a vague "complete" version covering every feature superficially.
+
+---
+
+# 28. Phase Reporting Format
+
+At the end of each phase, the implementation agent should report:
+
+```text
+Phase: <name>
+
+Implemented:
+- ...
+
+Files changed:
+- ...
+
+Tests run:
+- ...
+
+Tests passed:
+- ...
+
+Known limitations:
+- ...
+
+Next recommended phase:
+- ...
+```
+
+This makes progress measurable and prevents the project from becoming a collection of partially working components.
+
+---
+
+# 29. First Implementation Milestone
+
+The first implementation milestone is deliberately narrow:
+
+> **Get the static-data ingestion tools working correctly.**
+
+Specifically:
+
+```text
+fetch_airports.py
+fetch_visa_rules.py
+```
+
+Then verify:
+
+```text
+airports.json
+visa_rules.json
+```
+
+before building:
+
+- Agents
+- LangGraph
+- API workflow
+- Frontend
+
+This gives Safarnama a reliable data foundation before application complexity is introduced.
+
+---
+
+# 30. Guiding Principle
+
+The project should never optimize for:
+
+> "How quickly can we generate the whole application?"
+
+It should optimize for:
+
+> **"How reliably can we build and verify one layer before depending on it?"**
+
+A small, verified working system is more valuable than a large implementation where every component is only partially functional.
+
+Safarnama should therefore grow as:
+
+```text
+Reliable tool
+      ↓
+Reliable component
+      ↓
+Reliable node
+      ↓
+Reliable workflow
+      ↓
+Reliable API
+      ↓
+Reliable product
+```

@@ -1,0 +1,1220 @@
+[
+  {
+    "destination": "Albania",
+    "country_code": "AL",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Algeria",
+    "country_code": "DZ",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Andorra",
+    "country_code": "AD",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Angola",
+    "country_code": "AO",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 30
+  },
+  {
+    "destination": "Antigua and Barbuda",
+    "country_code": "AG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Argentina",
+    "country_code": "AR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Armenia",
+    "country_code": "AM",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Australia",
+    "country_code": "AU",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Austria",
+    "country_code": "AT",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Azerbaijan",
+    "country_code": "AZ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Bahamas",
+    "country_code": "BS",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Bahrain",
+    "country_code": "BH",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Bangladesh",
+    "country_code": "BD",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Barbados",
+    "country_code": "BB",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Belarus",
+    "country_code": "BY",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Belgium",
+    "country_code": "BE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Belize",
+    "country_code": "BZ",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Benin",
+    "country_code": "BJ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Bhutan",
+    "country_code": "BT",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 14
+  },
+  {
+    "destination": "Bolivia",
+    "country_code": "BO",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Bosnia and Herzegovina",
+    "country_code": "BA",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Botswana",
+    "country_code": "BW",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Brazil",
+    "country_code": "BR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Brunei",
+    "country_code": "BN",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Bulgaria",
+    "country_code": "BG",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Burkina Faso",
+    "country_code": "BF",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Burundi",
+    "country_code": "BI",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Cambodia",
+    "country_code": "KH",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Cameroon",
+    "country_code": "CM",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Canada",
+    "country_code": "CA",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Cape Verde",
+    "country_code": "CV",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Central African Republic",
+    "country_code": "CF",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Chad",
+    "country_code": "TD",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Chile",
+    "country_code": "CL",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "China",
+    "country_code": "CN",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Colombia",
+    "country_code": "CO",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Comoros",
+    "country_code": "KM",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Congo",
+    "country_code": "CG",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "DR Congo",
+    "country_code": "CD",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Costa Rica",
+    "country_code": "CR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Ivory Coast",
+    "country_code": "CI",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Croatia",
+    "country_code": "HR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Cuba",
+    "country_code": "CU",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Cyprus",
+    "country_code": "CY",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Czech Republic",
+    "country_code": "CZ",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Denmark",
+    "country_code": "DK",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Djibouti",
+    "country_code": "DJ",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Dominica",
+    "country_code": "DM",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 180
+  },
+  {
+    "destination": "Dominican Republic",
+    "country_code": "DO",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Ecuador",
+    "country_code": "EC",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Egypt",
+    "country_code": "EG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "El Salvador",
+    "country_code": "SV",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Equatorial Guinea",
+    "country_code": "GQ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Eritrea",
+    "country_code": "ER",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Estonia",
+    "country_code": "EE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Swaziland",
+    "country_code": "SZ",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Ethiopia",
+    "country_code": "ET",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Fiji",
+    "country_code": "FJ",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 120
+  },
+  {
+    "destination": "Finland",
+    "country_code": "FI",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "France",
+    "country_code": "FR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Gabon",
+    "country_code": "GA",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Gambia",
+    "country_code": "GM",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Georgia",
+    "country_code": "GE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Germany",
+    "country_code": "DE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Ghana",
+    "country_code": "GH",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Greece",
+    "country_code": "GR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Grenada",
+    "country_code": "GD",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Guatemala",
+    "country_code": "GT",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Guinea",
+    "country_code": "GN",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Guinea-Bissau",
+    "country_code": "GW",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Guyana",
+    "country_code": "GY",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Haiti",
+    "country_code": "HT",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Honduras",
+    "country_code": "HN",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Hong Kong",
+    "country_code": "HK",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Hungary",
+    "country_code": "HU",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Iceland",
+    "country_code": "IS",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "India",
+    "country_code": "IN",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": -1
+  },
+  {
+    "destination": "Indonesia",
+    "country_code": "ID",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Iran",
+    "country_code": "IR",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Iraq",
+    "country_code": "IQ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Ireland",
+    "country_code": "IE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Israel",
+    "country_code": "IL",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Italy",
+    "country_code": "IT",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Jamaica",
+    "country_code": "JM",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Japan",
+    "country_code": "JP",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Jordan",
+    "country_code": "JO",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Kazakhstan",
+    "country_code": "KZ",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 14
+  },
+  {
+    "destination": "Kenya",
+    "country_code": "KE",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Kiribati",
+    "country_code": "KI",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Kosovo",
+    "country_code": "XK",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Kuwait",
+    "country_code": "KW",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Kyrgyzstan",
+    "country_code": "KG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Laos",
+    "country_code": "LA",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Latvia",
+    "country_code": "LV",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Lebanon",
+    "country_code": "LB",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Lesotho",
+    "country_code": "LS",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Liberia",
+    "country_code": "LR",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Libya",
+    "country_code": "LY",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Liechtenstein",
+    "country_code": "LI",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Lithuania",
+    "country_code": "LT",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Luxembourg",
+    "country_code": "LU",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Macao",
+    "country_code": "MO",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 30
+  },
+  {
+    "destination": "Madagascar",
+    "country_code": "MG",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Malawi",
+    "country_code": "MW",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Malaysia",
+    "country_code": "MY",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Maldives",
+    "country_code": "MV",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Mali",
+    "country_code": "ML",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Malta",
+    "country_code": "MT",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Marshall Islands",
+    "country_code": "MH",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Mauritania",
+    "country_code": "MR",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Mauritius",
+    "country_code": "MU",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Mexico",
+    "country_code": "MX",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Micronesia",
+    "country_code": "FM",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 30
+  },
+  {
+    "destination": "Moldova",
+    "country_code": "MD",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Monaco",
+    "country_code": "MC",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Mongolia",
+    "country_code": "MN",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Montenegro",
+    "country_code": "ME",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Morocco",
+    "country_code": "MA",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Mozambique",
+    "country_code": "MZ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Myanmar",
+    "country_code": "MM",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Namibia",
+    "country_code": "NA",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Nauru",
+    "country_code": "NR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Nepal",
+    "country_code": "NP",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Netherlands",
+    "country_code": "NL",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "New Zealand",
+    "country_code": "NZ",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Nicaragua",
+    "country_code": "NI",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Niger",
+    "country_code": "NE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Nigeria",
+    "country_code": "NG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "North Korea",
+    "country_code": "KP",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "North Macedonia",
+    "country_code": "MK",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Norway",
+    "country_code": "NO",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Oman",
+    "country_code": "OM",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Pakistan",
+    "country_code": "PK",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Palau",
+    "country_code": "PW",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Palestine",
+    "country_code": "PS",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Panama",
+    "country_code": "PA",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Papua New Guinea",
+    "country_code": "PG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Paraguay",
+    "country_code": "PY",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Peru",
+    "country_code": "PE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Philippines",
+    "country_code": "PH",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 14
+  },
+  {
+    "destination": "Poland",
+    "country_code": "PL",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Portugal",
+    "country_code": "PT",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Qatar",
+    "country_code": "QA",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Romania",
+    "country_code": "RO",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Russia",
+    "country_code": "RU",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Rwanda",
+    "country_code": "RW",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 30
+  },
+  {
+    "destination": "Saint Kitts and Nevis",
+    "country_code": "KN",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Saint Lucia",
+    "country_code": "LC",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Samoa",
+    "country_code": "WS",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "San Marino",
+    "country_code": "SM",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Sao Tome and Principe",
+    "country_code": "ST",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Saudi Arabia",
+    "country_code": "SA",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Senegal",
+    "country_code": "SN",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Serbia",
+    "country_code": "RS",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Seychelles",
+    "country_code": "SC",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Sierra Leone",
+    "country_code": "SL",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Singapore",
+    "country_code": "SG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Slovakia",
+    "country_code": "SK",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Slovenia",
+    "country_code": "SI",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Solomon Islands",
+    "country_code": "SB",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Somalia",
+    "country_code": "SO",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "South Africa",
+    "country_code": "ZA",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "South Korea",
+    "country_code": "KR",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "South Sudan",
+    "country_code": "SS",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Spain",
+    "country_code": "ES",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Sri Lanka",
+    "country_code": "LK",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Saint Vincent and the Grenadines",
+    "country_code": "VC",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Sudan",
+    "country_code": "SD",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Suriname",
+    "country_code": "SR",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Sweden",
+    "country_code": "SE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Switzerland",
+    "country_code": "CH",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Syria",
+    "country_code": "SY",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Taiwan",
+    "country_code": "TW",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Tajikistan",
+    "country_code": "TJ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Tanzania",
+    "country_code": "TZ",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Thailand",
+    "country_code": "TH",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 60
+  },
+  {
+    "destination": "Timor-Leste",
+    "country_code": "TL",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Togo",
+    "country_code": "TG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Tonga",
+    "country_code": "TO",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Trinidad and Tobago",
+    "country_code": "TT",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 90
+  },
+  {
+    "destination": "Tunisia",
+    "country_code": "TN",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Turkmenistan",
+    "country_code": "TM",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Tuvalu",
+    "country_code": "TV",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Turkey",
+    "country_code": "TR",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Uganda",
+    "country_code": "UG",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Ukraine",
+    "country_code": "UA",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "United Arab Emirates",
+    "country_code": "AE",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "United Kingdom",
+    "country_code": "GB",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "United States",
+    "country_code": "US",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Uruguay",
+    "country_code": "UY",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Uzbekistan",
+    "country_code": "UZ",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Vanuatu",
+    "country_code": "VU",
+    "requirement": "VISA_FREE",
+    "last_updated": "2026-09-24",
+    "allowed_stay_days": 120
+  },
+  {
+    "destination": "Vatican",
+    "country_code": "VA",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Venezuela",
+    "country_code": "VE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Vietnam",
+    "country_code": "VN",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Yemen",
+    "country_code": "YE",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Zambia",
+    "country_code": "ZM",
+    "requirement": "E_VISA",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Zimbabwe",
+    "country_code": "ZW",
+    "requirement": "VISA_ON_ARRIVAL",
+    "last_updated": "2026-09-24"
+  },
+  {
+    "destination": "Afghanistan",
+    "country_code": "AF",
+    "requirement": "STICKER_VISA_REQUIRED",
+    "last_updated": "2026-09-24"
+  }
+]

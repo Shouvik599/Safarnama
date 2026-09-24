@@ -1,0 +1,11 @@
+"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"
+2430,"VIDP","large_airport","Indira Gandhi International Airport",28.5665,77.1031,777,"AS","IN","IN-DL","New Delhi","yes","VIDP","DEL","VIDP","",,"https://en.wikipedia.org/wiki/Indira_Gandhi_International_Airport",
+2431,"VECC","large_airport","Netaji Subhash Chandra Bose International Airport",22.6549,88.4467,16,"AS","IN","IN-WB","Kolkata","yes","VECC","CCU","VECC","",,"https://en.wikipedia.org/wiki/Netaji_Subhash_Chandra_Bose_International_Airport",
+2432,"VOBL","large_airport","Kempegowda International Airport Bengaluru",13.1986,77.7066,3000,"AS","IN","IN-KA","Bengaluru","yes","VOBL","BLR","VOBL","",,"https://en.wikipedia.org/wiki/Kempegowda_International_Airport",
+2433,"ENGM","large_airport","Oslo Gardermoen Airport",60.1939,11.1004,681,"EU","NO","NO-02","Oslo","yes","ENGM","OSL","ENGM","",,"https://en.wikipedia.org/wiki/Oslo_Airport,_Gardermoen",
+2434,"UTTT","large_airport","Islam Karimov Tashkent International Airport",41.2579,69.2812,1417,"AS","UZ","UZ-TO","Tashkent","yes","UTTT","TAS","UTTT","",,"https://en.wikipedia.org/wiki/Tashkent_International_Airport",
+2435,"UAFM","medium_airport","Manas International Airport",43.0612,74.4776,2058,"AS","KG","KG-GB","Bishkek","yes","UAFM","FRU","UAFM","",,"https://en.wikipedia.org/wiki/Manas_International_Airport",
+9999,"ZZZZ","small_airport","Tiny Airstrip",0.0,0.0,0,"AS","XX","XX-XX","Nowhere","no","ZZZZ","","ZZZZ","",,,
+9998,"YYYY","heliport","City Helipad",12.0,77.0,100,"AS","IN","IN-KA","Bengaluru","yes","YYYY","","YYYY","",,,
+9997,"WWWW","large_airport","Airport Without IATA",28.0,77.0,200,"AS","IN","IN-DL","Delhi","yes","WWWW","","WWWW","",,,
+9996,"VVVV","large_airport","Airport Not Scheduled",10.0,76.0,50,"AS","IN","IN-KL","Kochi","no","VVVV","COK_NO_SCHED","VVVV","",,,

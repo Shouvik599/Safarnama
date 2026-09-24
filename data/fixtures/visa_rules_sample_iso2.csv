@@ -1,0 +1,23 @@
+Passport,Destination,Requirement
+IN,NP,visa free
+IN,BT,visa free
+IN,MV,90
+IN,MU,60
+IN,TH,visa on arrival
+IN,ID,visa on arrival
+IN,LK,e-visa
+IN,KE,e-visa
+IN,MY,30
+IN,SG,30
+IN,GB,visa required
+IN,US,visa required
+IN,CN,visa required
+IN,AU,e-visa
+IN,NZ,eta
+IN,JP,visa required
+IN,DE,visa required
+IN,FR,visa required
+IN,UZ,visa on arrival
+IN,KH,visa on arrival
+AF,NP,visa on arrival
+AF,TH,visa on arrival
