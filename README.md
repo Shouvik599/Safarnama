@@ -452,7 +452,9 @@ print(f"Total: ₹{breakdown.total_with_buffer}, Status: {breakdown.variance.sta
 
 # 5. Deterministic Forex Conversion
 inr_cost = convert_to_inr(120.0, "USD")
-print(f"Converted: ₹{inr_cost.amount_inr} (Rate: {inr_cost.rate_used}, Estimated: {inr_cost.is_estimated})")
+print(
+    f"Converted: ₹{inr_cost.amount_inr} (Rate: {inr_cost.rate_used}, Estimated: {inr_cost.is_estimated})"
+)
 ```
 
 ---

@@ -202,7 +202,7 @@ scripts/fetch_visa_rules.py
 
 Source:
 
-`ilyankou/passport-index-dataset`
+`imorte/passport-index-data`
 
 Input:
 

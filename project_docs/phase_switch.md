@@ -2,89 +2,82 @@ We have completed **Phase [PREVIOUS PHASE] — [PREVIOUS PHASE NAME]**.
 
 Now proceed to:
 
-# Phase [NEXT PHASE] — [NEXT PHASE NAME]
+**Phase [NEXT PHASE] — [NEXT PHASE NAME]**
 
 Before making changes:
 
 1. Read the requirements for this phase in `phases.md`.
 2. Review `memory.md` to confirm the actual current project state.
-3. Inspect the implementation and tests produced by the previous phase.
-4. Verify that the previous phase is actually in a usable state before building on top of it.
-5. Review `rules.md` for any constraints relevant to this phase.
-6. Review `architecture.md` if this phase involves architectural decisions.
+3. Inspect the implementation and tests from the previous phase.
+4. Review `rules.md` and `architecture.md` for relevant constraints.
+5. Review `prd.md` and `README.md` for the current documented product state.
+6. Consider **all decisions and requirements we have discussed in this conversation**, including decisions that may not yet be reflected in the project documentation.
 
-Do not assume the previous phase is correct simply because it was marked complete. Verify the relevant implementation and tests.
+Do not assume the documentation is fully up to date. The current conversation may contain newer decisions.
 
-## Scope
+### Documentation Synchronization
 
-Implement **only this phase**.
+Before implementing the phase, identify any decisions we have made during this conversation that are missing, outdated, or inconsistent in:
 
-Do not implement functionality belonging to later phases.
-
-Reuse the existing implementation wherever appropriate. Do not rewrite working code unnecessarily or introduce speculative architecture.
-
-## Implementation
-
-Follow the exact requirements defined in:
-
-* `phases.md`
-* `architecture.md`
-* `rules.md`
 * `prd.md`
+* `architecture.md`
+* `phases.md`
+* `README.md`
+* `rules.md`
+* `design.md` where relevant
 
-Keep the implementation:
+Update the appropriate documentation files so they reflect the **latest agreed project decisions**.
 
-* Modular
-* Testable
-* Deterministic where applicable
-* Consistent with the existing architecture
-* Compatible with the completed previous phases
+Do not invent new requirements. Only document decisions that were actually established.
 
-If you discover that the current architecture or previous implementation has a problem that prevents this phase from being implemented correctly, explain the issue before making a significant architectural change.
+If a new decision conflicts with an existing document, update the affected document rather than leaving contradictory information.
 
-## Verification
+### Scope
+
+Implement **only Phase [NEXT PHASE]**.
+
+Do not implement later phases or unrelated improvements.
+
+Reuse existing work and avoid unnecessary rewrites or speculative architecture.
+
+### Verification
 
 After implementation:
 
 1. Run the new/updated tests for this phase.
-2. Run the relevant existing tests from previous phases.
-3. Run lint/format/type checks used by the project where applicable.
+2. Run relevant existing tests.
+3. Run applicable lint/format/type checks.
 4. Manually verify important behavior where appropriate.
 5. Fix failures caused by your changes.
 6. Inspect the final diff.
+7. Verify that the documentation accurately describes the resulting implementation.
 
-Do not claim the phase is complete unless the implementation has actually been verified.
+Do not claim the phase is complete without verification.
 
-## Memory
+### Memory
 
-Once the phase is genuinely complete, update `memory.md`.
-
-Record:
+Once the phase is genuinely complete, update `memory.md` with:
 
 * Current phase
-* What was implemented
-* Important files changed
+* Completed work
+* Files changed
 * Important implementation decisions
-* Tests/checks performed
-* Test results
-* Known limitations/issues
+* Tests/checks and results
+* Known issues/limitations
+* Documentation updates made
 * Next recommended phase
 
-Keep `memory.md` concise. Do not duplicate the project documentation or source code.
+Keep `memory.md` concise.
 
-## Stop Condition
+### Stop Condition
 
-When Phase [NEXT PHASE] is complete and verified:
+When Phase [NEXT PHASE] is complete, verified, and the documentation is synchronized:
 
 **STOP.**
 
-Do not automatically start Phase [NEXT PHASE + 1].
+Do not automatically start the next phase.
 
-Do not add unrelated improvements unless they are required to complete the current phase.
-
-## Final Report
-
-Provide:
+### Final Report
 
 ```text
 Phase: [NEXT PHASE] — [NEXT PHASE NAME]
@@ -95,6 +88,15 @@ Implemented:
 Files changed:
 - ...
 
+Documentation synchronized:
+- prd.md: Yes/No
+- architecture.md: Yes/No
+- phases.md: Yes/No
+- rules.md: Yes/No
+- design.md: Yes/No
+- README.md: Yes/No
+- memory.md: Yes/No
+
 Tests/checks run:
 - ...
 
@@ -103,9 +105,6 @@ Verification:
 
 Known issues/limitations:
 - ...
-
-Memory updated:
-- Yes / No
 
 Next recommended phase:
 - [NEXT PHASE + 1] — [NAME]

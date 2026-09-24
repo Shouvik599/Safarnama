@@ -7,8 +7,10 @@ Architecture & Fallback Chain:
 1. In-Memory Cache: 24-hour TTL in-memory rate store to prevent redundant HTTP requests.
 2. Fixture Mode: When requested or SAFARNAMA_USE_FIXTURES=true, loads data/fixtures/mock_forex.json.
 3. Live Tier 1 (Open Access): Keyless endpoint at https://open.er-api.com/v6/latest/USD.
-4. Live Tier 2 (Authenticated): Keyed endpoint at https://v6.exchangerate-api.com/v6/{KEY}/latest/USD.
-5. Offline Baseline Table: Built-in exchange rates for ~40 global travel currencies against USD/INR.
+4. Live Tier 2 (FawazAhmed CDN): 340+ currencies via jsDelivr CDN (zero key, cloudflare-backed).
+5. Live Tier 3 (Frankfurter): European Central Bank official reference rates (zero key).
+6. Live Tier 4 (Authenticated): Keyed endpoint at https://v6.exchangerate-api.com/v6/{KEY}/latest/USD.
+7. Offline Baseline Table: Built-in exchange rates for ~40 global travel currencies against USD/INR.
    Guarantees Safarnama never crashes even with zero internet connectivity.
 """
 
@@ -210,6 +212,55 @@ def _fetch_live_open_access() -> tuple[dict[str, float], str, bool, str]:
     return rates, "open-access", False, ts
 
 
+def _fetch_live_fawazahmed() -> tuple[dict[str, float], str, bool, str]:
+    """Fetch live rates from FawazAhmed open-source currency API via jsDelivr CDN."""
+    urls = [
+        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+        "https://latest.currency-api.pages.dev/v1/currencies/usd.json",
+    ]
+    last_exc: Exception | None = None
+    for url in urls:
+        try:
+            req = urllib.request.Request(
+                url,
+                headers={"User-Agent": "Safarnama/1.0", "Accept": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=6.0) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            raw_rates = data.get("usd", {})
+            if not raw_rates:
+                continue
+            rates = {k.upper(): float(v) for k, v in raw_rates.items()}
+            rates["USD"] = 1.0
+            ts = data.get("date", datetime.now(UTC).isoformat())
+            return rates, "fawazahmed-cdn", False, ts
+        except Exception as exc:
+            last_exc = exc
+            continue
+
+    raise RuntimeError(f"FawazAhmed CDN endpoints failed: {last_exc}")
+
+
+def _fetch_live_frankfurter() -> tuple[dict[str, float], str, bool, str]:
+    """Fetch live rates from Frankfurter (ECB reference rates)."""
+    url = "https://api.frankfurter.dev/v1/latest?base=USD"
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Safarnama/1.0", "Accept": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=6.0) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+
+    raw_rates = data.get("rates", {})
+    if not raw_rates:
+        raise RuntimeError("Frankfurter returned empty rates dictionary")
+
+    rates = {k.upper(): float(v) for k, v in raw_rates.items()}
+    rates["USD"] = 1.0
+    ts = data.get("date", datetime.now(UTC).isoformat())
+    return rates, "frankfurter", False, ts
+
+
 def _fetch_live_authenticated(api_key: str) -> tuple[dict[str, float], str, bool, str]:
     """Fetch live rates from ExchangeRate-API authenticated endpoint."""
     url = f"https://v6.exchangerate-api.com/v6/{api_key.strip()}/latest/USD"
@@ -235,7 +286,8 @@ def get_rates_table(
     """Retrieve the current exchange rate dictionary (relative to USD).
 
     Follows the multi-tier fallback architecture:
-    Fixture -> In-Memory Cache -> Open Access -> Authenticated -> Offline Baseline.
+    Fixture -> In-Memory Cache -> Open Access -> FawazAhmed CDN
+    -> Frankfurter -> Authenticated -> Offline Baseline.
 
     Returns:
         tuple of (rates_dict, provider_name, is_estimated, timestamp)
@@ -257,15 +309,31 @@ def get_rates_table(
             _global_cache.timestamp,
         )
 
-    # Tier 1: Try Open Access
+    # Tier 1: Try ExchangeRate-API Open Access
     try:
         rates, provider, is_estimated, ts = _fetch_live_open_access()
         _global_cache.set(rates, provider, is_estimated, ts)
         return rates, provider, is_estimated, ts
     except Exception as exc:
-        log.warning("Open access forex endpoint failed (%s). Checking authenticated tier.", exc)
+        log.warning("Open access forex endpoint failed (%s). Trying FawazAhmed CDN tier.", exc)
 
-    # Tier 2: Try Authenticated if key configured
+    # Tier 2: Try FawazAhmed CDN (340+ currencies, zero key, CDN-backed)
+    try:
+        rates, provider, is_estimated, ts = _fetch_live_fawazahmed()
+        _global_cache.set(rates, provider, is_estimated, ts)
+        return rates, provider, is_estimated, ts
+    except Exception as exc:
+        log.warning("FawazAhmed CDN forex endpoint failed (%s). Trying Frankfurter tier.", exc)
+
+    # Tier 3: Try Frankfurter (ECB reference rates)
+    try:
+        rates, provider, is_estimated, ts = _fetch_live_frankfurter()
+        _global_cache.set(rates, provider, is_estimated, ts)
+        return rates, provider, is_estimated, ts
+    except Exception as exc:
+        log.warning("Frankfurter forex endpoint failed (%s). Checking authenticated tier.", exc)
+
+    # Tier 4: Try Authenticated if key configured
     api_key = os.getenv("EXCHANGERATE_API_KEY", "").strip()
     if api_key:
         try:
@@ -275,7 +343,7 @@ def get_rates_table(
         except Exception as exc:
             log.warning("Authenticated forex endpoint failed (%s). Falling back to baseline.", exc)
 
-    # Tier 3: Fall back to Built-in Offline Baseline
+    # Tier 5: Fall back to Built-in Offline Baseline
     ts = datetime.now(UTC).isoformat()
     _global_cache.set(OFFLINE_BASELINE_RATES, "offline-baseline", True, ts)
     return dict(OFFLINE_BASELINE_RATES), "offline-baseline", True, ts

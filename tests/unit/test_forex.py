@@ -101,8 +101,44 @@ def test_get_exchange_rate_identity() -> None:
 # ===========================================================================
 
 
+def test_fallback_to_fawazahmed_when_open_access_fails() -> None:
+    """When ExchangeRate-API open access fails, tool falls back to FawazAhmed CDN."""
+    with (
+        patch("src.tools.forex._fetch_live_open_access", side_effect=RuntimeError("Rate limited")),
+        patch(
+            "src.tools.forex._fetch_live_fawazahmed",
+            return_value=(
+                {"USD": 1.0, "INR": 92.5},
+                "fawazahmed-cdn",
+                False,
+                "2026-09-25T00:00:00Z",
+            ),
+        ),
+    ):
+        conv = convert_to_inr(100.0, "USD", use_fixture=False)
+        assert conv.provider == "fawazahmed-cdn"
+        assert conv.is_estimated is False
+        assert conv.converted_amount == 9250.0
+
+
+def test_fallback_to_frankfurter_when_fawaz_fails() -> None:
+    """When both open access and FawazAhmed fail, tool falls back to Frankfurter."""
+    with (
+        patch("src.tools.forex._fetch_live_open_access", side_effect=RuntimeError("Failed")),
+        patch("src.tools.forex._fetch_live_fawazahmed", side_effect=RuntimeError("CDN down")),
+        patch(
+            "src.tools.forex._fetch_live_frankfurter",
+            return_value=({"USD": 1.0, "INR": 93.0}, "frankfurter", False, "2026-09-25T00:00:00Z"),
+        ),
+    ):
+        conv = convert_to_inr(100.0, "USD", use_fixture=False)
+        assert conv.provider == "frankfurter"
+        assert conv.is_estimated is False
+        assert conv.converted_amount == 9300.0
+
+
 def test_fallback_to_offline_baseline_when_network_fails() -> None:
-    """When both live endpoints fail, tool must fall back to built-in baseline rates."""
+    """When all live endpoints fail, tool must fall back to built-in baseline rates."""
     with patch(
         "urllib.request.urlopen",
         side_effect=urllib.error.URLError("Network unreachable"),

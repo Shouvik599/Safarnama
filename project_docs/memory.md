@@ -74,14 +74,30 @@ Phase 3 — External Tool Layer (Calculator & Forex Tools complete)
   - Multi-tier resilience chain:
     1. In-memory cache with 24-hour TTL to prevent redundant network requests.
     2. Fixture mode (`data/fixtures/mock_forex.json`) for 100% offline, zero-quota testing.
-    3. Live Tier 1: Keyless open access endpoint (`https://open.er-api.com/v6/latest/USD`).
-    4. Live Tier 2: Authenticated endpoint (`https://v6.exchangerate-api.com/v6/{KEY}/latest/USD`) if `EXCHANGERATE_API_KEY` present.
-    5. Offline baseline rates table: built-in dictionary for ~40 global currencies guaranteeing Safarnama never crashes.
+    3. Live Tier 1: ExchangeRate-API Open Access (`https://open.er-api.com/v6/latest/USD`).
+    4. Live Tier 2: FawazAhmed Currency API (`@fawazahmed0/currency-api` via jsDelivr CDN and Cloudflare Pages mirror, 340+ currencies, zero auth).
+    5. Live Tier 3: Frankfurter API (`https://api.frankfurter.dev/v1/latest?base=USD`, European Central Bank reference rates, zero auth).
+    6. Live Tier 4: ExchangeRate-API Authenticated (`https://v6.exchangerate-api.com/v6/{KEY}/latest/USD` if `EXCHANGERATE_API_KEY` present).
+    7. Offline baseline rates table: built-in dictionary for ~40 global currencies guaranteeing Safarnama never crashes.
   - Functions: `convert_to_inr`, `convert_currency`, `get_exchange_rate`, `get_rates_table`, `clear_forex_cache`.
   - Pydantic model: `ForexConversion` with full provenance, rate, timestamps, and `is_estimated` flag.
   - Typed exceptions: `ForexError`, `UnsupportedCurrencyError`, `ForexNetworkError`.
   - Fully re-exported in `src/tools/__init__.py`.
-  - 17 unit tests in `tests/unit/test_forex.py`.
+  - 19 unit tests in `tests/unit/test_forex.py`.
+- **Tool 3: Deterministic Weather Forecaster (`src/tools/weather.py`)**:
+  - Provides structured multi-day forecasts (temperatures, precipitation probability, WMO conditions, outdoor friendliness) by destination coordinates.
+  - Multi-tier resilience cascade:
+    1. Fixture mode (`data/fixtures/mock_weather.json`) for 100% deterministic offline unit testing.
+    2. In-memory cache with 3-hour TTL per coordinate/date pair.
+    3. Live Tier 1: Open-Meteo Forecast API (`https://api.open-meteo.com/v1/forecast`, zero auth, up to 16 days daily forecast).
+    4. Live Tier 2: wttr.in JSON API (`https://wttr.in/{lat},{lon}?format=j1`, zero auth, global fallback).
+    5. Live Tier 3: OpenWeatherMap 5-Day/3-Hour Forecast API (`https://api.openweathermap.org/data/2.5/forecast` using `OPENWEATHERMAP_API_KEY`).
+    6. Tier 4: Offline Climate Baseline Heuristic (latitude + seasonal solar declination cycle physics guaranteeing Safarnama never crashes).
+  - Functions: `get_weather_forecast`, `is_outdoor_friendly`, `generate_weather_summary`, `clear_weather_cache`.
+  - Pydantic models: `DailyWeatherForecast`, `WeatherForecastResult` in `src/models/weather.py` (re-exported in `src.models` and `src.tools`).
+  - Typed exceptions: `WeatherError`, `InvalidCoordinatesError`, `InvalidDateRangeError`, `WeatherAPIError`.
+  - Fully re-exported in `src/tools/__init__.py`.
+  - 17 unit tests in `tests/unit/test_weather.py`.
 
 ## Important files/modules
 
@@ -92,11 +108,13 @@ Phase 3 — External Tool Layer (Calculator & Forex Tools complete)
 | `src/models/airport.py` | Canonical Pydantic model: `Airport` |
 | `src/models/country.py` | Canonical Pydantic models: `CountryProfile`, `CurrencyInfo`, `LanguageInfo`, `Coordinates` |
 | `src/models/visa.py` | Canonical Pydantic models: `BaseVisaRule`, `VisaOption`, `EnrichedVisaRecord` |
+| `src/models/weather.py` | Canonical Pydantic models: `DailyWeatherForecast`, `WeatherForecastResult` |
 | `src/models/__init__.py` | Re-exports all domain models |
 | `src/tools/static_data.py` | Phase 2 in-memory static data access layer & query functions |
 | `src/tools/calculator.py` | Phase 3 deterministic travel budget calculator |
-| `src/tools/forex.py` | Phase 3 deterministic foreign currency converter |
-| `src/tools/__init__.py` | Re-exports static data, calculator, and forex tools API |
+| `src/tools/forex.py` | Phase 3 deterministic foreign currency converter with multi-tier live fallbacks |
+| `src/tools/weather.py` | Phase 3 deterministic weather forecasting tool with multi-tier live fallbacks |
+| `src/tools/__init__.py` | Re-exports static data, calculator, forex, and weather tools API |
 | `scripts/fetch_airports.py` | Airport ingestion script |
 | `scripts/fetch_visa_rules.py` | Visa rules ingestion — dual-CSV source |
 | `scripts/enrich_visa_rules.py` | On-demand Gemini enrichment script |
@@ -106,7 +124,9 @@ Phase 3 — External Tool Layer (Calculator & Forex Tools complete)
 | `data/static/visa_rules_enriched.json` | Generated: 199 enriched destination rules for Indian passport |
 | `data/static/countries.json` | Generated: 250 enriched country profiles |
 | `data/fixtures/mock_forex.json` | Generated: 35+ currency rates fixture for offline forex testing |
-| `tests/unit/test_forex.py` | 17 deterministic forex unit tests |
+| `data/fixtures/mock_weather.json` | Generated: multi-day weather forecast fixture for offline weather testing |
+| `tests/unit/test_weather.py` | 17 deterministic weather unit tests |
+| `tests/unit/test_forex.py` | 19 deterministic forex unit tests |
 | `tests/unit/test_calculator.py` | 56 deterministic calculator unit tests |
 | `tests/unit/test_static_data.py` | 31 static data access layer unit tests |
 | `tests/unit/test_fetch_airports.py` | 23 airport ingestion tests |
@@ -115,13 +135,13 @@ Phase 3 — External Tool Layer (Calculator & Forex Tools complete)
 | `tests/unit/test_enrich_visa_rules.py` | 6 visa enrichment tests |
 | `tests/unit/test_project_foundation.py` | 2 Phase 0 smoke tests |
 | `README.md` | Standalone developer and AI agent entry point & project guide |
-| `.env.example` | Env var template incl. `GEMINI_ENRICHMENT_API_KEY`, `TAVILY_VISA_ENRICHMENT_API_KEY`, `REST_COUNTRIES_API_KEY`, `EXCHANGERATE_API_KEY` |
+| `.env.example` | Env var template incl. `GEMINI_ENRICHMENT_API_KEY`, `TAVILY_VISA_ENRICHMENT_API_KEY`, `REST_COUNTRIES_API_KEY`, `EXCHANGERATE_API_KEY`, `OPENWEATHERMAP_API_KEY` |
 
 ## Tests completed and their status
 
-- `uv run pytest tests/ -v`: **193 passed**
+- `uv run pytest tests/ -v`: **212 passed**
 - `uv run ruff check .`: **all checks passed**
-- `uv run ruff format --check .`: **36 files already formatted**
+- `uv run ruff format --check .`: **40 files already formatted**
 - Airport ingestion script executed successfully: 3244 airports written
 - Visa rules ingestion script executed successfully: 199 rules written
 - Visa rules enrichment script executed successfully: 199 enriched rules written
@@ -234,7 +254,7 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 **Phase 3 — External Tool Layer** (implement one tool at a time upon confirmation):
 - [x] **Tool 1: Calculator Tool** (`src/tools/calculator.py`) — Deterministic budget arithmetic (complete)
 - [x] **Tool 2: Forex Tool** (`src/tools/forex.py`) — Currency conversion to INR + offline baseline rates + fixture (complete)
-- [ ] **Tool 3: Weather Tool** (`src/tools/weather.py`) — Open-Meteo API wrapper + `data/fixtures/mock_weather.json`
+- [x] **Tool 3: Weather Tool** (`src/tools/weather.py`) — Multi-tier forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) + fixture (complete)
 - [ ] **Tool 4: Web Search Tool** (`src/tools/web_search.py`) — Tavily Search wrapper + `data/fixtures/mock_tavily_search.json`
 - [ ] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Route search adapter + `data/fixtures/mock_flights.json`
 - [ ] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Real hotel discovery adapter + `data/fixtures/mock_hotels.json`

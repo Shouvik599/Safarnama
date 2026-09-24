@@ -3,6 +3,7 @@
 from src.models.airport import Airport
 from src.models.country import Coordinates, CountryProfile, CurrencyInfo, LanguageInfo
 from src.models.visa import BaseVisaRule, EnrichedVisaRecord, VisaOption
+from src.models.weather import DailyWeatherForecast, WeatherForecastResult
 
 __all__ = [
     "Airport",
@@ -10,7 +11,9 @@ __all__ = [
     "Coordinates",
     "CountryProfile",
     "CurrencyInfo",
+    "DailyWeatherForecast",
     "EnrichedVisaRecord",
     "LanguageInfo",
     "VisaOption",
+    "WeatherForecastResult",
 ]

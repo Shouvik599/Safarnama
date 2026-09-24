@@ -1,0 +1,81 @@
+{
+  "default": [
+    {
+      "day_offset": 0,
+      "temp_max_c": 28.5,
+      "temp_min_c": 19.0,
+      "temp_avg_c": 23.8,
+      "precipitation_probability": 10,
+      "precipitation_mm": 0.0,
+      "weather_code": 1,
+      "condition": "Mainly clear",
+      "is_outdoor_friendly": true
+    },
+    {
+      "day_offset": 1,
+      "temp_max_c": 27.0,
+      "temp_min_c": 18.5,
+      "temp_avg_c": 22.8,
+      "precipitation_probability": 25,
+      "precipitation_mm": 0.5,
+      "weather_code": 2,
+      "condition": "Partly cloudy",
+      "is_outdoor_friendly": true
+    },
+    {
+      "day_offset": 2,
+      "temp_max_c": 23.0,
+      "temp_min_c": 17.0,
+      "temp_avg_c": 20.0,
+      "precipitation_probability": 85,
+      "precipitation_mm": 18.2,
+      "weather_code": 63,
+      "condition": "Moderate rain",
+      "is_outdoor_friendly": false
+    },
+    {
+      "day_offset": 3,
+      "temp_max_c": 24.5,
+      "temp_min_c": 16.5,
+      "temp_avg_c": 20.5,
+      "precipitation_probability": 70,
+      "precipitation_mm": 9.4,
+      "weather_code": 61,
+      "condition": "Slight rain",
+      "is_outdoor_friendly": false
+    },
+    {
+      "day_offset": 4,
+      "temp_max_c": 26.0,
+      "temp_min_c": 17.5,
+      "temp_avg_c": 21.8,
+      "precipitation_probability": 20,
+      "precipitation_mm": 0.0,
+      "weather_code": 3,
+      "condition": "Overcast",
+      "is_outdoor_friendly": true
+    },
+    {
+      "day_offset": 5,
+      "temp_max_c": 29.0,
+      "temp_min_c": 19.5,
+      "temp_avg_c": 24.2,
+      "precipitation_probability": 5,
+      "precipitation_mm": 0.0,
+      "weather_code": 0,
+      "condition": "Clear sky",
+      "is_outdoor_friendly": true
+    },
+    {
+      "day_offset": 6,
+      "temp_max_c": 30.0,
+      "temp_min_c": 20.0,
+      "temp_avg_c": 25.0,
+      "precipitation_probability": 10,
+      "precipitation_mm": 0.0,
+      "weather_code": 0,
+      "condition": "Clear sky",
+      "is_outdoor_friendly": true
+    }
+  ]
+}
