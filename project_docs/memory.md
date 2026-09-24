@@ -114,6 +114,7 @@ Phase 3 — External Tool Layer (Calculator & Forex Tools complete)
 | `tests/unit/test_fetch_country_profiles.py` | 8 country profile ingestion tests |
 | `tests/unit/test_enrich_visa_rules.py` | 6 visa enrichment tests |
 | `tests/unit/test_project_foundation.py` | 2 Phase 0 smoke tests |
+| `README.md` | Standalone developer and AI agent entry point & project guide |
 | `.env.example` | Env var template incl. `GEMINI_ENRICHMENT_API_KEY`, `TAVILY_VISA_ENRICHMENT_API_KEY`, `REST_COUNTRIES_API_KEY`, `EXCHANGERATE_API_KEY` |
 
 ## Tests completed and their status
