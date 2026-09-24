@@ -9,7 +9,7 @@
 ```text
 Status: In Active Development
 Current Phase: Phase 3 — External Tool Layer (In Progress)
-Current Milestone: Tool 1 (Calculator) & Tool 2 (Forex) complete; Tools 3–8 pending
+Current Milestone: Tools 1 (Calculator), 2 (Forex), and 3 (Weather) complete; Tools 4–8 pending
 Test Suite: 193 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
