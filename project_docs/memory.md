@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 4 — API Layer complete.** FastAPI endpoints (`/health`, `/api/v1/tools/status`, `/api/v1/estimate`, `/api/v1/plan/preview`, `/api/v1/stream/events`) implemented and verified with 262 passing unit tests.
+**Phase 5 — Domain Models complete.** Five domain model files implemented in `src/models/` with 89 new unit tests (351 total passing). All lint/format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 4 — API Layer (Completed)
+Phase 5 — Domain Models (Completed)
 
 ## Completed functionality
 
@@ -55,6 +55,15 @@ Phase 4 — API Layer (Completed)
 - `src/api/__init__.py`: Public package exports.
 - `tests/unit/test_api.py`: 10 comprehensive unit tests covering endpoints, validation error responses (422), domain exception handling (400), CORS headers, and SSE streaming.
 
+### Phase 5 (Domain Models — 100% complete)
+- **`src/models/trip.py`**: Trip context models including enums (`TravelScope`, `DateMode`, `BudgetMode`, `TravelStyle`, `Pace`, `FoodImportance`) and composites (`TripParty`, `TripDates` with cross-field mode validation, `TripBudget` with per-person multiplier, `FoodPreferences`, `PreviousTravelEntry`, `TripContext`).
+- **`src/models/itinerary.py`**: Itinerary models including enums (`Daypart`, `ActivityCategory`) and composites (`PointOfInterest`, `ActivitySlot` with weather-substitution metadata, `DayMeal`, `DayPlan` with `total_day_cost_inr` property, `ExperiencePlan`).
+- **`src/models/logistics.py`**: Logistics models (`TransportLeg`, `HotelStay`, `LogisticsPlan`). Domain-layer contracts separate from tool-layer transport/hotel result models.
+- **`src/models/visa.py`** (extended): Added planning domain models (`VisaRequirementStatus` enum with 8 values including `DOMESTIC_BYPASS`, `VisaCountryVerdict`, `VisaVerdict` with Schengen optimization flag) to the existing data-ingestion models.
+- **`src/models/budget.py`**: Budget models including enums (`BudgetStatus`, `OptimizationAction`) and composites (`CostBreakdown` with `subtotal_inr` property, `ContingencyConfig` with trip-complexity factors, `BudgetVariance` with cross-field consistency validator, `OptimizationResult`, `BudgetBreakdown`). Enforces architecture rule that LLMs may not perform arithmetic.
+- **`src/models/__init__.py`** (updated): Exports all Phase 1–5 models with clear section comments.
+- **`tests/unit/test_domain_models.py`**: 89 unit tests covering all five model files — valid construction, defaults, field validation, cross-field validators, enum values, properties, and invalid state rejection.
+
 ## Important files/modules
 
 | Path | Role |
@@ -64,6 +73,11 @@ Phase 4 — API Layer (Completed)
 | `src/api/routes.py` | FastAPI router endpoints |
 | `src/api/app.py` | FastAPI application factory, CORS & exception handlers |
 | `src/api/__init__.py` | Package re-exports |
+| `src/models/trip.py` | Trip context, party, dates, budget, food, preferences |
+| `src/models/itinerary.py` | POIs, activity slots, day plans, experience plan |
+| `src/models/logistics.py` | Transport legs, hotel stays, logistics plan |
+| `src/models/visa.py` | Visa ingestion models + VisaVerdict planning domain |
+| `src/models/budget.py` | Cost breakdown, contingency, variance, optimization, budget breakdown |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
 | `src/prompts/visa_prompts.py` | Isolated prompt templates for visa enrichment |
 | `src/tools/static_data.py` | In-memory indexed static data store |
@@ -75,14 +89,15 @@ Phase 4 — API Layer (Completed)
 | `src/tools/hotels.py` | Multi-tier hotel search tool |
 | `src/tools/places.py` | Multi-tier points of interest and dining tool |
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
+| `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
-- `uv run pytest`: **262 passed**
+- `uv run pytest`: **351 passed** (262 pre-Phase 5 + 89 new domain model tests)
 - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-- `uv run ruff format --check src/ tests/ scripts/`: **50 files formatted**
+- `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
 
 ## Decisions that should not be changed without discussion
 
@@ -93,12 +108,16 @@ Phase 4 — API Layer (Completed)
 - Prompt Isolation Rule (Rule 9.3 in `rules.md`): All LLM prompt strings are strictly isolated in `src/prompts/`.
 - All financial arithmetic goes through `src/tools/calculator.py` using `Decimal`.
 - API routes validate all requests with Pydantic and return structured JSON errors (`APIErrorResponse`) on failures.
+- Domain models in `src/models/` are frozen (`model_config = ConfigDict(frozen=True)`) — they are value objects.
+- `VisaVerdict` and related planning domain models live in `src/models/visa.py` alongside the data-ingestion models rather than a separate file, to keep all visa-related types co-located.
+- `BudgetVariance` cross-field validator rejects inconsistent `variance_inr` values (must equal `projected_total - user_budget` within ₹1).
+- `TripDates` cross-field validator enforces required fields per `DateMode` (EXACT requires start+end; FLEXIBLE requires start+duration; FIND_BEST requires window+duration).
 
-## Phase 4 Completion Status
+## Phase 5 Completion Status
 
-Phase 4 — API Layer is **100% complete, fully tested, and verified**.
+Phase 5 — Domain Models is **100% complete, fully tested, and verified**.
 
 ## Next recommended phase
 
-**Phase 5 — Domain Models**:
-Define and test canonical Pydantic domain models in `src/models/` (`trip.py`, `itinerary.py`, `logistics.py`, `visa.py`, `budget.py`) for state orchestration.
+**Phase 6 — Intake Functionality**:
+Implement `src/nodes/intake_node.py` to validate/sanitize user input, resolve origin/destination, load coordinates, and create initial planning state from a `TripContext`. Test with domestic, international, multi-destination, and invalid-input scenarios.
