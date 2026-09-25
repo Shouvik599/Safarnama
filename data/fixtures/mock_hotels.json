@@ -1,0 +1,180 @@
+{
+  "destinations": {
+    "TOKYO": {
+      "destination": "TOKYO",
+      "provider_used": "fixture",
+      "total_found": 3,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-26T00:00:00Z",
+      "options": [
+        {
+          "hotel_id": "HTL-TYO-101",
+          "name": "Keio Plaza Hotel Tokyo",
+          "destination": "TOKYO",
+          "star_rating": 4,
+          "user_rating": 8.6,
+          "reviews_count": 4820,
+          "address": "2-2-1 Nishi-Shinjuku, Shinjuku-ku, Tokyo, Japan",
+          "latitude": 35.6895,
+          "longitude": 139.6917,
+          "price_per_night_inr": 14250.0,
+          "amenities": ["Free Wi-Fi", "Swimming Pool", "Fitness Center", "Restaurant", "Bar"],
+          "room_type": "Superior Double Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/keio_plaza_tokyo.jpg",
+          "booking_url": "https://safarnama.local/hotels/keio-plaza-tokyo",
+          "provider": "fixture"
+        },
+        {
+          "hotel_id": "HTL-TYO-102",
+          "name": "Shinjuku Washington Hotel Main",
+          "destination": "TOKYO",
+          "star_rating": 3,
+          "user_rating": 7.8,
+          "reviews_count": 6150,
+          "address": "3-2-9 Nishi-Shinjuku, Shinjuku-ku, Tokyo, Japan",
+          "latitude": 35.6872,
+          "longitude": 139.6908,
+          "price_per_night_inr": 7800.0,
+          "amenities": ["Free Wi-Fi", "24-Hour Front Desk", "Restaurant", "Air Conditioning"],
+          "room_type": "Standard Twin Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/shinjuku_washington.jpg",
+          "booking_url": "https://safarnama.local/hotels/shinjuku-washington",
+          "provider": "fixture"
+        },
+        {
+          "hotel_id": "HTL-TYO-103",
+          "name": "Park Hyatt Tokyo",
+          "destination": "TOKYO",
+          "star_rating": 5,
+          "user_rating": 9.4,
+          "reviews_count": 2310,
+          "address": "3-7-1-2 Nishi-Shinjuku, Shinjuku-ku, Tokyo, Japan",
+          "latitude": 35.6855,
+          "longitude": 139.6911,
+          "price_per_night_inr": 48500.0,
+          "amenities": ["Spa & Wellness", "Indoor Pool", "Fine Dining", "Sky Bar", "Concierge"],
+          "room_type": "Park Deluxe King Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/park_hyatt_tokyo.jpg",
+          "booking_url": "https://safarnama.local/hotels/park-hyatt-tokyo",
+          "provider": "fixture"
+        }
+      ]
+    },
+    "MUMBAI": {
+      "destination": "MUMBAI",
+      "provider_used": "fixture",
+      "total_found": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-26T00:00:00Z",
+      "options": [
+        {
+          "hotel_id": "HTL-BOM-101",
+          "name": "The Taj Mahal Palace Mumbai",
+          "destination": "MUMBAI",
+          "star_rating": 5,
+          "user_rating": 9.3,
+          "reviews_count": 8940,
+          "address": "Apollo Bunder, Colaba, Mumbai, Maharashtra 400001, India",
+          "latitude": 18.9217,
+          "longitude": 72.8333,
+          "price_per_night_inr": 24500.0,
+          "amenities": ["Heritage View", "Swimming Pool", "Spa", "Butler Service", "Multiple Restaurants"],
+          "room_type": "Luxury Sea View Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/taj_mahal_palace.jpg",
+          "booking_url": "https://safarnama.local/hotels/taj-mahal-palace-mumbai",
+          "provider": "fixture"
+        },
+        {
+          "hotel_id": "HTL-BOM-102",
+          "name": "Trident Nariman Point Mumbai",
+          "destination": "MUMBAI",
+          "star_rating": 5,
+          "user_rating": 8.9,
+          "reviews_count": 5120,
+          "address": "Nariman Point, Mumbai, Maharashtra 400021, India",
+          "latitude": 18.9265,
+          "longitude": 72.8228,
+          "price_per_night_inr": 13800.0,
+          "amenities": ["Marine Drive View", "Outdoor Pool", "Fitness Center", "Free Wi-Fi"],
+          "room_type": "Superior City View Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/trident_nariman_point.jpg",
+          "booking_url": "https://safarnama.local/hotels/trident-nariman-point",
+          "provider": "fixture"
+        }
+      ]
+    },
+    "PARIS": {
+      "destination": "PARIS",
+      "provider_used": "fixture",
+      "total_found": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-26T00:00:00Z",
+      "options": [
+        {
+          "hotel_id": "HTL-PAR-101",
+          "name": "Novotel Paris Les Halles",
+          "destination": "PARIS",
+          "star_rating": 4,
+          "user_rating": 8.5,
+          "reviews_count": 3410,
+          "address": "8 Place Marguerite de Navarre, 75001 Paris, France",
+          "latitude": 48.8606,
+          "longitude": 2.3468,
+          "price_per_night_inr": 18500.0,
+          "amenities": ["Central Location", "Free Wi-Fi", "Restaurant", "Bar", "Family Rooms"],
+          "room_type": "Executive Double Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/novotel_paris.jpg",
+          "booking_url": "https://safarnama.local/hotels/novotel-paris-les-halles",
+          "provider": "fixture"
+        },
+        {
+          "hotel_id": "HTL-PAR-102",
+          "name": "Hotel Malte - Astotel",
+          "destination": "PARIS",
+          "star_rating": 4,
+          "user_rating": 9.1,
+          "reviews_count": 1890,
+          "address": "63 Rue de Richelieu, 75002 Paris, France",
+          "latitude": 48.8682,
+          "longitude": 2.3375,
+          "price_per_night_inr": 15200.0,
+          "amenities": ["Free Open Bar Snacks", "Wi-Fi", "Air Conditioning", "24-Hour Front Desk"],
+          "room_type": "Classic Room",
+          "thumbnail_url": "https://images.safarnama.local/hotels/hotel_malte_paris.jpg",
+          "booking_url": "https://safarnama.local/hotels/hotel-malte-astotel",
+          "provider": "fixture"
+        }
+      ]
+    }
+  },
+  "default_fallback": {
+    "destination": "DESTINATION",
+    "provider_used": "fixture",
+    "total_found": 1,
+    "is_fallback": true,
+    "is_estimated": true,
+    "timestamp": "2026-09-26T00:00:00Z",
+    "options": [
+      {
+        "hotel_id": "HTL-GEN-101",
+        "name": "Grand City Hotel & Resort",
+        "destination": "DESTINATION",
+        "star_rating": 4,
+        "user_rating": 8.2,
+        "reviews_count": 1200,
+        "address": "100 Central Boulevard, City Center",
+        "latitude": 28.6139,
+        "longitude": 77.2090,
+        "price_per_night_inr": 6500.0,
+        "amenities": ["Free Wi-Fi", "Restaurant", "Air Conditioning", "24-Hour Desk"],
+        "room_type": "Standard Deluxe Room",
+        "thumbnail_url": "https://images.safarnama.local/hotels/default_grand_hotel.jpg",
+        "booking_url": "https://safarnama.local/hotels/default-grand-hotel",
+        "provider": "fixture"
+      }
+    ]
+  }
+}

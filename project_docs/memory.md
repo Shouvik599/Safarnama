@@ -287,6 +287,6 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 - [x] **Tool 3: Weather Tool** (`src/tools/weather.py`) — Multi-tier forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) + fixture (complete)
 - [x] **Tool 4: Web Search Tool** (`src/tools/web_search.py`) — Multi-tier search (Tavily, DuckDuckGo, Firecrawl, offline fixture) + cache + fixture (complete)
 - [x] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Multi-tier route search (Sky Scraper, Flights Sky, IRCTC, transport.rest, web search fallback, distance physics engine) + fixture (complete)
-- [ ] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Real hotel discovery adapter + `data/fixtures/mock_hotels.json`
+- [x] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Multi-tier hotel search (SerpApi Google Hotels, Booking.com on RapidAPI, OpenStreetMap Nominatim, web search fallback, location heuristic) + `data/fixtures/mock_hotels.json` (complete)
 - [ ] **Tool 7: Places & Dining Tool** (`src/tools/places.py`) — Attractions & restaurants adapter + `data/fixtures/mock_places.json`
 - [ ] **Tool 8: Fallback Estimator** (`src/tools/fallback_estimator.py`) — Gemini structured fallback cost estimation
