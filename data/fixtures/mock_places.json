@@ -1,0 +1,188 @@
+{
+  "destinations": {
+    "TOKYO": {
+      "destination": "TOKYO",
+      "provider_used": "fixture",
+      "total_found": 3,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-26T00:00:00Z",
+      "items": [
+        {
+          "place_id": "PLC-TYO-101",
+          "name": "Senso-ji Temple",
+          "destination": "TOKYO",
+          "category": "ATTRACTION",
+          "rating": 4.7,
+          "reviews_count": 42100,
+          "price_level": "Free",
+          "estimated_cost_inr": 0.0,
+          "address": "2-3-1 Asakusa, Taito City, Tokyo 111-0032, Japan",
+          "latitude": 35.7148,
+          "longitude": 139.7967,
+          "description": "Ancient Buddhist temple located in Asakusa, Tokyo's oldest temple.",
+          "open_hours": "06:00 - 17:00",
+          "thumbnail_url": "https://images.safarnama.local/places/sensoji_temple.jpg",
+          "maps_url": "https://safarnama.local/places/sensoji-temple",
+          "provider": "fixture"
+        },
+        {
+          "place_id": "PLC-TYO-102",
+          "name": "Ichiran Ramen Shinjuku",
+          "destination": "TOKYO",
+          "category": "RESTAURANT",
+          "rating": 4.5,
+          "reviews_count": 12800,
+          "price_level": "$$",
+          "estimated_cost_inr": 850.0,
+          "address": "3-34-11 Shinjuku, Shinjuku City, Tokyo, Japan",
+          "latitude": 35.6905,
+          "longitude": 139.7018,
+          "description": "World-famous tonkotsu ramen featuring individual dining booths.",
+          "open_hours": "Open 24 hours",
+          "thumbnail_url": "https://images.safarnama.local/places/ichiran_ramen.jpg",
+          "maps_url": "https://safarnama.local/places/ichiran-ramen-shinjuku",
+          "provider": "fixture"
+        },
+        {
+          "place_id": "PLC-TYO-103",
+          "name": "Shinjuku Gyoen National Garden",
+          "destination": "TOKYO",
+          "category": "ATTRACTION",
+          "rating": 4.6,
+          "reviews_count": 28400,
+          "price_level": "$",
+          "estimated_cost_inr": 300.0,
+          "address": "11 Naitomachi, Shinjuku City, Tokyo 160-0014, Japan",
+          "latitude": 35.6852,
+          "longitude": 139.7101,
+          "description": "Large park and garden blending French Formal, English Landscape, and Traditional Japanese styles.",
+          "open_hours": "09:00 - 16:30",
+          "thumbnail_url": "https://images.safarnama.local/places/shinjuku_gyoen.jpg",
+          "maps_url": "https://safarnama.local/places/shinjuku-gyoen",
+          "provider": "fixture"
+        }
+      ]
+    },
+    "MUMBAI": {
+      "destination": "MUMBAI",
+      "provider_used": "fixture",
+      "total_found": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-26T00:00:00Z",
+      "items": [
+        {
+          "place_id": "PLC-BOM-101",
+          "name": "Gateway of India",
+          "destination": "MUMBAI",
+          "category": "ATTRACTION",
+          "rating": 4.6,
+          "reviews_count": 89000,
+          "price_level": "Free",
+          "estimated_cost_inr": 0.0,
+          "address": "Apollo Bandar, Colaba, Mumbai, Maharashtra 400001, India",
+          "latitude": 18.9220,
+          "longitude": 72.8347,
+          "description": "Iconic arch monument built during the 20th century overlooking the Arabian Sea.",
+          "open_hours": "Open 24 hours",
+          "thumbnail_url": "https://images.safarnama.local/places/gateway_of_india.jpg",
+          "maps_url": "https://safarnama.local/places/gateway-of-india",
+          "provider": "fixture"
+        },
+        {
+          "place_id": "PLC-BOM-102",
+          "name": "Leopold Cafe",
+          "destination": "MUMBAI",
+          "category": "CAFE",
+          "rating": 4.2,
+          "reviews_count": 15400,
+          "price_level": "$$",
+          "estimated_cost_inr": 950.0,
+          "address": "Shahid Bhagat Singh Rd, Colaba, Mumbai, Maharashtra 400001, India",
+          "latitude": 18.9228,
+          "longitude": 72.8318,
+          "description": "Historic restaurant and bar in Colaba, famous for multi-cuisine dining.",
+          "open_hours": "07:30 - 00:00",
+          "thumbnail_url": "https://images.safarnama.local/places/leopold_cafe.jpg",
+          "maps_url": "https://safarnama.local/places/leopold-cafe",
+          "provider": "fixture"
+        }
+      ]
+    },
+    "PARIS": {
+      "destination": "PARIS",
+      "provider_used": "fixture",
+      "total_found": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-26T00:00:00Z",
+      "items": [
+        {
+          "place_id": "PLC-PAR-101",
+          "name": "Eiffel Tower",
+          "destination": "PARIS",
+          "category": "ATTRACTION",
+          "rating": 4.7,
+          "reviews_count": 310000,
+          "price_level": "$$",
+          "estimated_cost_inr": 2400.0,
+          "address": "Champ de Mars, 5 Av. Anatole France, 75007 Paris, France",
+          "latitude": 48.8584,
+          "longitude": 2.2945,
+          "description": "Wrought-iron lattice tower on the Champ de Mars, global cultural icon of France.",
+          "open_hours": "09:30 - 22:45",
+          "thumbnail_url": "https://images.safarnama.local/places/eiffel_tower.jpg",
+          "maps_url": "https://safarnama.local/places/eiffel-tower",
+          "provider": "fixture"
+        },
+        {
+          "place_id": "PLC-PAR-102",
+          "name": "Café de Flore",
+          "destination": "PARIS",
+          "category": "CAFE",
+          "rating": 4.1,
+          "reviews_count": 9200,
+          "price_level": "$$$",
+          "estimated_cost_inr": 1800.0,
+          "address": "172 Blvd Saint-Germain, 75006 Paris, France",
+          "latitude": 48.8542,
+          "longitude": 2.3326,
+          "description": "Famous coffeehouse in Saint-Germain-des-Prés, historic hub of writers and philosophers.",
+          "open_hours": "07:30 - 01:30",
+          "thumbnail_url": "https://images.safarnama.local/places/cafe_de_flore.jpg",
+          "maps_url": "https://safarnama.local/places/cafe-de-flore",
+          "provider": "fixture"
+        }
+      ]
+    }
+  },
+  "default_fallback": {
+    "destination": "DESTINATION",
+    "provider_used": "fixture",
+    "total_found": 1,
+    "is_fallback": true,
+    "is_estimated": true,
+    "timestamp": "2026-09-26T00:00:00Z",
+    "items": [
+      {
+        "place_id": "PLC-GEN-101",
+        "name": "Central Heritage Square & Park",
+        "destination": "DESTINATION",
+        "category": "ATTRACTION",
+        "rating": 4.4,
+        "reviews_count": 2100,
+        "price_level": "Free",
+        "estimated_cost_inr": 0.0,
+        "address": "1 Main Street, City Center",
+        "latitude": 28.6139,
+        "longitude": 77.2090,
+        "description": "Historic public square and park in the city center.",
+        "open_hours": "08:00 - 20:00",
+        "thumbnail_url": "https://images.safarnama.local/places/default_square.jpg",
+        "maps_url": "https://safarnama.local/places/default-square",
+        "provider": "fixture"
+      }
+    ]
+  }
+}

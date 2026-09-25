@@ -278,6 +278,14 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 - `VisaOption` and `EnrichedVisaRecord` live in `src/models/visa.py` and are re-exported
   from `src.models`. The script inserts the project root into `sys.path` at runtime so it
   can import `src.*` without the package being pip-installed.
+- `Places & Dining Tool` (`src/tools/places.py`) uses a 5-tier fallback cascade:
+  1) Fixture mode (`data/fixtures/mock_places.json`)
+  2) In-memory cache (1-hour TTL)
+  3) Live Tier 1: SerpApi Google Maps Engine (`engine=google_maps`, `SERPAPI_KEY`)
+  4) Live Tier 2: OpenStreetMap Nominatim & Overpass API (Keyless)
+  5) Live Tier 3: Web Search Tool (`search_web()`)
+  6) Tier 4: Category heuristic baseline (`_estimate_category_heuristic()`).
+  Categories supported: `ATTRACTION`, `RESTAURANT`, `CAFE`. Zero external API keys strictly required.
 
 ## Next recommended step
 
@@ -288,5 +296,5 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 - [x] **Tool 4: Web Search Tool** (`src/tools/web_search.py`) — Multi-tier search (Tavily, DuckDuckGo, Firecrawl, offline fixture) + cache + fixture (complete)
 - [x] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Multi-tier route search (Sky Scraper, Flights Sky, IRCTC, transport.rest, web search fallback, distance physics engine) + fixture (complete)
 - [x] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Multi-tier hotel search (SerpApi Google Hotels, Booking.com on RapidAPI, OpenStreetMap Nominatim, web search fallback, location heuristic) + `data/fixtures/mock_hotels.json` (complete)
-- [ ] **Tool 7: Places & Dining Tool** (`src/tools/places.py`) — Attractions & restaurants adapter + `data/fixtures/mock_places.json`
+- [x] **Tool 7: Places & Dining Tool** (`src/tools/places.py`) — Points of interest & dining adapter + SerpApi Google Maps + Nominatim OSM + web search fallback + offline category baseline + `data/fixtures/mock_places.json` (complete)
 - [ ] **Tool 8: Fallback Estimator** (`src/tools/fallback_estimator.py`) — Gemini structured fallback cost estimation

@@ -313,10 +313,10 @@ src/tools/
 ├── static_data.py
 ├── weather.py
 ├── web_search.py
-├── forex.py
-├── flights.py              # future/provider-specific implementation
-├── hotels.py               # future/provider-specific implementation
-├── places.py               # future/provider-specific implementation
+├── forex.py                # currency conversion adapter
+├── transport.py            # transport & flights search adapter
+├── hotels.py               # hotels search adapter
+├── places.py               # points of interest & dining adapter
 └── fallback_estimator.py   # dedicated fallback LLM
 ```
 
