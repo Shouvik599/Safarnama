@@ -527,7 +527,7 @@ Responsibilities:
 
 ## 7.8 Fallback Estimator
 
-Implement a dedicated fallback component for estimation-only behavior.
+Implement a dedicated fallback component for estimation-only behavior (`src/tools/fallback_estimator.py`).
 
 It may estimate:
 
@@ -536,6 +536,7 @@ It may estimate:
 - Food cost
 - Activity cost
 - Miscellaneous travel costs
+- Total budget baseline
 
 It may not invent:
 
@@ -546,7 +547,15 @@ It may not invent:
 - Booking links
 - Visa requirements
 
-Every estimate must carry a clear estimated status.
+Every estimate must carry a clear estimated status (`is_estimated=True`).
+
+Multi-provider LLM Fallback Cascade:
+1. **Test Fixture Mode**: `data/fixtures/mock_fallback_estimates.json`
+2. **In-Memory Cache**: 24-hour TTL
+3. **Live Tier 1**: Google Gemini API (`gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.5-pro`)
+4. **Live Tier 2**: Groq API (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, `mixtral-8x7b-32768`)
+5. **Live Tier 3**: NVIDIA NIM API (`meta/llama-3.3-70b-instruct`, `meta/llama-3.1-8b-instruct`, `mistralai/mistral-7b-instruct-v0.3`)
+6. **Tier 4**: Offline Rule-Based Mathematical Baseline (`_estimate_heuristic_baseline`)
 
 ---
 

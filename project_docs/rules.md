@@ -263,6 +263,14 @@ LLMs must not:
 - Invent application procedures
 - Treat generated knowledge as current live provider data
 
+## 9.3 Prompt Isolation Rule
+
+**All LLM prompt strings must be isolated in `src/prompts/` modules.**
+
+Do NOT hardcode system prompts, user prompts, or instruction strings inline inside tool adapters (`src/tools/`), ingestion scripts (`scripts/`), or graph planning nodes (`src/planning/`).
+
+Each domain or component using LLM prompts must import prompt builder functions from its dedicated file in `src/prompts/` (e.g., `estimator_prompts.py`, `visa_prompts.py`, `experience_prompts.py`).
+
 ---
 
 # 10. Deterministic Calculation Rule

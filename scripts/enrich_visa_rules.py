@@ -58,6 +58,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 # Allow importing from src.* when run directly
 sys.path.insert(0, str(PROJECT_ROOT))
 from src.models.visa import EnrichedVisaRecord, VisaOption  # noqa: E402
+from src.prompts.visa_prompts import build_visa_enrichment_prompt  # noqa: E402
 
 log = logging.getLogger(__name__)
 
@@ -222,53 +223,7 @@ def build_enrichment_prompt(
     search_context: str,
 ) -> str:
     """Build the multi-option enrichment prompt for Gemini."""
-    baseline_json = json.dumps(baseline, indent=2)
-    today = datetime.date.today().isoformat()
-    return f"""You are a travel visa information specialist researching entry requirements
-for Indian passport holders.
-
-Today's date: {today}
-Destination: {destination}
-Country code: {baseline.get("country_code", "??")}
-
-Static baseline (may be outdated — use as context only):
-{baseline_json}
-
-Verified web search research results:
-{search_context if search_context else "No external search data. Rely on official knowledge."}
-
-Instructions:
-1. Base your output on the verified search data above and official immigration policies
-   for Indian passport holders entering {destination}.
-
-2. **CRITICAL — Multi-option capture**: Look for ALL overlapping or alternative
-   legal entry pathways that currently coexist. For example:
-   - A new visa-free regime may still coexist with a legacy e-visa or
-     visa-on-arrival option.
-   - Some countries offer both a free short-stay AND a paid longer-stay option.
-   - Include EVERY currently valid legal pathway in the ``options`` array.
-   - Do NOT collapse multiple options into a single status string.
-
-3. For each option, provide:
-   - visa_type: short human-readable label
-   - duration_days: maximum permitted stay in days (integer, or null)
-   - cost_inr: fee in INR (0.0 for free; convert from foreign currency)
-   - entry_type: VISA_FREE | CONDITIONAL_FREE | VISA_ON_ARRIVAL |
-                 E_VISA | STICKER_VISA_REQUIRED | UNKNOWN
-   - entry_port_restriction: airport/port restrictions (null if none)
-   - requires_loi: true only if a Letter of Invitation is mandatory
-   - notes: brief factual note on conditions/changes/pilots (null if none)
-   - source: list of credible/official source URLs confirming this option
-
-4. For ``selected_option``: choose the most favourable currently active
-   pathway (lowest cost, longest duration, fewest restrictions). This must
-   be one of the entries in the ``options`` array.
-
-5. Set ``last_updated`` to today: {today}.
-
-6. Use ONLY officially confirmed information. Do NOT invent hotels,
-   booking links, flight routes, prices, or unverified policies.
-"""
+    return build_visa_enrichment_prompt(destination, baseline, search_context)
 
 
 # ---------------------------------------------------------------------------

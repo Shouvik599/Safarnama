@@ -2,6 +2,12 @@
 
 from src.models.airport import Airport
 from src.models.country import Coordinates, CountryProfile, CurrencyInfo, LanguageInfo
+from src.models.fallback_estimator import (
+    CostCategory,
+    EstimateRequest,
+    FallbackEstimateResult,
+    TravelTier,
+)
 from src.models.hotels import HotelOption, HotelSearchResult
 from src.models.places import PlaceItem, PlacesSearchResult
 from src.models.transport import TransportSearchResult, TransportSegment
@@ -13,10 +19,13 @@ __all__ = [
     "Airport",
     "BaseVisaRule",
     "Coordinates",
+    "CostCategory",
     "CountryProfile",
     "CurrencyInfo",
     "DailyWeatherForecast",
     "EnrichedVisaRecord",
+    "EstimateRequest",
+    "FallbackEstimateResult",
     "HotelOption",
     "HotelSearchResult",
     "LanguageInfo",
@@ -25,6 +34,7 @@ __all__ = [
     "SearchResultItem",
     "TransportSearchResult",
     "TransportSegment",
+    "TravelTier",
     "VisaOption",
     "WeatherForecastResult",
     "WebSearchResult",

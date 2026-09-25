@@ -286,10 +286,19 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
   5) Live Tier 3: Web Search Tool (`search_web()`)
   6) Tier 4: Category heuristic baseline (`_estimate_category_heuristic()`).
   Categories supported: `ATTRACTION`, `RESTAURANT`, `CAFE`. Zero external API keys strictly required.
+- `Fallback Estimator` (`src/tools/fallback_estimator.py`) uses a multi-provider, multi-model fallback cascade for estimation-only numerical cost bounds (`is_estimated=True`):
+  1) Fixture mode (`data/fixtures/mock_fallback_estimates.json`)
+  2) In-memory cache (24-hour TTL)
+  3) Live Tier 1: Google Gemini API (`gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.5-pro`)
+  4) Live Tier 2: Groq API (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, `mixtral-8x7b-32768`)
+  5) Live Tier 3: NVIDIA NIM API (`meta/llama-3.3-70b-instruct`, `meta/llama-3.1-8b-instruct`, `mistralai/mistral-7b-instruct-v0.3`)
+  6) Tier 4: Offline Rule-Based Mathematical Baseline (`_estimate_heuristic_baseline`).
+  Strictly estimation-only: Never invents concrete entity names (no invented hotel/restaurant names).
+- **Prompt Isolation Rule (Rule 9.3 in `rules.md`)**: All LLM prompt templates are strictly isolated in `src/prompts/` (`estimator_prompts.py`, `visa_prompts.py`). Inline hardcoded prompt strings in tools/scripts are forbidden.
 
-## Next recommended step
+## Phase 3 Completion Status
 
-**Phase 3 — External Tool Layer** (implement one tool at a time upon confirmation):
+All 8 foundational external and deterministic tools in **Phase 3 — External Tool Layer** are now **100% complete, fully tested, and verified**:
 - [x] **Tool 1: Calculator Tool** (`src/tools/calculator.py`) — Deterministic budget arithmetic (complete)
 - [x] **Tool 2: Forex Tool** (`src/tools/forex.py`) — Currency conversion to INR + offline baseline rates + fixture (complete)
 - [x] **Tool 3: Weather Tool** (`src/tools/weather.py`) — Multi-tier forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) + fixture (complete)
@@ -297,4 +306,9 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 - [x] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Multi-tier route search (Sky Scraper, Flights Sky, IRCTC, transport.rest, web search fallback, distance physics engine) + fixture (complete)
 - [x] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Multi-tier hotel search (SerpApi Google Hotels, Booking.com on RapidAPI, OpenStreetMap Nominatim, web search fallback, location heuristic) + `data/fixtures/mock_hotels.json` (complete)
 - [x] **Tool 7: Places & Dining Tool** (`src/tools/places.py`) — Points of interest & dining adapter + SerpApi Google Maps + Nominatim OSM + web search fallback + offline category baseline + `data/fixtures/mock_places.json` (complete)
-- [ ] **Tool 8: Fallback Estimator** (`src/tools/fallback_estimator.py`) — Gemini structured fallback cost estimation
+- [x] **Tool 8: Fallback Estimator** (`src/tools/fallback_estimator.py`) — Multi-provider LLM fallback cost estimation (Gemini, Groq, NVIDIA NIM, offline rule baseline) + `data/fixtures/mock_fallback_estimates.json` (complete)
+
+## Next recommended step
+
+**Phase 4 — API Layer / Phase 5 — Domain Contracts & Planning Functions**:
+- Proceed to implementing FastAPI endpoints (`src/api/`) or foundational planning state schemas (`src/planning/`) for trip orchestration.
