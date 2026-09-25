@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 4 — API Layer (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete) & Phase 4 (FastAPI endpoints, CORS, validation & SSE streaming complete)
-Test Suite: 262 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 5 — Domain Models (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete)
+Test Suite: 351 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project is currently in the domain modeling and workflow planning stage. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, and the core domain models. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
 
 | Phase | Description | Status |
 |---|---|---|
@@ -23,8 +23,8 @@ Safarnama is being built in small, verified, test-driven phases. The project is 
 | **Phase 2** | Static Data Access Layer & In-Memory Store | **Complete** |
 | **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Transport, Hotels, Places, Estimator) | **Complete** |
 | **Phase 4** | API Layer (FastAPI endpoints, validation & SSE streaming) | **Complete** |
-| **Phase 5** | Domain Models (Travel state, Itinerary, Budget schemas) | Planned |
-| **Phase 6** | Individual Planning Functions | Planned |
+| **Phase 5** | Domain Models (Trip context, Itinerary, Logistics, Visa verdict, Budget schemas) | **Complete** |
+| **Phase 6** | Individual Planning Functions (Intake, Visa, Logistics, Experience, Optimizer nodes) | Planned |
 | **Phase 7** | LangGraph Orchestration & Multi-Agent Graph | Planned |
 | **Phase 8** | Budget Engine & Optimization | Planned |
 | **Phase 9** | Complete Planning Workflow & Verification | Planned |
@@ -55,33 +55,43 @@ Generic conversational AI chatbots fail at this task because they:
 
 ### Currently Implemented Capabilities
 
-- **Global Airport Directory**: 3,244 commercial passenger airports worldwide loaded into memory and indexed by IATA code, city, and ISO country code.
-- **Country Intelligence & Profiles**: 250 sovereign countries and territories indexed by ISO-2, ISO-3, and English names, including currencies, languages, capitals, Schengen membership, driving sides, and coordinates.
+- **Global Airport Directory**: 3,244 commercial passenger airports worldwide loaded into memory and indexed by IATA code, city, and ISO country code (`src/models/airport.py`, `src/tools/static_data.py`).
+- **Country Intelligence & Profiles**: 250 sovereign countries and territories indexed by ISO-2, ISO-3, and English names, including currencies, languages, capitals, Schengen membership, driving sides, and coordinates (`src/models/country.py`).
 - **Indian Passport Visa Regulations**:
   - Baseline rules for 199 international destinations categorized into standardized regimes (`VISA_FREE`, `VISA_ON_ARRIVAL`, `E_VISA`, `STICKER_VISA_REQUIRED`).
-  - Enriched multi-option tourist pathways for 199 destinations with exact visa fees in INR, stay limits, application requirements, and source references.
-- **High-Performance In-Memory Query Layer**: Fast, zero-disk-I/O cached lookups with custom typed exceptions and intelligent IST time difference calculations.
+  - Enriched multi-option tourist pathways for 199 destinations with exact visa fees in INR, stay limits, application requirements, and source references (`src/models/visa.py`).
+- **High-Performance In-Memory Query Layer**: Fast, zero-disk-I/O cached lookups with custom typed exceptions and intelligent IST time difference calculations (`src/tools/static_data.py`).
 - **Deterministic Budget Calculator**:
   - Exact financial arithmetic via Python `Decimal` with `ROUND_HALF_UP` rounding to 2 decimal places.
   - Expense category summation (transport, hotels, food, activities, visa, misc, contingency buffer).
   - Per-person splits, daily averages, and room requirement calculations.
-  - Budget variance analysis categorizing outcomes as `UNDER_BUDGET`, `EXACT`, or `OVER_BUDGET`.
+  - Budget variance analysis categorizing outcomes as `UNDER_BUDGET`, `EXACT`, or `OVER_BUDGET` (`src/tools/calculator.py`).
 - **Deterministic Forex Currency Converter**:
   - Multi-tier conversion to INR: In-Memory Cache (24h TTL) $\rightarrow$ Fixture Mode $\rightarrow$ Live Open-Access Tier $\rightarrow$ Live Authenticated Tier $\rightarrow$ Built-in Offline Baseline Table (~40 global currencies).
-  - Explicit provenance and reliability tracking with `is_estimated` flags.
-- **100% Offline Test Harness**: Comprehensive test suite with zero live API calls during unit testing.
+  - Explicit provenance and reliability tracking with `is_estimated` flags (`src/tools/forex.py`).
+- **External Travel Tools Suite (8/8 Complete)**:
+  - **Weather Tool (`src/tools/weather.py`)**: Multi-tier forecasts (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) with weather hazard detection.
+  - **Web Search Tool (`src/tools/web_search.py`)**: Multi-tier travel search (Tavily, DuckDuckGo, Firecrawl, offline fixture).
+  - **Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, IRCTC rail, European rail, web search fallback, distance physics engine).
+  - **Hotel Tool (`src/tools/hotels.py`)**: Multi-tier lodging search (SerpApi Google Hotels, Booking.com, Nominatim OSM, web search fallback, location heuristic).
+  - **Places & Dining Tool (`src/tools/places.py`)**: Points of interest and dining search (SerpApi Google Maps, Nominatim OSM, web search fallback, category baseline).
+  - **Fallback Estimator (`src/tools/fallback_estimator.py`)**: Multi-provider LLM fallback cost estimation (Gemini, Groq, NVIDIA NIM, offline rule baseline) with isolated prompts in `src/prompts/estimator_prompts.py`.
+- **FastAPI REST API Layer (`src/api/`)**:
+  - Application factory with CORS middleware and global typed error handling.
+  - Endpoints: `GET /health`, `GET /api/v1/tools/status`, `POST /api/v1/estimate`, `POST /api/v1/plan/preview`, `GET /api/v1/stream/events` (SSE streaming).
+- **Domain Modeling Layer (`src/models/`)**:
+  - Immutable, frozen Pydantic v2 domain schemas (`TripContext`, `TripDates`, `TripParty`, `TripBudget`, `FoodPreferences`, `ExperiencePlan`, `DayPlan`, `ActivitySlot`, `PointOfInterest`, `LogisticsPlan`, `TransportLeg`, `HotelStay`, `VisaVerdict`, `BudgetBreakdown`, `BudgetVariance`).
+  - Strict cross-field validations enforcing mode-dependent date constraints and mathematical variance equality.
+- **100% Offline Test Harness**: 351 unit tests running completely offline with zero network reliance or live API key dependencies.
 
 ### Planned Capabilities (Future Phases)
 
-- **Weather-Aware Planning Tool** (Open-Meteo integration) — *Phase 3*
-- **Live Travel Research Tool** (Tavily search wrapper) — *Phase 3*
-- **Flight & Route Adapter** — *Phase 3*
-- **Hotel Discovery Adapter** — *Phase 3*
-- **Attractions & Dining Discovery Adapter** — *Phase 3*
-- **LLM Fallback Estimator** (Gemini structured cost estimation when live pricing is missing) — *Phase 3*
-- **LangGraph Multi-Agent Architecture** (Intake, Visa, Logistics, Experience, Optimizer nodes) — *Phase 7*
-- **FastAPI Backend Server & SSE Streaming** — *Phase 4 & 11*
-- **Warm Indian-Inspired Web Frontend** (Vite / React) — *Phase 10*
+- **Individual Planning Nodes** (Intake, Visa, Logistics, Experience, Optimizer) — *Phase 6*
+- **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 7*
+- **Budget Engine & Optimization Loop** (Feasibility checking, cost cutbacks, trade-off proposals) — *Phase 8*
+- **Complete End-to-End Planning Workflow & Verification** — *Phase 9*
+- **Warm Indian-Inspired Web Frontend** (Vite / React / TypeScript / pnpm) — *Phase 10*
+- **End-to-End Integration, SSE Client Hook & Hardening** — *Phase 11*
 
 ---
 
@@ -157,30 +167,32 @@ Generic conversational AI chatbots fail at this task because they:
                 ┌──────────────┐  ┌──────────────┐
                 │Final Itinery │  │Trade-off Plan│
                 └──────────────┘  └──────────────┘
-```
+`
 
 ### Current Implementation vs Planned Components
 
 ```text
-IMPLEMENTED & VERIFIED                     PLANNED (Upcoming Phases)
+IMPLEMENTED & VERIFIED (Phases 0–5)            PLANNED (Upcoming Phases)
 ┌─────────────────────────────────┐        ┌───────────────────────────────┐
-│ src/tools/static_data.py        │        │ src/api/                      │
-│ - In-Memory Singleton Store     │        │ - FastAPI endpoints & models  │
-│ - 3,244 Airports (IATA/City)    │        ├───────────────────────────────┤
-│ - 250 Countries (ISO/Time/Bloc) │        │ src/graph/ & src/nodes/       │
-│ - 199 Visa Rules & Enriched     │        │ - LangGraph state & nodes     │
-├─────────────────────────────────┤        ├───────────────────────────────┤
-│ src/tools/calculator.py         │        │ src/tools/ (Pending)          │
-│ - Decimal Arithmetic            │        │ - weather.py (Open-Meteo)     │
-│ - Category Sum & Buffer         │        │ - web_search.py (Tavily)      │
-│ - Budget Variance Analysis      │        │ - transport.py (Routes)       │
-├─────────────────────────────────┤        │ - hotels.py (Accommodations)  │
-│ src/tools/forex.py              │        │ - places.py (Attractions/Food)│
-│ - Multi-tier Currency Engine    │        │ - fallback_estimator.py (LLM) │
-│ - 40+ Offline Rates + Live Tiers│        ├───────────────────────────────┤
-│ - INR Conversion with Provenance│        │ Frontend                      │
-└─────────────────────────────────┘        │ - Vite / React / pnpm UI      │
-                                           └───────────────────────────────┘
+│ src/api/                        │        │ src/nodes/                    │
+│ - FastAPI endpoints, CORS & SSE │        │ - intake_node.py              │
+│ - Request/Response Pydantic     │        │ - visa_node.py                │
+├─────────────────────────────────┤        │ - logistics_node.py           │
+│ src/models/                     │        │ - experience_node.py          │
+│ - trip, itinerary, logistics    │        │ - optimizer_node.py           │
+│ - visa, budget, static models   │        ├───────────────────────────────┤
+├─────────────────────────────────┤        │ src/graph/                    │
+│ src/tools/ (All 8 Tools)        │        │ - LangGraph StateGraph        │
+│ - static_data.py (3 datasets)   │        │ - State transitions & routing │
+│ - calculator.py (Decimal math)  │        ├───────────────────────────────┤
+│ - forex.py (Multi-tier INR)     │        │ Frontend                      │
+│ - weather.py (Forecasts)        │        │ - Vite / React / pnpm UI      │
+│ - web_search.py (Search)        │        └───────────────────────────────┘
+│ - transport.py (Routes)         │
+│ - hotels.py (Accommodations)    │
+│ - places.py (Attractions/Food)  │
+│ - fallback_estimator.py (LLM)   │
+└─────────────────────────────────┘
 ```
 
 ---
@@ -193,6 +205,7 @@ IMPLEMENTED & VERIFIED                     PLANNED (Upcoming Phases)
 - **Package & Dependency Manager**: [`uv`](https://docs.astral.sh/uv/) (strictly required; `pip` is prohibited)
 - **Build System**: `hatchling` (configured with `src` package layout)
 - **Data Validation & Schemas**: [`pydantic>=2.13.5`](https://docs.pydantic.dev/) (Pydantic v2 domain models)
+- **Web API Framework**: [`fastapi>=0.115.0`](https://fastapi.tiangolo.com/) & [`httpx>=0.28.1`](https://www.python-httpx.org/)
 - **Environment Management**: [`python-dotenv>=1.2.3`](https://github.com/theskumar/python-dotenv)
 - **AI SDK**: [`google-genai>=2.25.0`](https://github.com/googleapis/python-genai) (Google Gemini API client)
 - **Testing**: [`pytest>=9.1.1`](https://docs.pytest.org/)
@@ -201,7 +214,6 @@ IMPLEMENTED & VERIFIED                     PLANNED (Upcoming Phases)
 ### Planned Technologies (Future Phases)
 
 - **Workflow Orchestration**: `langgraph` (Phase 7)
-- **Web API Framework**: `fastapi` & `uvicorn` (Phase 4)
 - **Frontend**: Vite / React / TypeScript with `pnpm` (Phase 10)
 
 ---
@@ -217,6 +229,11 @@ Safarnama/
 │   ├── fixtures/             # Offline mock data for zero-network testing
 │   │   ├── airports_sample.csv
 │   │   ├── mock_forex.json
+│   │   ├── mock_hotels.json
+│   │   ├── mock_places.json
+│   │   ├── mock_routes.json
+│   │   ├── mock_search.json
+│   │   ├── mock_weather.json
 │   │   ├── visa_rules_sample.csv
 │   │   └── visa_rules_sample_iso2.csv
 │   └── static/               # Production static JSON datasets
@@ -238,30 +255,53 @@ Safarnama/
 │   ├── fetch_country_profiles.py # Ingests country metadata from REST Countries v5
 │   └── fetch_visa_rules.py   # Ingests passport visa baseline from passport-index
 ├── src/                      # Importable application source package (`import src.*`)
-│   ├── api/                  # FastAPI routers and endpoints (Phase 4 scaffold)
+│   ├── api/                  # FastAPI routers, app factory and endpoints (Phase 4)
+│   │   ├── app.py            # FastAPI app factory with CORS & exception handlers
+│   │   ├── models.py         # API Request/Response schemas (Estimate, PlanPreview, etc.)
+│   │   └── routes.py         # API routes (health, tools/status, estimate, preview, SSE)
 │   ├── graph/                # LangGraph state graph definitions (Phase 7 scaffold)
-│   ├── models/               # Canonical Pydantic domain models
+│   ├── models/               # Canonical Pydantic v2 domain models (Phases 1–5)
 │   │   ├── airport.py        # Airport model
+│   │   ├── budget.py         # CostBreakdown, ContingencyConfig, BudgetVariance, BudgetBreakdown
 │   │   ├── country.py        # CountryProfile, CurrencyInfo, LanguageInfo, Coordinates
-│   │   └── visa.py           # BaseVisaRule, VisaOption, EnrichedVisaRecord
-│   ├── nodes/                # LangGraph agent planning nodes (Phase 7 scaffold)
-│   ├── prompts/              # System prompts and prompt templates (Phase 7 scaffold)
-│   └── tools/                # Deterministic utilities and external tool wrappers
-│       ├── calculator.py     # Phase 3 Tool 1: Deterministic budget calculator
-│       ├── forex.py          # Phase 3 Tool 2: Multi-tier currency converter
-│       └── static_data.py    # Phase 2: In-memory indexed static data store
+│   │   ├── itinerary.py      # PointOfInterest, ActivitySlot, DayMeal, DayPlan, ExperiencePlan
+│   │   ├── logistics.py      # TransportLeg, HotelStay, LogisticsPlan
+│   │   ├── trip.py           # TripParty, TripDates, TripBudget, FoodPreferences, TripContext
+│   │   └── visa.py           # BaseVisaRule, VisaOption, EnrichedVisaRecord, VisaVerdict
+│   ├── nodes/                # LangGraph agent planning nodes (Phase 6–7 scaffold)
+│   ├── prompts/              # Isolated system prompts and prompt templates
+│   │   ├── estimator_prompts.py # Prompts for LLM fallback estimator
+│   │   └── visa_prompts.py   # Prompts for visa enrichment
+│   └── tools/                # Deterministic utilities and external tool wrappers (Phase 2–3)
+│       ├── calculator.py     # Tool 1: Deterministic budget calculator (Decimal)
+│       ├── fallback_estimator.py # Tool 8: Multi-provider LLM cost fallback estimator
+│       ├── forex.py          # Tool 2: Multi-tier currency converter (INR)
+│       ├── hotels.py         # Tool 6: Multi-tier hotel & stay search
+│       ├── places.py         # Tool 7: Points of interest & dining discovery
+│       ├── static_data.py    # Static data access layer & in-memory store
+│       ├── transport.py      # Tool 5: Multi-tier route & transport search
+│       ├── weather.py        # Tool 3: Multi-tier weather forecast
+│       └── web_search.py     # Tool 4: Multi-tier web search engine
 └── tests/                    # Automated test suite
     ├── conftest.py           # Shared pytest fixtures
     ├── integration/          # Integration test suite (Phase 11 scaffold)
-    └── unit/                 # 193 passing offline unit tests
+    └── unit/                 # 351 passing offline unit tests
+        ├── test_api.py       # API endpoint, validation & SSE streaming tests
         ├── test_calculator.py
+        ├── test_domain_models.py # 89 tests for trip, itinerary, logistics, visa, budget
         ├── test_enrich_visa_rules.py
+        ├── test_fallback_estimator.py
         ├── test_fetch_airports.py
         ├── test_fetch_country_profiles.py
         ├── test_fetch_visa_rules.py
         ├── test_forex.py
+        ├── test_hotels.py
+        ├── test_places.py
         ├── test_project_foundation.py
-        └── test_static_data.py
+        ├── test_static_data.py
+        ├── test_transport.py
+        ├── test_weather.py
+        └── test_web_search.py
 ```
 
 ---
@@ -277,13 +317,13 @@ Phase 1: Static Data Ingestion [COMPLETED]
       ↓
 Phase 2: Static Data Tools [COMPLETED]
       ↓
-Phase 3: External Tool Layer [IN PROGRESS: Tools 1 & 2 done; Tools 3–8 pending]
+Phase 3: External Tool Layer [COMPLETED: 8/8 Tools Done]
       ↓
-Phase 4: API Layer [PLANNED]
+Phase 4: API Layer [COMPLETED: FastAPI, Endpoints & SSE]
       ↓
-Phase 5: Domain Models [PLANNED]
+Phase 5: Domain Models [COMPLETED: Trip, Itinerary, Logistics, Visa, Budget]
       ↓
-Phase 6: Planning Functions [PLANNED]
+Phase 6: Planning Functions [NEXT PHASE: Intake, Visa, Logistics, Experience, Optimizer]
       ↓
 Phase 7: LangGraph Orchestration [PLANNED]
       ↓
@@ -311,13 +351,31 @@ Phase 11: Integration & Hardening [PLANNED]
 - **Phase 2 (Static Data Access Layer)**:
   - `StaticDataStore` singleton caching all static datasets in memory.
   - Fast O(1) indexed lookup functions (`get_airport`, `get_country`, `get_visa_rule`, `is_schengen`, `get_ist_time_difference_hours`).
-- **Phase 3 (External Tool Layer — Active)**:
-  - **Tool 1: Calculator Tool (`src/tools/calculator.py`)**: Exact decimal arithmetic, expense categorization, buffer calculations, and budget variance evaluation. 56 unit tests.
-  - **Tool 2: Forex Tool (`src/tools/forex.py`)**: Deterministic currency conversion to INR with 5-tier fallback and 40+ built-in offline currency rates. 17 unit tests.
+- **Phase 3 (External Tool Layer — 8/8 Complete)**:
+  - **Tool 1: Calculator Tool (`src/tools/calculator.py`)**: Exact decimal arithmetic, expense categorization, buffer calculations, and budget variance evaluation.
+  - **Tool 2: Forex Tool (`src/tools/forex.py`)**: Deterministic currency conversion to INR with 5-tier fallback and 40+ built-in offline currency rates.
+  - **Tool 3: Weather Tool (`src/tools/weather.py`)**: Multi-tier weather forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) with weather hazard detection.
+  - **Tool 4: Web Search Tool (`src/tools/web_search.py`)**: Multi-tier travel search (Tavily, DuckDuckGo, Firecrawl, offline fixture).
+  - **Tool 5: Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, IRCTC, European rail, web search fallback, distance physics engine).
+  - **Tool 6: Hotel Tool (`src/tools/hotels.py`)**: Multi-tier lodging search (SerpApi Google Hotels, Booking.com, Nominatim OSM, web search fallback, location heuristic).
+  - **Tool 7: Places & Dining Tool (`src/tools/places.py`)**: Points of interest and dining search (SerpApi Google Maps, Nominatim OSM, web search fallback, category baseline).
+  - **Tool 8: Fallback Estimator (`src/tools/fallback_estimator.py`)**: Multi-provider LLM fallback cost estimation (Gemini, Groq, NVIDIA NIM, offline rule baseline) with isolated prompts in `src/prompts/estimator_prompts.py`.
+- **Phase 4 (API Layer — Complete)**:
+  - `src/api/models.py`: API request/response Pydantic models (`HealthResponse`, `ToolStatusResponse`, `EstimateRequest`, `EstimateResponse`, `PlanPreviewRequest`, `PlanPreviewResponse`, `APIErrorResponse`).
+  - `src/api/routes.py`: FastAPI routes with error mapping, request validation, and SSE streaming.
+  - `src/api/app.py`: FastAPI app factory (`create_app()`) with CORS middleware and global exception handling.
+  - 10 comprehensive unit tests in `tests/unit/test_api.py`.
+- **Phase 5 (Domain Models — Complete)**:
+  - `src/models/trip.py`: Enums (`TravelScope`, `DateMode`, `BudgetMode`, `TravelStyle`, `Pace`, `FoodImportance`) and composites (`TripParty`, `TripDates`, `TripBudget`, `FoodPreferences`, `TripContext`).
+  - `src/models/itinerary.py`: Enums (`Daypart`, `ActivityCategory`) and composites (`PointOfInterest`, `ActivitySlot`, `DayMeal`, `DayPlan`, `ExperiencePlan`).
+  - `src/models/logistics.py`: `TransportLeg`, `HotelStay`, `LogisticsPlan` domain models.
+  - `src/models/visa.py`: Extended with planning domain types (`VisaRequirementStatus`, `VisaCountryVerdict`, `VisaVerdict`).
+  - `src/models/budget.py`: Enums (`BudgetStatus`, `OptimizationAction`) and composites (`CostBreakdown`, `ContingencyConfig`, `BudgetVariance`, `OptimizationResult`, `BudgetBreakdown`).
+  - 89 unit tests in `tests/unit/test_domain_models.py`.
 
 ### Immediate Next Milestone
 
-- **Phase 3, Tool 3: Weather Tool (`src/tools/weather.py`)**: Implement Open-Meteo weather forecast wrapper with offline fixtures (`data/fixtures/mock_weather.json`), historical climate fallback, and unit tests.
+- **Phase 6 — Individual Planning Functions**: Implement `src/nodes/intake_node.py` to validate/sanitize user input, resolve origin/destination, load coordinates, and create initial planning state from a `TripContext`. Test with domestic, international, multi-destination, and invalid-input scenarios.
 
 ---
 
@@ -390,7 +448,26 @@ The project uses `.env` for local configuration. A documented template is provid
 
 ## 12. Running the Project
 
-Because the project is currently in Phase 3, the runtime consists of static data ingestion scripts, the deterministic tool layer, and automated tests.
+Safarnama currently provides:
+1. The **FastAPI REST API Server** (`src/api/`) with interactive OpenAPI docs, health checks, tool status telemetry, cost estimation, and SSE streaming.
+2. The **Immutable Domain Modeling Layer** (`src/models/`) defining contracts for trip context, itineraries, logistics, visas, and budgets.
+3. The **External Travel Tools Suite** (`src/tools/`) with all 8 multi-tier adapters and offline fixtures.
+4. The **Static Data Ingestion Suite** (`scripts/`) for on-demand dataset ingestion and AI-assisted visa rule enrichment.
+
+### Starting the FastAPI Server
+
+Launch the local development API server using `uv`:
+
+```bash
+uv run uvicorn src.api.app:app --reload --port 8000
+```
+
+Once running, explore:
+- **Interactive Swagger UI**: `http://127.0.0.1:8000/docs`
+- **ReDoc Documentation**: `http://127.0.0.1:8000/redoc`
+- **Health Check**: `curl http://127.0.0.1:8000/health`
+- **Tool Status Report**: `curl http://127.0.0.1:8000/api/v1/tools/status`
+- **Real-time SSE Stream**: `curl -N http://127.0.0.1:8000/api/v1/stream/events`
 
 ### Running Ingestion Scripts
 
@@ -411,15 +488,26 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan"
 uv run python scripts/enrich_visa_rules.py --destination "Thailand" --dry-run
 ```
 
-### Interactive Usage of Implemented Tools
+### Interactive Python Usage
 
-You can explore the implemented tools in Python:
+You can import and use the domain models and tools directly in Python:
 
 ```bash
 uv run python
 ```
 
 ```python
+from datetime import date
+from src.models import (
+    BudgetMode,
+    DateMode,
+    TravelScope,
+    TravelStyle,
+    TripBudget,
+    TripContext,
+    TripDates,
+    TripParty,
+)
 from src.tools import (
     calculate_budget_breakdown,
     convert_to_inr,
@@ -427,6 +515,8 @@ from src.tools import (
     get_country,
     get_visa_rule,
     get_weather_forecast,
+    search_transport,
+    search_web,
 )
 
 # 1. Airport Lookup
@@ -441,7 +531,26 @@ print(f"Country: {france.name}, Schengen: {france.is_schengen}")
 visa = get_visa_rule("UZ")
 print(f"Destination: {visa.destination}, Best Option: {visa.selected_option.visa_type}")
 
-# 4. Deterministic Budget Math
+# 4. Constructing Immutable Domain Models (Phase 5)
+trip = TripContext(
+    origin="BOM",
+    destinations=["DXB"],
+    scope=TravelScope.INTERNATIONAL,
+    dates=TripDates(
+        mode=DateMode.EXACT,
+        start_date=date(2026, 11, 10),
+        end_date=date(2026, 11, 17),
+    ),
+    party=TripParty(adults=2, children=0),
+    budget=TripBudget(
+        mode=BudgetMode.TOTAL,
+        amount_inr=250000.0,
+    ),
+    travel_style=TravelStyle.COMFORT,
+)
+print(f"Trip Context: {trip.origin} -> {trip.destinations}, Party: {trip.party.total_count}")
+
+# 5. Deterministic Budget Math
 breakdown = calculate_budget_breakdown(
     user_budget=150000.0,
     expenses={"flights": 45000.0, "hotels": 35000.0, "activities": 15000.0},
@@ -451,21 +560,21 @@ breakdown = calculate_budget_breakdown(
 )
 print(f"Total: ₹{breakdown.total_with_buffer}, Status: {breakdown.variance.status}")
 
-# 5. Deterministic Forex Conversion
+# 6. Deterministic Forex Conversion
 inr_cost = convert_to_inr(120.0, "USD")
 print(
     f"Converted: ₹{inr_cost.converted_amount} (Rate: {inr_cost.exchange_rate}, Estimated: {inr_cost.is_estimated})"
 )
 
-# 6. Multi-Tier Weather Forecast
+# 7. Multi-Tier Weather Forecast
 weather = get_weather_forecast(latitude=35.6762, longitude=139.6503, days=5, destination="Tokyo")
 print(f"Weather: {weather.summary} (Provider: {weather.provider})")
 
-# 7. Resilient Multi-Tier Web Search
+# 8. Resilient Multi-Tier Web Search
 search_res = search_web("japan visa for indian citizens", max_results=3)
 print(f"Search: {search_res.total_results} results via {search_res.provider_used}")
 
-# 8. Multi-Tier Transport & Route Search
+# 9. Multi-Tier Transport & Route Search
 transport_res = search_transport(origin="DEL", destination="BOM", travel_date="2026-10-15")
 print(f"Transport: {transport_res.total_found} options via {transport_res.provider_used}")
 ```
@@ -479,18 +588,27 @@ Safarnama adheres to a **fixture-first testing philosophy**. All unit tests must
 ### Executing Tests
 
 ```bash
-# Run all unit tests
+# Run the entire test suite (351 passing tests)
 uv run pytest
 
 # Run tests with verbose output
 uv run pytest tests/ -v
 
-# Run specific tool test suites
+# Run API layer test suite (10 tests)
+uv run pytest tests/unit/test_api.py
+
+# Run domain model test suite (89 tests)
+uv run pytest tests/unit/test_domain_models.py
+
+# Run tool-specific test suites
 uv run pytest tests/unit/test_calculator.py
 uv run pytest tests/unit/test_forex.py
 uv run pytest tests/unit/test_weather.py
 uv run pytest tests/unit/test_web_search.py
 uv run pytest tests/unit/test_transport.py
+uv run pytest tests/unit/test_hotels.py
+uv run pytest tests/unit/test_places.py
+uv run pytest tests/unit/test_fallback_estimator.py
 uv run pytest tests/unit/test_static_data.py
 ```
 
