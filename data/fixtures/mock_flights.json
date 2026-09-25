@@ -1,0 +1,164 @@
+{
+  "routes": {
+    "DEL:BOM": {
+      "origin": "DEL",
+      "destination": "BOM",
+      "travel_date": "2026-10-15",
+      "provider_used": "fixture",
+      "total_found": 3,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T22:00:00Z",
+      "options": [
+        {
+          "mode": "FLIGHT",
+          "carrier": "IndiGo",
+          "transport_code": "6E-204",
+          "origin": "DEL",
+          "destination": "BOM",
+          "departure_time": "08:00",
+          "arrival_time": "10:15",
+          "duration_minutes": 135,
+          "price_inr": 4850.0,
+          "cabin_class": "ECONOMY",
+          "booking_url": "https://www.goindigo.in",
+          "provider": "fixture"
+        },
+        {
+          "mode": "TRAIN",
+          "carrier": "Vande Bharat Express",
+          "transport_code": "20902",
+          "origin": "NDLS",
+          "destination": "MMCT",
+          "departure_time": "15:00",
+          "arrival_time": "23:25",
+          "duration_minutes": 505,
+          "price_inr": 2850.0,
+          "cabin_class": "CC",
+          "booking_url": "https://www.irctc.co.in",
+          "provider": "fixture"
+        },
+        {
+          "mode": "FLIGHT",
+          "carrier": "Air India",
+          "transport_code": "AI-805",
+          "origin": "DEL",
+          "destination": "BOM",
+          "departure_time": "18:30",
+          "arrival_time": "20:45",
+          "duration_minutes": 135,
+          "price_inr": 5400.0,
+          "cabin_class": "ECONOMY",
+          "booking_url": "https://www.airindia.com",
+          "provider": "fixture"
+        }
+      ]
+    },
+    "DEL:TYO": {
+      "origin": "DEL",
+      "destination": "TYO",
+      "travel_date": "2026-10-15",
+      "provider_used": "fixture",
+      "total_found": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T22:00:00Z",
+      "options": [
+        {
+          "mode": "FLIGHT",
+          "carrier": "Japan Airlines",
+          "transport_code": "JL-740",
+          "origin": "DEL",
+          "destination": "NRT",
+          "departure_time": "19:05",
+          "arrival_time": "06:40",
+          "duration_minutes": 485,
+          "price_inr": 38500.0,
+          "cabin_class": "ECONOMY",
+          "booking_url": "https://www.jal.co.jp",
+          "provider": "fixture"
+        },
+        {
+          "mode": "FLIGHT",
+          "carrier": "ANA (All Nippon Airways)",
+          "transport_code": "NH-828",
+          "origin": "DEL",
+          "destination": "HND",
+          "departure_time": "20:00",
+          "arrival_time": "07:35",
+          "duration_minutes": 485,
+          "price_inr": 41200.0,
+          "cabin_class": "ECONOMY",
+          "booking_url": "https://www.ana.co.jp",
+          "provider": "fixture"
+        }
+      ]
+    },
+    "PARIS:LONDON": {
+      "origin": "PARIS",
+      "destination": "LONDON",
+      "travel_date": "2026-10-15",
+      "provider_used": "fixture",
+      "total_found": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T22:00:00Z",
+      "options": [
+        {
+          "mode": "TRAIN",
+          "carrier": "Eurostar",
+          "transport_code": "9023",
+          "origin": "PARIS GARE DU NORD",
+          "destination": "LONDON ST PANCRAS",
+          "departure_time": "10:13",
+          "arrival_time": "11:30",
+          "duration_minutes": 137,
+          "price_inr": 7800.0,
+          "cabin_class": "STANDARD",
+          "booking_url": "https://www.eurostar.com",
+          "provider": "fixture"
+        },
+        {
+          "mode": "BUS",
+          "carrier": "FlixBus",
+          "transport_code": "FLX-120",
+          "origin": "PARIS BERCY",
+          "destination": "LONDON VICTORIA",
+          "departure_time": "08:00",
+          "arrival_time": "17:30",
+          "duration_minutes": 570,
+          "price_inr": 2900.0,
+          "cabin_class": "STANDARD",
+          "booking_url": "https://www.flixbus.com",
+          "provider": "fixture"
+        }
+      ]
+    }
+  },
+  "default_fallback": {
+    "origin": "ORIGIN",
+    "destination": "DESTINATION",
+    "travel_date": "2026-10-15",
+    "provider_used": "fixture",
+    "total_found": 1,
+    "is_fallback": true,
+    "is_estimated": true,
+    "timestamp": "2026-09-25T22:00:00Z",
+    "options": [
+      {
+        "mode": "FLIGHT",
+        "carrier": "International Express Airline",
+        "transport_code": "SA-101",
+        "origin": "ORIGIN",
+        "destination": "DESTINATION",
+        "departure_time": "10:00",
+        "arrival_time": "14:00",
+        "duration_minutes": 240,
+        "price_inr": 12500.0,
+        "cabin_class": "ECONOMY",
+        "booking_url": "https://safarnama.local/transport",
+        "provider": "fixture"
+      }
+    ]
+  }
+}

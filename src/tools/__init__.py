@@ -52,6 +52,16 @@ from src.tools.static_data import (
     is_schengen,
     reload_static_data,
 )
+from src.tools.transport import (
+    InvalidLocationError,
+    TransportAPIError,
+    TransportError,
+    TransportSearchResult,
+    TransportSegment,
+    clear_transport_cache,
+    get_transport_status,
+    search_transport,
+)
 from src.tools.weather import (
     DailyWeatherForecast,
     InvalidCoordinatesError,
@@ -89,6 +99,7 @@ __all__ = [
     "InvalidCoordinatesError",
     "InvalidDateRangeError",
     "InvalidDaysError",
+    "InvalidLocationError",
     "InvalidLookupError",
     "InvalidPercentageError",
     "InvalidQueryError",
@@ -97,6 +108,10 @@ __all__ = [
     "SearchResultItem",
     "StaticDataError",
     "StaticDataStore",
+    "TransportAPIError",
+    "TransportError",
+    "TransportSearchResult",
+    "TransportSegment",
     "UnsupportedCurrencyError",
     "VisaRuleNotFoundError",
     "WeatherAPIError",
@@ -114,6 +129,7 @@ __all__ = [
     "calculate_total_expenses",
     "calculate_total_with_buffer",
     "clear_forex_cache",
+    "clear_transport_cache",
     "clear_weather_cache",
     "clear_web_search_cache",
     "convert_currency",
@@ -131,6 +147,7 @@ __all__ = [
     "get_ist_time_difference_hours",
     "get_rates_table",
     "get_store",
+    "get_transport_status",
     "get_visa_baseline",
     "get_visa_rule",
     "get_weather_forecast",
@@ -139,5 +156,6 @@ __all__ = [
     "is_schengen",
     "reload_static_data",
     "round_currency",
+    "search_transport",
     "search_web",
 ]

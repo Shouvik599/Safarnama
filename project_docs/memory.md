@@ -112,6 +112,22 @@ Phase 3 — External Tool Layer (Calculator, Forex, Weather, and Web Search Tool
   - Typed exceptions: `WebSearchError`, `InvalidQueryError`, `WebSearchAPIError`.
   - Fully re-exported in `src/tools/__init__.py`.
   - 9 unit tests in `tests/unit/test_web_search.py`.
+- **Tool 5: Deterministic Transport & Route Search Tool (`src/tools/transport.py`)**:
+  - Provides structured transport segments (flights, trains, buses) for domestic and international trips with fares in INR.
+  - Multi-tier resilience cascade:
+    1. Fixture mode (`data/fixtures/mock_flights.json`) for 100% deterministic offline unit testing.
+    2. In-memory cache with 1-hour TTL per `(origin, destination, date, mode)` query.
+    3. Live Tier 1 (Flights): Sky Scraper API (`sky-scrapper.p.rapidapi.com`, `RAPIDAPI_KEY`).
+    4. Live Tier 2 (Flights Backup): Flights Sky API (`flights-sky.p.rapidapi.com`, `RAPIDAPI_KEY`) & Aviationstack.
+    5. Live Tier 3 (Indian Railways): Indian Railway IRCTC API (`indian-railway-irctc.p.rapidapi.com`, `RAPIDAPI_KEY`) & eRail open wrapper.
+    6. Live Tier 4 (International Rail/Bus): `transport.rest` open European rail API & Transitland v2 feed.
+    7. Live Tier 5 (Web Search Fallback): `search_web()` query for live schedule & ticket price snippets.
+    8. Tier 6 (Distance & Speed Physics Engine): Haversine coordinate math + speed & fare rates in INR (Guarantees zero crashes).
+  - Functions: `search_transport`, `clear_transport_cache`, `get_transport_status`.
+  - Pydantic models: `TransportSegment`, `TransportSearchResult` in `src/models/transport.py` (re-exported in `src.models` and `src.tools`).
+  - Typed exceptions: `TransportError`, `InvalidLocationError`, `TransportAPIError`.
+  - Fully re-exported in `src/tools/__init__.py`.
+  - 8 unit tests in `tests/unit/test_transport.py`.
 
 ## Important files/modules
 
@@ -270,7 +286,7 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 - [x] **Tool 2: Forex Tool** (`src/tools/forex.py`) — Currency conversion to INR + offline baseline rates + fixture (complete)
 - [x] **Tool 3: Weather Tool** (`src/tools/weather.py`) — Multi-tier forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) + fixture (complete)
 - [x] **Tool 4: Web Search Tool** (`src/tools/web_search.py`) — Multi-tier search (Tavily, DuckDuckGo, Firecrawl, offline fixture) + cache + fixture (complete)
-- [ ] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Route search adapter + `data/fixtures/mock_flights.json`
+- [x] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Multi-tier route search (Sky Scraper, Flights Sky, IRCTC, transport.rest, web search fallback, distance physics engine) + fixture (complete)
 - [ ] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Real hotel discovery adapter + `data/fixtures/mock_hotels.json`
 - [ ] **Tool 7: Places & Dining Tool** (`src/tools/places.py`) — Attractions & restaurants adapter + `data/fixtures/mock_places.json`
 - [ ] **Tool 8: Fallback Estimator** (`src/tools/fallback_estimator.py`) — Gemini structured fallback cost estimation

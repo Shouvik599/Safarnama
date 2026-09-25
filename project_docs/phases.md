@@ -425,17 +425,28 @@ Responsibilities:
 
 ## 7.3 Transport/Flight Tool
 
-Create the provider-independent interface first.
+Implement:
+
+```text
+src/tools/transport.py
+```
 
 Responsibilities:
 
-- Search transport options
-- Normalize provider response
-- Return validated transport data
-- Support fixtures
-- Preserve source/provenance
-
-Do not tightly couple planning logic to a single provider.
+- Search available transport options (flights, trains, buses) for domestic and international travel
+- Query transport providers with multi-tier fallback cascade:
+  1. Test Fixture: `data/fixtures/mock_flights.json` (offline testing)
+  2. In-Memory Cache: 1-hour TTL per `(origin, destination, date, mode)` search
+  3. Live Aviation APIs: Sky Scraper / Flights Sky / Aviationstack (`RAPIDAPI_KEY` / `AVIATIONSTACK_API_KEY`)
+  4. Live Indian Railways APIs: Indian Railway IRCTC / eRail (`RAPIDAPI_KEY` / open access)
+  5. Live International Rail & Bus APIs: `transport.rest` / Transitland (Zero-auth open access)
+  6. Live Web Search Tool Fallback: `search_web()` for live route & ticket pricing snippets
+  7. Tier 5: Offline Distance & Speed Physics Engine (Haversine math guaranteeing zero-crash operation)
+- Return structured transport models (`TransportSegment`, `TransportSearchResult` in `src/models/transport.py`)
+- Support fixture mode: `data/fixtures/mock_flights.json`
+- Convert all fares to Indian Rupee (INR) deterministically
+- Preserve carrier, code, class, URL, and provider provenance metadata
+- Provide cache management (`clear_transport_cache`) and status reporting (`get_transport_status`)
 
 ---
 
