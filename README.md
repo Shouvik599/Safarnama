@@ -429,18 +429,27 @@ Phase 11: Integration & Hardening [PLANNED]
 
 The project uses `.env` for local configuration. A documented template is provided in `.env.example`.
 
-| Variable | Required For | Purpose |
-|---|---|---|
-| `GOOGLE_API_KEY` | Runtime Planning | Primary Gemini planning LLM key (Google AI Studio). |
-| `FALLBACK_LLM_API_KEY` | Runtime Planning | Dedicated key for fallback cost estimations when live tools lack pricing. |
-| `FALLBACK_LLM_MODEL` | Runtime Planning | Model name for fallback estimations (e.g., `gemini-2.5-flash`). |
-| `GEMINI_ENRICHMENT_API_KEY` | Ingestion Script | Key used by `scripts/enrich_visa_rules.py` for structured visa synthesis. |
-| `GEMINI_ENRICHMENT_MODEL` | Ingestion Script | Optional model override (default: `gemini-2.5-flash-lite`). |
-| `TAVILY_VISA_ENRICHMENT_API_KEY` | Ingestion Script | Dedicated Tavily key for web research in `scripts/enrich_visa_rules.py`. |
-| `TAVILY_API_KEY` | Ingestion / Runtime | General Tavily search API key. |
-| `REST_COUNTRIES_API_KEY` | Ingestion Script | API key for REST Countries v5 ingestion (`scripts/fetch_country_profiles.py`). |
-| `EXCHANGERATE_API_KEY` | Forex Tool | Optional key for ExchangeRate-API. If omitted, open tier and offline rates are used. |
-| `SAFARNAMA_USE_FIXTURES` | Testing / Dev | When set to `true`, forces tools to load mock fixtures from `data/fixtures/`. |
+> **Rule 46 (Configuration Synchronization)**: Whenever an environment variable is added, modified, or removed in `.env`, `.env.example`, `README.md`, and project documentation must be updated in lockstep.
+
+| Variable | Category | Required For | Purpose & Fallback Behavior |
+|---|---|---|---|
+| `GEMINI_API_KEY` / `GOOGLE_API_KEY` | 1. LLM & Fallback | Planning & Fallback | Primary Gemini planning LLM and Fallback Estimator Tier 1 (Google AI Studio). |
+| `GROQ_API_KEY` | 1. LLM & Fallback | Fallback Estimator | Groq API key for ultra-fast LPU fallback cost estimation (Tier 2). If omitted, cascades to NVIDIA NIM / offline rules. |
+| `NVIDIA_API_KEY` | 1. LLM & Fallback | Fallback Estimator | NVIDIA NIM key for hosted open models fallback estimation (Tier 3). If omitted, cascades to offline heuristic. |
+| `FALLBACK_LLM_API_KEY` | 1. LLM & Fallback | Fallback Estimator | Optional dedicated override key for LLM cost estimations. |
+| `FALLBACK_LLM_MODEL` | 1. LLM & Fallback | Fallback Estimator | Optional dedicated model override for fallback estimation (e.g., `gemini-2.5-flash`). |
+| `GEMINI_ENRICHMENT_API_KEY` | 2. Visa Enrichment | Ingestion Script | Dedicated Gemini key for multi-pathway visa synthesis in `scripts/enrich_visa_rules.py`. |
+| `GEMINI_ENRICHMENT_MODEL` | 2. Visa Enrichment | Ingestion Script | Optional model override for visa enrichment (default: `gemini-2.5-flash-lite`). |
+| `TAVILY_VISA_ENRICHMENT_API_KEY` | 2. Visa Enrichment | Ingestion Script | Dedicated Tavily key for web research in `scripts/enrich_visa_rules.py`. |
+| `TAVILY_API_KEY` | 3. Web Search | Ingestion & Runtime | General Tavily search API key used by `src/tools/web_search.py` and tool search fallbacks. |
+| `FIRECRAWL_API_KEY` | 3. Web Search | Runtime Search | Optional Firecrawl Search API key (Tier 3). If omitted, Tavily, DuckDuckGo, and offline fixtures are used. |
+| `SERPAPI_KEY` | 4. Travel & Lodging | Hotels & Places | Google Hotels and Google Maps search for accommodations, POIs, and dining (`src/tools/hotels.py`, `src/tools/places.py`). Fallbacks to Nominatim/OSM. |
+| `RAPIDAPI_KEY` | 4. Travel & Lodging | Transport & Hotels | Multi-modal travel endpoints: Sky Scraper flights, Flights Sky, and Indian Railways IRCTC (`src/tools/transport.py`), Booking.com (`src/tools/hotels.py`). Fallbacks to European rail, web search, and physics engine. |
+| `AVIATIONSTACK_API_KEY` | 4. Travel & Lodging | Flight Schedules | Optional live airline and flight schedule status tracking. |
+| `REST_COUNTRIES_API_KEY` | 4. Travel & Lodging | Ingestion Script | Ingestion API key for REST Countries v5 in `scripts/fetch_country_profiles.py` (free 1,000 req/mo). |
+| `OPENWEATHERMAP_API_KEY` | 5. Weather & Forex | Weather Tool | Optional OpenWeatherMap 5-day forecast fallback (`src/tools/weather.py`). If omitted, Open-Meteo, wttr.in, and climate baseline are used. |
+| `EXCHANGERATE_API_KEY` | 5. Weather & Forex | Forex Tool | Optional ExchangeRate-API key (`src/tools/forex.py`). If omitted, open.er-api.com and offline tables are used automatically. |
+| `SAFARNAMA_USE_FIXTURES` | 6. Configuration | Testing & Offline Dev | When set to `true`, forces all runtime tools to load offline mock fixtures from `data/fixtures/` with zero live network calls. |
 
 > **Security Notice**: Never commit `.env` or real API keys to source control.
 

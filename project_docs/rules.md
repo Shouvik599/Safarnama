@@ -1040,6 +1040,7 @@ Before completing any implementation task, verify:
 - [ ] Did I avoid unnecessary changes?
 - [ ] Did I build only the requested phase?
 - [ ] Did I place all new Pydantic models inside `src/models/`?
+- [ ] Did I update `.env.example`, `README.md`, and project docs whenever `.env` variables changed?
 
 ---
 
@@ -1104,3 +1105,23 @@ from src.models.visa import EnrichedVisaRecord, VisaOption  # noqa: E402
 - If a new Pydantic `BaseModel` subclass is created anywhere outside `src/models/`,
   move it to the appropriate `src/models/<domain>.py` file before completing the task.
 - Never duplicate a model definition across multiple files — import it instead.
+
+---
+
+# 46. Environment Variable & Configuration Synchronization
+
+Whenever any environment variable is added, modified, renamed, or removed in `.env`:
+
+## 46.1 Update `.env.example` Immediately
+- `.env.example` must mirror the exact section layout, variable names, category headers, and comments of `.env`.
+- **Never commit real secrets or production API keys to `.env.example`**. Values must be empty (`VAR=`) or documented non-sensitive default values (e.g., `SAFARNAMA_USE_FIXTURES=false`).
+- Include helpful comments indicating what the variable is used for and where a developer can register for free API credentials.
+
+## 46.2 Update `README.md`
+- Section 11 of `README.md` (Environment Variables) must be kept strictly synchronized with `.env.example`.
+- Document every environment variable in the table, including its category, whether it is required or optional, its runtime/ingestion role, and its fallback behavior when omitted.
+
+## 46.3 Update Project Documentation
+- Any architecture or tooling specifications in `project_docs/architecture.md`, `project_docs/rules.md`, and `project_docs/memory.md` that discuss provider integration or environment configuration must be updated in lockstep.
+- An implementation task or phase is **not complete** if environment variables were introduced or altered without updating `.env.example`, `README.md`, and the project docs.
+

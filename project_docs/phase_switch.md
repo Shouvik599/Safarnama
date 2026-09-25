@@ -4,57 +4,116 @@ Now proceed to:
 
 **Phase [NEXT PHASE] — [NEXT PHASE NAME]**
 
-Before making changes:
+## 1. Establish Current Context
 
-1. Read the requirements for this phase in `phases.md`.
-2. Review `memory.md` to confirm the actual current project state.
-3. Inspect the implementation and tests from the previous phase.
-4. Review `rules.md` and `architecture.md` for relevant constraints.
-5. Review `prd.md` and `README.md` for the current documented product state.
-6. Consider **all decisions and requirements we have discussed in this conversation**, including decisions that may not yet be reflected in the project documentation.
+Before making changes, determine the actual current project state.
 
-Do not assume the documentation is fully up to date. The current conversation may contain newer decisions.
+Read:
 
-### Documentation Synchronization
+* `memory.md`
+* `phases.md`
+* `rules.md`
+* `architecture.md`
+* `prd.md`
+* `README.md`
+* `design.md` where relevant
 
-Before implementing the phase, identify any decisions we have made during this conversation that are missing, outdated, or inconsistent in:
+Then inspect the existing implementation and tests from the previous phase.
+
+### Context rule
+
+Use the sources available to you according to this priority:
+
+1. **Decisions explicitly made in the current conversation**, if this is the same chat.
+2. **`memory.md`**, which records the latest project handoff state.
+3. **The actual code, tests, and configuration in the repository.**
+4. **Project documentation** (`prd.md`, `architecture.md`, `phases.md`, `rules.md`, `design.md`, `README.md`).
+
+If this is a new chat or a different IDE, do **not** assume you have any context from the previous AI/session. Reconstruct the current state from the repository and `memory.md`.
+
+Do not assume documentation or `memory.md` is perfectly accurate. Verify important claims against the actual implementation.
+
+---
+
+## 2. Documentation Synchronization
+
+Before implementing the phase, identify any project decisions that are:
+
+* New
+* Changed
+* Missing
+* Outdated
+* Contradictory
+
+This includes decisions made in the current conversation, if available.
+
+Update the appropriate documentation:
 
 * `prd.md`
 * `architecture.md`
 * `phases.md`
-* `README.md`
 * `rules.md`
-* `design.md` where relevant
+* `design.md`
+* `README.md`
 
-Update the appropriate documentation files so they reflect the **latest agreed project decisions**.
+Do not invent requirements or make undocumented design decisions.
 
-Do not invent new requirements. Only document decisions that were actually established.
+If documentation conflicts with an explicitly agreed newer decision, update the affected documentation so there is one consistent source of truth.
 
-If a new decision conflicts with an existing document, update the affected document rather than leaving contradictory information.
+---
 
-### Scope
+## 3. Phase Scope
 
 Implement **only Phase [NEXT PHASE]**.
 
 Do not implement later phases or unrelated improvements.
 
-Reuse existing work and avoid unnecessary rewrites or speculative architecture.
+Reuse existing work.
 
-### Verification
+Do not rewrite working code unnecessarily.
+
+Do not introduce speculative architecture.
+
+If a problem in an earlier phase prevents this phase from being implemented correctly, investigate it and make only the necessary correction.
+
+---
+
+## 4. Implementation Requirements
+
+Follow:
+
+* `phases.md`
+* `architecture.md`
+* `rules.md`
+* `prd.md`
+
+Keep the implementation:
+
+* Modular
+* Testable
+* Maintainable
+* Deterministic where applicable
+* Consistent with the existing architecture
+
+---
+
+## 5. Verification
 
 After implementation:
 
-1. Run the new/updated tests for this phase.
+1. Run tests for this phase.
 2. Run relevant existing tests.
 3. Run applicable lint/format/type checks.
 4. Manually verify important behavior where appropriate.
 5. Fix failures caused by your changes.
 6. Inspect the final diff.
-7. Verify that the documentation accurately describes the resulting implementation.
+7. Verify that documentation matches the resulting implementation.
 
-Do not claim the phase is complete without verification.
+Do not claim completion without verification.
 
-### Memory
+---
+
+## 6. Update Project Memory
 
 Once the phase is genuinely complete, update `memory.md` with:
 
@@ -64,20 +123,24 @@ Once the phase is genuinely complete, update `memory.md` with:
 * Important implementation decisions
 * Tests/checks and results
 * Known issues/limitations
-* Documentation updates made
+* Documentation updates
 * Next recommended phase
 
-Keep `memory.md` concise.
+Keep `memory.md` concise. It is a **handoff/context file**, not a copy of the documentation or source code.
 
-### Stop Condition
+---
 
-When Phase [NEXT PHASE] is complete, verified, and the documentation is synchronized:
+## 7. Stop
+
+When Phase [NEXT PHASE] is complete, verified, and documentation is synchronized:
 
 **STOP.**
 
 Do not automatically start the next phase.
 
-### Final Report
+---
+
+## Final Report
 
 ```text
 Phase: [NEXT PHASE] — [NEXT PHASE NAME]
