@@ -1,0 +1,48 @@
+{
+  "queries": {
+    "japan visa for indian citizens": {
+      "query": "japan visa for indian citizens",
+      "provider_used": "fixture",
+      "total_results": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T20:00:00Z",
+      "results": [
+        {
+          "title": "Japan eVisa for Indian Passport Holders",
+          "url": "https://www.evisa.mofa.go.jp/index",
+          "snippet": "Indian nationals residing in India can apply for a single-entry tourist visa online (e-Visa) for short-term stays up to 15 days.",
+          "source_provider": "fixture",
+          "score": 0.95,
+          "published_date": "2026-01-15"
+        },
+        {
+          "title": "Embassy of Japan in India - Visa Services",
+          "url": "https://www.in.emb-japan.go.jp/itpr_en/visa.html",
+          "snippet": "Complete guide on Japan tourist visa requirements, processing fees in INR, VFS Global application centers, and document checklists for Indian travelers.",
+          "source_provider": "fixture",
+          "score": 0.90,
+          "published_date": "2026-02-01"
+        }
+      ]
+    }
+  },
+  "default_fallback": {
+    "query": "default search query",
+    "provider_used": "fixture",
+    "total_results": 2,
+    "is_fallback": true,
+    "is_estimated": true,
+    "timestamp": "2026-09-25T20:00:00Z",
+    "results": [
+      {
+        "title": "Safarnama Offline Travel Research Baseline",
+        "url": "https://safarnama.local/search/baseline",
+        "snippet": "Offline mock travel search result provided when external search services are unreachable or unconfigured.",
+        "source_provider": "fixture",
+        "score": 0.80,
+        "published_date": "2026-09-25"
+      }
+    ]
+  }
+}

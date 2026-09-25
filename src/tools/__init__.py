@@ -64,6 +64,16 @@ from src.tools.weather import (
     get_weather_forecast,
     is_outdoor_friendly,
 )
+from src.tools.web_search import (
+    InvalidQueryError,
+    SearchResultItem,
+    WebSearchAPIError,
+    WebSearchError,
+    WebSearchResult,
+    clear_web_search_cache,
+    get_web_search_status,
+    search_web,
+)
 
 __all__ = [
     "AirportNotFoundError",
@@ -81,8 +91,10 @@ __all__ = [
     "InvalidDaysError",
     "InvalidLookupError",
     "InvalidPercentageError",
+    "InvalidQueryError",
     "InvalidTravelerCountError",
     "RecordNotFoundError",
+    "SearchResultItem",
     "StaticDataError",
     "StaticDataStore",
     "UnsupportedCurrencyError",
@@ -90,6 +102,9 @@ __all__ = [
     "WeatherAPIError",
     "WeatherError",
     "WeatherForecastResult",
+    "WebSearchAPIError",
+    "WebSearchError",
+    "WebSearchResult",
     "calculate_budget_breakdown",
     "calculate_budget_variance",
     "calculate_contingency_buffer",
@@ -100,6 +115,7 @@ __all__ = [
     "calculate_total_with_buffer",
     "clear_forex_cache",
     "clear_weather_cache",
+    "clear_web_search_cache",
     "convert_currency",
     "convert_to_inr",
     "find_airport",
@@ -118,8 +134,10 @@ __all__ = [
     "get_visa_baseline",
     "get_visa_rule",
     "get_weather_forecast",
+    "get_web_search_status",
     "is_outdoor_friendly",
     "is_schengen",
     "reload_static_data",
     "round_currency",
+    "search_web",
 ]

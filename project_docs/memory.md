@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 3 in progress.** Tool 1: Deterministic Calculator, Tool 2: Forex Currency Converter, and Tool 3: Weather Forecaster complete.
+**Phase 3 in progress.** Tool 1: Deterministic Calculator, Tool 2: Forex Currency Converter, Tool 3: Weather Forecaster, and Tool 4: Web Search Engine complete.
 
 Do not start subsequent tools until explicitly requested.
 
 ## Current implementation phase
 
-Phase 3 — External Tool Layer (Calculator, Forex, and Weather Tools complete)
+Phase 3 — External Tool Layer (Calculator, Forex, Weather, and Web Search Tools complete)
 
 ## Completed functionality
 
@@ -98,6 +98,20 @@ Phase 3 — External Tool Layer (Calculator, Forex, and Weather Tools complete)
   - Typed exceptions: `WeatherError`, `InvalidCoordinatesError`, `InvalidDateRangeError`, `WeatherAPIError`.
   - Fully re-exported in `src/tools/__init__.py`.
   - 17 unit tests in `tests/unit/test_weather.py`.
+- **Tool 4: Deterministic Web Search Engine (`src/tools/web_search.py`)**:
+  - Provides structured web search results (title, destination URL, snippet/markdown content, provider provenance) for destination research, visa rules, travel guides, transport, and hotels.
+  - Multi-tier resilience cascade:
+    1. Fixture mode (`data/fixtures/mock_web_search.json` / `mock_tavily_search.json`) for 100% deterministic offline unit testing.
+    2. In-memory cache with 1-hour TTL per query string / result limit pair.
+    3. Live Tier 1: Tavily Search API (`POST https://api.tavily.com/search`, `TAVILY_API_KEY`).
+    4. Live Tier 2: DuckDuckGo Search (Keyless open-access instant answer API / HTTP fallback).
+    5. Live Tier 3: Firecrawl Search API (`POST https://api.firecrawl.dev/v2/search`, `FIRECRAWL_API_KEY`).
+    6. Tier 4: Offline Search Fixture (Guarantees zero-crash resilience when offline/unconfigured).
+  - Functions: `search_web`, `clear_web_search_cache`, `get_web_search_status`.
+  - Pydantic models: `SearchResultItem`, `WebSearchResult` in `src/models/web_search.py` (re-exported in `src.models` and `src.tools`).
+  - Typed exceptions: `WebSearchError`, `InvalidQueryError`, `WebSearchAPIError`.
+  - Fully re-exported in `src/tools/__init__.py`.
+  - 9 unit tests in `tests/unit/test_web_search.py`.
 
 ## Important files/modules
 
@@ -255,7 +269,7 @@ uv run python scripts/enrich_visa_rules.py --destination "Japan" --dry-run
 - [x] **Tool 1: Calculator Tool** (`src/tools/calculator.py`) — Deterministic budget arithmetic (complete)
 - [x] **Tool 2: Forex Tool** (`src/tools/forex.py`) — Currency conversion to INR + offline baseline rates + fixture (complete)
 - [x] **Tool 3: Weather Tool** (`src/tools/weather.py`) — Multi-tier forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) + fixture (complete)
-- [ ] **Tool 4: Web Search Tool** (`src/tools/web_search.py`) — Tavily Search wrapper + `data/fixtures/mock_tavily_search.json`
+- [x] **Tool 4: Web Search Tool** (`src/tools/web_search.py`) — Multi-tier search (Tavily, DuckDuckGo, Firecrawl, offline fixture) + cache + fixture (complete)
 - [ ] **Tool 5: Transport/Flight Tool** (`src/tools/transport.py`) — Route search adapter + `data/fixtures/mock_flights.json`
 - [ ] **Tool 6: Hotel Tool** (`src/tools/hotels.py`) — Real hotel discovery adapter + `data/fixtures/mock_hotels.json`
 - [ ] **Tool 7: Places & Dining Tool** (`src/tools/places.py`) — Attractions & restaurants adapter + `data/fixtures/mock_places.json`

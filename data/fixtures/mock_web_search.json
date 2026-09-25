@@ -1,0 +1,108 @@
+{
+  "queries": {
+    "japan visa for indian citizens": {
+      "query": "japan visa for indian citizens",
+      "provider_used": "fixture",
+      "total_results": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T20:00:00Z",
+      "results": [
+        {
+          "title": "Japan eVisa for Indian Passport Holders",
+          "url": "https://www.evisa.mofa.go.jp/index",
+          "snippet": "Indian nationals residing in India can apply for a single-entry tourist visa online (e-Visa) for short-term stays up to 15 days.",
+          "source_provider": "fixture",
+          "score": 0.95,
+          "published_date": "2026-01-15"
+        },
+        {
+          "title": "Embassy of Japan in India - Visa Services",
+          "url": "https://www.in.emb-japan.go.jp/itpr_en/visa.html",
+          "snippet": "Complete guide on Japan tourist visa requirements, processing fees in INR, VFS Global application centers, and document checklists for Indian travelers.",
+          "source_provider": "fixture",
+          "score": 0.90,
+          "published_date": "2026-02-01"
+        }
+      ]
+    },
+    "tokyo weather october": {
+      "query": "tokyo weather october",
+      "provider_used": "fixture",
+      "total_results": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T20:00:00Z",
+      "results": [
+        {
+          "title": "Tokyo Autumn Travel & Weather Guide",
+          "url": "https://www.japan-guide.com/e/e2273.html",
+          "snippet": "October in Tokyo brings mild autumn temperatures ranging from 14°C to 22°C with low rainfall and clear skies ideal for sightseeing.",
+          "source_provider": "fixture",
+          "score": 0.92,
+          "published_date": "2026-03-10"
+        },
+        {
+          "title": "Tokyo Weather Monthly Forecast - October",
+          "url": "https://www.jma.go.jp/jma/indexe.html",
+          "snippet": "Average October temperature is 18°C. Mild breezes, low humidity, and excellent conditions for outdoor activities and autumn foliage viewing.",
+          "source_provider": "fixture",
+          "score": 0.88,
+          "published_date": "2026-03-12"
+        }
+      ]
+    },
+    "budget hotels near shinjuku station tokyo": {
+      "query": "budget hotels near shinjuku station tokyo",
+      "provider_used": "fixture",
+      "total_results": 2,
+      "is_fallback": true,
+      "is_estimated": true,
+      "timestamp": "2026-09-25T20:00:00Z",
+      "results": [
+        {
+          "title": "Best Budget Hotels Near Shinjuku Station",
+          "url": "https://www.japan.travel/en/lodging/shinjuku-hotels",
+          "snippet": "Top-rated affordable accommodation near Shinjuku Station including business hotels, capsule hotels, and hostels under 8000 JPY per night.",
+          "source_provider": "fixture",
+          "score": 0.94,
+          "published_date": "2026-04-01"
+        },
+        {
+          "title": "Shinjuku Accommodation Guide for Travelers",
+          "url": "https://www.gotokyo.org/en/plan/stay/shinjuku/index.html",
+          "snippet": "Stay near Yamanote Line connections with clean, quiet budget rooms, free WiFi, and easy access to Narita Express.",
+          "source_provider": "fixture",
+          "score": 0.89,
+          "published_date": "2026-04-05"
+        }
+      ]
+    }
+  },
+  "default_fallback": {
+    "query": "default search query",
+    "provider_used": "fixture",
+    "total_results": 2,
+    "is_fallback": true,
+    "is_estimated": true,
+    "timestamp": "2026-09-25T20:00:00Z",
+    "results": [
+      {
+        "title": "Safarnama Offline Travel Research Baseline",
+        "url": "https://safarnama.local/search/baseline",
+        "snippet": "Offline mock travel search result provided when external search services are unreachable or unconfigured.",
+        "source_provider": "fixture",
+        "score": 0.80,
+        "published_date": "2026-09-25"
+      },
+      {
+        "title": "General Travel Information & Destination Overview",
+        "url": "https://safarnama.local/travel-guide",
+        "snippet": "General travel guidance, destination highlights, entry rules, and transportation options for Indian travelers.",
+        "source_provider": "fixture",
+        "score": 0.75,
+        "published_date": "2026-09-25"
+      }
+    ]
+  }
+}

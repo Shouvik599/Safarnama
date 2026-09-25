@@ -9,8 +9,8 @@
 ```text
 Status: In Active Development
 Current Phase: Phase 3 — External Tool Layer (In Progress)
-Current Milestone: Tools 1 (Calculator), 2 (Forex), and 3 (Weather) complete; Tools 4–8 pending
-Test Suite: 193 unit tests passing (100% offline, zero network reliance in tests)
+Current Milestone: Tools 1 (Calculator), 2 (Forex), 3 (Weather), and 4 (Web Search) complete; Tools 5–8 pending
+Test Suite: 221 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
@@ -21,7 +21,7 @@ Safarnama is being built in small, verified, test-driven phases. The project is 
 | **Phase 0** | Project Foundation & Packaging | **Complete** |
 | **Phase 1** | Static Data Ingestion (Airports, Countries, Visa Rules) | **Complete** |
 | **Phase 2** | Static Data Access Layer & In-Memory Store | **Complete** |
-| **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Places) | **In Progress** (Tools 1 & 2 done) |
+| **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Places) | **In Progress** (Tools 1, 2, 3 & 4 done) |
 | **Phase 4** | API Layer (FastAPI endpoints & contracts) | Planned |
 | **Phase 5** | Domain Models (Travel state, Itinerary, Budget schemas) | Planned |
 | **Phase 6** | Individual Planning Functions | Planned |
@@ -460,6 +460,10 @@ print(
 # 6. Multi-Tier Weather Forecast
 weather = get_weather_forecast(latitude=35.6762, longitude=139.6503, days=5, destination="Tokyo")
 print(f"Weather: {weather.summary} (Provider: {weather.provider})")
+
+# 7. Resilient Multi-Tier Web Search
+search_res = search_web("japan visa for indian citizens", max_results=3)
+print(f"Search: {search_res.total_results} results via {search_res.provider_used}")
 ```
 
 ---
@@ -481,6 +485,7 @@ uv run pytest tests/ -v
 uv run pytest tests/unit/test_calculator.py
 uv run pytest tests/unit/test_forex.py
 uv run pytest tests/unit/test_weather.py
+uv run pytest tests/unit/test_web_search.py
 uv run pytest tests/unit/test_static_data.py
 ```
 
@@ -526,6 +531,7 @@ Safarnama accesses external services through strict tool interfaces with fallbac
 |---|---|---|---|
 | **Forex Providers** | Forex conversion | `src/tools/forex.py` | 24h cache $\rightarrow$ fixture mode $\rightarrow$ Open Access (`open.er-api.com`) $\rightarrow$ FawazAhmed CDN mirror $\rightarrow$ Frankfurter ECB rates $\rightarrow$ authenticated tier $\rightarrow$ offline table of ~40 currencies. |
 | **Weather Providers** | Meteorological forecast | `src/tools/weather.py` | 3h cache $\rightarrow$ fixture mode $\rightarrow$ Open-Meteo 16-day forecast $\rightarrow$ wttr.in fallback $\rightarrow$ OpenWeatherMap 5-day fallback $\rightarrow$ offline seasonal climate baseline heuristic. |
+| **Web Search Providers** | Travel & general search | `src/tools/web_search.py` | 1h cache $\rightarrow$ fixture mode $\rightarrow$ Tavily Search API $\rightarrow$ DuckDuckGo Open Access $\rightarrow$ Firecrawl Search API $\rightarrow$ offline search fixture. |
 | **REST Countries v5** | Country metadata | `scripts/fetch_country_profiles.py` | On-demand script; outputs preserved in `data/static/countries.json`. |
 | **OurAirports** | Airport directory | `scripts/fetch_airports.py` | Source CSV fetched and saved to `data/static/airports.json`. |
 | **Passport Index** | Visa baseline | `scripts/fetch_visa_rules.py` | Positional join of dual CSVs saved to `data/static/visa_rules.json`. |

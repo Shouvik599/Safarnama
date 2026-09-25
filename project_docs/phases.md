@@ -408,16 +408,18 @@ src/tools/web_search.py
 
 Responsibilities:
 
-- Search configured provider
-- Support fixture mode
-- Handle failures
-- Return structured search results
-
-Test using:
-
-```text
-data/fixtures/mock_tavily_search.json
-```
+- Execute web search queries for travel research, visa rules, attractions, hotels, and flight advice
+- Query web search providers with multi-tier fallback cascade:
+  1. Test Fixture: `data/fixtures/mock_web_search.json` (or `mock_tavily_search.json` for offline testing)
+  2. In-Memory Cache: 1-hour TTL per query string / result limit
+  3. Live Tier 1: Tavily Search API (`POST https://api.tavily.com/search` using `TAVILY_API_KEY`)
+  4. Live Tier 2: DuckDuckGo Search (Keyless open-access instant answer API / HTTP fallback)
+  5. Live Tier 3: Firecrawl Search API (`POST https://api.firecrawl.dev/v2/search` using `FIRECRAWL_API_KEY`)
+  6. Tier 4: Offline Search Fixture (Guarantees zero-crash resilience when offline/unconfigured)
+- Return structured search result models (`SearchResultItem`, `WebSearchResult` in `src/models/web_search.py`)
+- Support fixture mode: `data/fixtures/mock_web_search.json`
+- Preserve title, URL snippet/markdown, and provider provenance metadata
+- Provide cache management (`clear_web_search_cache`) and status reporting (`get_web_search_status`)
 
 ---
 
