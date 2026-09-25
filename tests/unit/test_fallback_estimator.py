@@ -76,19 +76,21 @@ def test_estimate_cost_offline_heuristic_fallback() -> None:
 
 def test_estimate_gemini_provider_mock() -> None:
     """Test live Tier 1 Gemini provider estimation using mock HTTP response."""
-    mock_gemini_json = json.dumps({
-        "estimated_cost_inr": 9200.0,
-        "min_cost_inr": 7000.0,
-        "max_cost_inr": 12500.0,
-        "confidence_score": 0.88,
-        "reasoning": "Mocked Gemini AI price estimation for Tokyo hotels.",
-    })
+    mock_gemini_json = json.dumps(
+        {
+            "estimated_cost_inr": 9200.0,
+            "min_cost_inr": 7000.0,
+            "max_cost_inr": 12500.0,
+            "confidence_score": 0.88,
+            "reasoning": "Mocked Gemini AI price estimation for Tokyo hotels.",
+        }
+    )
 
     mock_resp = MagicMock()
     mock_resp.status = 200
-    mock_resp.read.return_value = json.dumps({
-        "candidates": [{"content": {"parts": [{"text": mock_gemini_json}]}}]
-    }).encode("utf-8")
+    mock_resp.read.return_value = json.dumps(
+        {"candidates": [{"content": {"parts": [{"text": mock_gemini_json}]}}]}
+    ).encode("utf-8")
     mock_resp.__enter__.return_value = mock_resp
 
     with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_gemini_key"}, clear=True):
@@ -110,19 +112,21 @@ def test_estimate_gemini_provider_mock() -> None:
 
 def test_estimate_groq_provider_mock() -> None:
     """Test live Tier 2 Groq provider estimation using mock HTTP response."""
-    mock_groq_json = json.dumps({
-        "estimated_cost_inr": 3400.0,
-        "min_cost_inr": 2500.0,
-        "max_cost_inr": 4800.0,
-        "confidence_score": 0.85,
-        "reasoning": "Mocked Groq Llama-3.3 price estimation for Mumbai dining.",
-    })
+    mock_groq_json = json.dumps(
+        {
+            "estimated_cost_inr": 3400.0,
+            "min_cost_inr": 2500.0,
+            "max_cost_inr": 4800.0,
+            "confidence_score": 0.85,
+            "reasoning": "Mocked Groq Llama-3.3 price estimation for Mumbai dining.",
+        }
+    )
 
     mock_resp = MagicMock()
     mock_resp.status = 200
-    mock_resp.read.return_value = json.dumps({
-        "choices": [{"message": {"content": mock_groq_json}}]
-    }).encode("utf-8")
+    mock_resp.read.return_value = json.dumps(
+        {"choices": [{"message": {"content": mock_groq_json}}]}
+    ).encode("utf-8")
     mock_resp.__enter__.return_value = mock_resp
 
     # Set GROQ_API_KEY but clear GEMINI_API_KEY so it proceeds to Groq
@@ -144,19 +148,21 @@ def test_estimate_groq_provider_mock() -> None:
 
 def test_estimate_nvidia_provider_mock() -> None:
     """Test live Tier 3 NVIDIA NIM provider estimation using mock HTTP response."""
-    mock_nvidia_json = json.dumps({
-        "estimated_cost_inr": 1500.0,
-        "min_cost_inr": 1000.0,
-        "max_cost_inr": 2200.0,
-        "confidence_score": 0.82,
-        "reasoning": "Mocked NVIDIA Llama-3.3 price estimation for transport.",
-    })
+    mock_nvidia_json = json.dumps(
+        {
+            "estimated_cost_inr": 1500.0,
+            "min_cost_inr": 1000.0,
+            "max_cost_inr": 2200.0,
+            "confidence_score": 0.82,
+            "reasoning": "Mocked NVIDIA Llama-3.3 price estimation for transport.",
+        }
+    )
 
     mock_resp = MagicMock()
     mock_resp.status = 200
-    mock_resp.read.return_value = json.dumps({
-        "choices": [{"message": {"content": mock_nvidia_json}}]
-    }).encode("utf-8")
+    mock_resp.read.return_value = json.dumps(
+        {"choices": [{"message": {"content": mock_nvidia_json}}]}
+    ).encode("utf-8")
     mock_resp.__enter__.return_value = mock_resp
 
     with patch.dict("os.environ", {"NVIDIA_API_KEY": "fake_nvidia_key"}, clear=True):

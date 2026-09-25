@@ -383,9 +383,8 @@ def _search_serpapi_google_hotels(
                 for prop in properties[:8]:
                     name = prop.get("name") or f"{clean_dest.title()} Hotel"
                     rate_obj = prop.get("rate_per_night", {})
-                    extracted_rate = (
-                        rate_obj.get("extracted_lowest")
-                        or rate_obj.get("extracted_before_taxes_fees")
+                    extracted_rate = rate_obj.get("extracted_lowest") or rate_obj.get(
+                        "extracted_before_taxes_fees"
                     )
 
                     if not extracted_rate:

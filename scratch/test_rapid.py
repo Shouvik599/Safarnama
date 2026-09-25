@@ -1,6 +1,7 @@
+import json
 import os
 import urllib.request
-import json
+
 from dotenv import load_dotenv
 
 load_dotenv()

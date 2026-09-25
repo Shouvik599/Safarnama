@@ -165,7 +165,9 @@ def _search_fixture(
                     description=item.get("description"),
                     open_hours=item.get("open_hours", "09:00 - 18:00"),
                     thumbnail_url=item.get("thumbnail_url"),
-                    maps_url=item.get("maps_url", f"https://safarnama.local/places/{clean_dest.lower()}"),
+                    maps_url=item.get(
+                        "maps_url", f"https://safarnama.local/places/{clean_dest.lower()}"
+                    ),
                     provider="fixture",
                 )
             )
@@ -493,9 +495,7 @@ def _search_nominatim_osm(
                     lon = float(p.get("lon", 0.0))
 
                     cat = (
-                        req_cat
-                        if req_cat in ("ATTRACTION", "RESTAURANT", "CAFE")
-                        else "ATTRACTION"
+                        req_cat if req_cat in ("ATTRACTION", "RESTAURANT", "CAFE") else "ATTRACTION"
                     )
 
                     items.append(
@@ -681,9 +681,7 @@ def search_places(
         return res
 
     # 3. Live Tier 3: Web Search Tool Fallback
-    res = _search_via_web_search(
-        clean_dest, category=req_cat, query=query, max_results=max_results
-    )
+    res = _search_via_web_search(clean_dest, category=req_cat, query=query, max_results=max_results)
     if res and res.items:
         _PLACES_CACHE.set(clean_dest, req_cat, query, max_results, res)
         return res

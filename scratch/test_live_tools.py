@@ -1,53 +1,39 @@
+import json
 import os
 import sys
-import json
 from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
 from src.tools.forex import (
-    _fetch_live_open_access,
+    OFFLINE_BASELINE_RATES,
+    _fetch_live_authenticated,
     _fetch_live_fawazahmed,
     _fetch_live_frankfurter,
-    _fetch_live_authenticated,
-    _load_fixture_rates,
-    OFFLINE_BASELINE_RATES,
-    get_rates_table,
-    convert_to_inr
+    _fetch_live_open_access,
 )
-
-from src.tools.weather import (
-    _fetch_open_meteo,
-    _fetch_wttr_in,
-    _fetch_openweathermap,
-    _load_fixture_forecast,
-    get_weather_forecast
-)
-
-from src.tools.web_search import (
-    _search_tavily,
-    _search_duckduckgo,
-    _search_firecrawl,
-    _search_fixture,
-    search_web
-)
-
 from src.tools.transport import (
-    _search_sky_scraper,
+    _estimate_physics_transport,
     _search_flights_sky,
     _search_indian_railways,
     _search_transport_rest,
     _search_via_web_search,
-    _estimate_physics_transport,
-    search_transport
 )
+from src.tools.weather import (
+    _fetch_open_meteo,
+    _fetch_openweathermap,
+    _fetch_wttr_in,
+    get_weather_forecast,
+)
+from src.tools.web_search import _search_duckduckgo, _search_fixture, _search_tavily
 
 print("=================================================================")
 print("RUNNING COMPREHENSIVE LIVE API DIAGNOSTIC VERIFICATION")

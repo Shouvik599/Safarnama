@@ -41,15 +41,11 @@ class HotelOption(BaseModel):
         default_factory=list,
         description="List of available amenities (e.g. ['Wi-Fi', 'Pool', 'Breakfast']).",
     )
-    room_type: str = Field(
-        default="Standard Room", description="Room category description."
-    )
+    room_type: str = Field(default="Standard Room", description="Room category description.")
     thumbnail_url: str | None = Field(
         default=None, description="URL to main property image or thumbnail."
     )
-    booking_url: str | None = Field(
-        default=None, description="Direct booking or reservation link."
-    )
+    booking_url: str | None = Field(default=None, description="Direct booking or reservation link.")
     provider: str = Field(
         description=(
             "Provenance provider: 'serpapi-google-hotels', 'booking-com', "

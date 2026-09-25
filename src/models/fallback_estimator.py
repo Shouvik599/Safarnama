@@ -62,12 +62,8 @@ class FallbackEstimateResult(BaseModel):
     estimated_cost_inr: Annotated[
         float, Field(ge=0.0, description="Point estimate of total cost in INR")
     ]
-    min_cost_inr: Annotated[
-        float, Field(ge=0.0, description="Minimum estimated cost range in INR")
-    ]
-    max_cost_inr: Annotated[
-        float, Field(ge=0.0, description="Maximum estimated cost range in INR")
-    ]
+    min_cost_inr: Annotated[float, Field(ge=0.0, description="Minimum estimated cost range in INR")]
+    max_cost_inr: Annotated[float, Field(ge=0.0, description="Maximum estimated cost range in INR")]
     currency: str = "INR"
     confidence_score: Annotated[
         float, Field(ge=0.0, le=1.0, description="Confidence score between 0.0 and 1.0")

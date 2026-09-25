@@ -87,17 +87,11 @@ def test_serpapi_google_hotels_search(monkeypatch):
                 "hotel_class": "4-star hotel",
                 "overall_rating": 8.8,
                 "reviews": 1420,
-                "rate_per_night": {
-                    "extracted_lowest": 12500.0,
-                    "lowest": "₹12,500"
-                },
-                "gps_coordinates": {
-                    "latitude": 35.6895,
-                    "longitude": 139.6917
-                },
+                "rate_per_night": {"extracted_lowest": 12500.0, "lowest": "₹12,500"},
+                "gps_coordinates": {"latitude": 35.6895, "longitude": 139.6917},
                 "amenities": ["Free Wi-Fi", "Pool", "Restaurant"],
                 "images": [{"thumbnail": "https://images.local/thumb.jpg"}],
-                "deal_url": "https://booking.com/hotel/tokyo-grand"
+                "deal_url": "https://booking.com/hotel/tokyo-grand",
             }
         ]
     }
@@ -140,7 +134,7 @@ def test_booking_com_search(monkeypatch):
                 "address": "Paris City Center",
                 "latitude": 48.8566,
                 "longitude": 2.3522,
-                "url": "https://booking.com/paris-novotel"
+                "url": "https://booking.com/paris-novotel",
             }
         ]
     }
@@ -186,7 +180,7 @@ def test_nominatim_osm_search(monkeypatch):
             "place_id": 501,
             "display_name": "Hotel Metropolis, Rome, Italy",
             "lat": "41.9028",
-            "lon": "12.4964"
+            "lon": "12.4964",
         }
     ]
     mock_resp = MagicMock()

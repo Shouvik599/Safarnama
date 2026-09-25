@@ -89,7 +89,7 @@ def test_serpapi_google_maps_search(monkeypatch):
                 "address": "Shinjuku, Tokyo",
                 "gps_coordinates": {"latitude": 35.6905, "longitude": 139.7018},
                 "open_state": "Open 24 hours",
-                "link": "https://maps.google.com/ichiran"
+                "link": "https://maps.google.com/ichiran",
             }
         ]
     }
@@ -122,7 +122,7 @@ def test_nominatim_osm_search(monkeypatch):
             "place_id": 901,
             "display_name": "Louvre Museum, Paris, France",
             "lat": "48.8606",
-            "lon": "2.3376"
+            "lon": "2.3376",
         }
     ]
     mock_resp = MagicMock()

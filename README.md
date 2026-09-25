@@ -8,21 +8,21 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 3 — External Tool Layer (In Progress)
-Current Milestone: Tools 1 (Calculator), 2 (Forex), 3 (Weather), 4 (Web Search), and 5 (Transport) complete; Tools 6–8 pending
-Test Suite: 229 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 4 — API Layer (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete) & Phase 4 (FastAPI endpoints, CORS, validation & SSE streaming complete)
+Test Suite: 262 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project is currently in the external tool development stage. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project is currently in the domain modeling and workflow planning stage. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
 
 | Phase | Description | Status |
 |---|---|---|
 | **Phase 0** | Project Foundation & Packaging | **Complete** |
 | **Phase 1** | Static Data Ingestion (Airports, Countries, Visa Rules) | **Complete** |
 | **Phase 2** | Static Data Access Layer & In-Memory Store | **Complete** |
-| **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Transport, Places) | **In Progress** (Tools 1, 2, 3, 4 & 5 done) |
-| **Phase 4** | API Layer (FastAPI endpoints & contracts) | Planned |
+| **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Transport, Hotels, Places, Estimator) | **Complete** |
+| **Phase 4** | API Layer (FastAPI endpoints, validation & SSE streaming) | **Complete** |
 | **Phase 5** | Domain Models (Travel state, Itinerary, Budget schemas) | Planned |
 | **Phase 6** | Individual Planning Functions | Planned |
 | **Phase 7** | LangGraph Orchestration & Multi-Agent Graph | Planned |
