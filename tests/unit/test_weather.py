@@ -403,6 +403,20 @@ def test_wmo_code_mappings() -> None:
     assert o_desc == "Moderate rain"
 
 
+def test_map_wttr_code_to_wmo_failures_and_defaults() -> None:
+    """Verify wttr code mapping returns default values on parse failure or unmapped code."""
+    # Invalid string input (ValueError)
+    assert _map_wttr_code_to_wmo("invalid") == (2, "Partly cloudy")
+    assert _map_wttr_code_to_wmo("") == (2, "Partly cloudy")
+
+    # Non-string input causing TypeError or non-int parsing
+    assert _map_wttr_code_to_wmo(None) == (2, "Partly cloudy")
+    assert _map_wttr_code_to_wmo([113]) == (2, "Partly cloudy")
+
+    # Unmapped valid integer code
+    assert _map_wttr_code_to_wmo("999") == (2, "Partly cloudy")
+
+
 def test_climate_baseline_seasons() -> None:
     """Climate baseline respects hemispheres and summer/winter extremes."""
     # Tokyo (35° N) in July (summer) vs January (winter)
