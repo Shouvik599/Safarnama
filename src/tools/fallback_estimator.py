@@ -15,6 +15,7 @@ Cascade Strategy:
 6. Tier 4: Offline Rule-Based Mathematical Baseline (`_estimate_heuristic_baseline`)
 """
 
+import concurrent.futures
 import json
 import logging
 import os
@@ -312,6 +313,81 @@ def _parse_llm_json_response(text: str) -> dict[str, Any] | None:
 # ---------------------------------------------------------------------------
 
 
+def _estimate_gemini_single_model(
+    model_name: str,
+    gemini_key: str,
+    prompt: str,
+    clean_dest: str,
+    req_cat: str,
+    req_tier: str,
+    timeout: float,
+) -> FallbackEstimateResult | None:
+    """Attempt Gemini estimation for a single model."""
+    try:
+        # Try google-genai SDK if installed
+        try:
+            from google import genai  # type: ignore
+
+            client = genai.Client(api_key=gemini_key)
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+            )
+            raw_text = response.text if hasattr(response, "text") else str(response)
+        except Exception:
+            # Fallback to direct REST call if SDK call fails or unavailable
+            url = (
+                f"https://generativelanguage.googleapis.com/v1beta/models/"
+                f"{model_name}:generateContent?key={gemini_key}"
+            )
+            payload = {"contents": [{"parts": [{"text": prompt}]}]}
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                if resp.status != 200:
+                    return None
+                res_body = json.loads(resp.read().decode("utf-8"))
+                candidates = res_body.get("candidates", [])
+                if not candidates:
+                    return None
+                parts = candidates[0].get("content", {}).get("parts", [])
+                raw_text = parts[0].get("text", "") if parts else ""
+
+        parsed = _parse_llm_json_response(raw_text)
+        if parsed and "estimated_cost_inr" in parsed:
+            est = float(parsed.get("estimated_cost_inr", 0.0))
+            min_c = float(parsed.get("min_cost_inr") or est * 0.75)
+            max_c = float(parsed.get("max_cost_inr") or est * 1.35)
+            conf = float(parsed.get("confidence_score") or 0.85)
+            reas = str(parsed.get("reasoning") or f"Gemini {model_name} estimation.")
+
+            log.info("Gemini model %s generated cost estimate for %s", model_name, clean_dest)
+            return FallbackEstimateResult(
+                destination=clean_dest,
+                category=req_cat,
+                tier=req_tier,
+                estimated_cost_inr=round(est, 2),
+                min_cost_inr=round(min_c, 2),
+                max_cost_inr=round(max_c, 2),
+                currency="INR",
+                confidence_score=min(1.0, max(0.0, conf)),
+                reasoning=reas,
+                provider_used="gemini",
+                model_used=model_name,
+                is_fallback=True,
+                is_estimated=True,
+                timestamp=datetime.now(UTC).isoformat(),
+            )
+    except Exception as exc:
+        log.warning("Gemini model %s estimation failed for %s: %s", model_name, clean_dest, exc)
+
+    return None
+
+
 def _estimate_gemini(
     request: EstimateRequest, timeout: float = DEFAULT_TIMEOUT_SECONDS
 ) -> FallbackEstimateResult | None:
@@ -340,68 +416,32 @@ def _estimate_gemini(
         context_notes=request.context_notes,
     )
 
-    for model_name in models_to_try:
-        try:
-            # Try google-genai SDK if installed
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=min(len(models_to_try), 8))
+    try:
+        futures = [
+            executor.submit(
+                _estimate_gemini_single_model,
+                model_name,
+                gemini_key,
+                prompt,
+                clean_dest,
+                req_cat,
+                req_tier,
+                timeout,
+            )
+            for model_name in models_to_try
+        ]
+
+        for future in futures:
             try:
-                from google import genai  # type: ignore
-
-                client = genai.Client(api_key=gemini_key)
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                )
-                raw_text = response.text if hasattr(response, "text") else str(response)
+                res = future.result()
+                if res is not None:
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    return res
             except Exception:
-                # Fallback to direct REST call if SDK call fails or unavailable
-                url = (
-                    f"https://generativelanguage.googleapis.com/v1beta/models/"
-                    f"{model_name}:generateContent?key={gemini_key}"
-                )
-                payload = {"contents": [{"parts": [{"text": prompt}]}]}
-                req = urllib.request.Request(
-                    url,
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers={"Content-Type": "application/json"},
-                    method="POST",
-                )
-                with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    if resp.status != 200:
-                        continue
-                    res_body = json.loads(resp.read().decode("utf-8"))
-                    candidates = res_body.get("candidates", [])
-                    if not candidates:
-                        continue
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    raw_text = parts[0].get("text", "") if parts else ""
-
-            parsed = _parse_llm_json_response(raw_text)
-            if parsed and "estimated_cost_inr" in parsed:
-                est = float(parsed.get("estimated_cost_inr", 0.0))
-                min_c = float(parsed.get("min_cost_inr") or est * 0.75)
-                max_c = float(parsed.get("max_cost_inr") or est * 1.35)
-                conf = float(parsed.get("confidence_score") or 0.85)
-                reas = str(parsed.get("reasoning") or f"Gemini {model_name} estimation.")
-
-                log.info("Gemini model %s generated cost estimate for %s", model_name, clean_dest)
-                return FallbackEstimateResult(
-                    destination=clean_dest,
-                    category=req_cat,
-                    tier=req_tier,
-                    estimated_cost_inr=round(est, 2),
-                    min_cost_inr=round(min_c, 2),
-                    max_cost_inr=round(max_c, 2),
-                    currency="INR",
-                    confidence_score=min(1.0, max(0.0, conf)),
-                    reasoning=reas,
-                    provider_used="gemini",
-                    model_used=model_name,
-                    is_fallback=True,
-                    is_estimated=True,
-                    timestamp=datetime.now(UTC).isoformat(),
-                )
-        except Exception as exc:
-            log.warning("Gemini model %s estimation failed for %s: %s", model_name, clean_dest, exc)
+                continue
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
 
     return None
 
@@ -409,6 +449,91 @@ def _estimate_gemini(
 # ---------------------------------------------------------------------------
 # Provider Implementation 4: Live Tier 2 & 3 - OpenAI-Compatible Endpoint (Groq & NVIDIA)
 # ---------------------------------------------------------------------------
+
+
+def _estimate_openai_compatible_single_model(
+    model_name: str,
+    provider_name: str,
+    api_key: str,
+    base_url: str,
+    sys_prompt: str,
+    user_prompt: str,
+    clean_dest: str,
+    req_cat: str,
+    req_tier: str,
+    timeout: float,
+) -> FallbackEstimateResult | None:
+    """Attempt cost estimation for a single OpenAI-compatible model."""
+    url = f"{base_url.rstrip('/')}/chat/completions"
+    try:
+        payload = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": 0.2,
+            "response_format": {"type": "json_object"},
+        }
+
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "Safarnama/0.1.0",
+            },
+            method="POST",
+        )
+
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                choices = data.get("choices", [])
+                if choices:
+                    content = choices[0].get("message", {}).get("content", "")
+                    parsed = _parse_llm_json_response(content)
+                    if parsed and "estimated_cost_inr" in parsed:
+                        est = float(parsed.get("estimated_cost_inr", 0.0))
+                        min_c = float(parsed.get("min_cost_inr") or est * 0.75)
+                        max_c = float(parsed.get("max_cost_inr") or est * 1.35)
+                        conf = float(parsed.get("confidence_score") or 0.85)
+                        default_reas = f"{provider_name.title()} estimation."
+                        reas = str(parsed.get("reasoning") or default_reas)
+
+                        log.info(
+                            "%s model %s generated cost estimate for %s",
+                            provider_name.title(),
+                            model_name,
+                            clean_dest,
+                        )
+                        return FallbackEstimateResult(
+                            destination=clean_dest,
+                            category=req_cat,
+                            tier=req_tier,
+                            estimated_cost_inr=round(est, 2),
+                            min_cost_inr=round(min_c, 2),
+                            max_cost_inr=round(max_c, 2),
+                            currency="INR",
+                            confidence_score=min(1.0, max(0.0, conf)),
+                            reasoning=reas,
+                            provider_used=provider_name.lower(),
+                            model_used=model_name,
+                            is_fallback=True,
+                            is_estimated=True,
+                            timestamp=datetime.now(UTC).isoformat(),
+                        )
+    except Exception as exc:
+        log.warning(
+            "%s model %s estimation failed for %s: %s",
+            provider_name.title(),
+            model_name,
+            clean_dest,
+            exc,
+        )
+
+    return None
 
 
 def _estimate_openai_compatible(
@@ -437,76 +562,35 @@ def _estimate_openai_compatible(
         context_notes=request.context_notes,
     )
 
-    url = f"{base_url.rstrip('/')}/chat/completions"
-
-    for model_name in models:
-        try:
-            payload = {
-                "model": model_name,
-                "messages": [
-                    {"role": "system", "content": sys_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "temperature": 0.2,
-                "response_format": {"type": "json_object"},
-            }
-
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                    "User-Agent": "Safarnama/0.1.0",
-                },
-                method="POST",
-            )
-
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                if resp.status == 200:
-                    data = json.loads(resp.read().decode("utf-8"))
-                    choices = data.get("choices", [])
-                    if choices:
-                        content = choices[0].get("message", {}).get("content", "")
-                        parsed = _parse_llm_json_response(content)
-                        if parsed and "estimated_cost_inr" in parsed:
-                            est = float(parsed.get("estimated_cost_inr", 0.0))
-                            min_c = float(parsed.get("min_cost_inr") or est * 0.75)
-                            max_c = float(parsed.get("max_cost_inr") or est * 1.35)
-                            conf = float(parsed.get("confidence_score") or 0.85)
-                            default_reas = f"{provider_name.title()} estimation."
-                            reas = str(parsed.get("reasoning") or default_reas)
-
-                            log.info(
-                                "%s model %s generated cost estimate for %s",
-                                provider_name.title(),
-                                model_name,
-                                clean_dest,
-                            )
-                            return FallbackEstimateResult(
-                                destination=clean_dest,
-                                category=req_cat,
-                                tier=req_tier,
-                                estimated_cost_inr=round(est, 2),
-                                min_cost_inr=round(min_c, 2),
-                                max_cost_inr=round(max_c, 2),
-                                currency="INR",
-                                confidence_score=min(1.0, max(0.0, conf)),
-                                reasoning=reas,
-                                provider_used=provider_name.lower(),
-                                model_used=model_name,
-                                is_fallback=True,
-                                is_estimated=True,
-                                timestamp=datetime.now(UTC).isoformat(),
-                            )
-        except Exception as exc:
-            log.warning(
-                "%s model %s estimation failed for %s: %s",
-                provider_name.title(),
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=min(len(models), 8))
+    try:
+        futures = [
+            executor.submit(
+                _estimate_openai_compatible_single_model,
                 model_name,
+                provider_name,
+                api_key,
+                base_url,
+                sys_prompt,
+                user_prompt,
                 clean_dest,
-                exc,
+                req_cat,
+                req_tier,
+                timeout,
             )
+            for model_name in models
+        ]
+
+        for future in futures:
+            try:
+                res = future.result()
+                if res is not None:
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    return res
+            except Exception:
+                continue
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
 
     return None
 
