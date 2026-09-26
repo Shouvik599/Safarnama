@@ -42,6 +42,13 @@ TAVILY_FIXTURE_PATH = (
 CACHE_TTL_SECONDS = 3600  # 1 hour
 DEFAULT_TIMEOUT_SECONDS = 8.0
 
+# Pre-compiled regular expressions for DuckDuckGo HTML result parsing
+DDG_LINK_PATTERN = re.compile(
+    r'<a class="result__url" href="([^"]+)".*?>\s*(.*?)\s*</a>', re.DOTALL
+)
+DDG_SNIPPET_PATTERN = re.compile(r'<a class="result__snippet".*?>\s*(.*?)\s*</a>', re.DOTALL)
+HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+
 
 # ---------------------------------------------------------------------------
 # Custom Exceptions
@@ -330,23 +337,15 @@ def _search_duckduckgo(
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             if resp.status == 200:
                 html_text = resp.read().decode("utf-8", errors="ignore")
-                # Parse links and snippets with regex to avoid extra dependencies
-                link_pattern = re.compile(
-                    r'<a class="result__url" href="([^"]+)".*?>\s*(.*?)\s*</a>', re.DOTALL
-                )
-                snippet_pattern = re.compile(
-                    r'<a class="result__snippet".*?>\s*(.*?)\s*</a>', re.DOTALL
-                )
-
-                urls = link_pattern.findall(html_text)
-                snippets = snippet_pattern.findall(html_text)
+                urls = DDG_LINK_PATTERN.findall(html_text)
+                snippets = DDG_SNIPPET_PATTERN.findall(html_text)
 
                 results = []
                 for idx, (raw_url, title_text) in enumerate(urls[:max_results]):
-                    clean_title = re.sub(r"<[^>]+>", "", title_text).strip()
+                    clean_title = HTML_TAG_PATTERN.sub("", title_text).strip()
                     clean_snippet = ""
                     if idx < len(snippets):
-                        clean_snippet = re.sub(r"<[^>]+>", "", snippets[idx]).strip()
+                        clean_snippet = HTML_TAG_PATTERN.sub("", snippets[idx]).strip()
 
                     # Unquote DuckDuckGo redirect link if present
                     actual_url = raw_url
