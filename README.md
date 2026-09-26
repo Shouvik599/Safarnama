@@ -110,11 +110,18 @@ Generic conversational AI chatbots fail at this task because they:
   - Sequential stay duration and checkin/checkout date allocation across multi-destination itineraries.
   - Deterministic financial arithmetic scaling per-person transport fares across traveler party size and hotel costs across rooms and nights.
   - Booking URL preservation and non-crashing fallback synthesis (`is_estimated=True`, `physics-heuristic`, `location-heuristic`).
-- **100% Offline Test Harness**: 414 unit tests running completely offline with zero network reliance or live API key dependencies.
+- **Experience Planning & Pacing Engine (`src/nodes/experience_node.py`)**:
+  - Pacing calibration: Schedules activities per day tailored to user pace preference (`RELAXED`: 1, `BALANCED`: 2, `PACKED`: 3 activity slots per day across MORNING, AFTERNOON, and EVENING dayparts).
+  - Authentic dining recommendations: Selects authentic breakfast, lunch, and dinner venues per day from `search_places` with meal-type appropriate budget tiers.
+  - Weather-responsive indoor substitution: Evaluates daily meteorological forecasts, detects adverse outdoor conditions (rain, storms), and seamlessly substitutes outdoor attractions with indoor cultural venues (museums, galleries) with user-facing explanation notes and substitution tracking.
+  - Must-visit fulfillment tracking: Prioritizes user must-visit sights, tracks fulfillment, and issues clear feasibility warnings if constraints prevent inclusion.
+  - Logistics integration: Automatically associates hotel stay details and booking URLs from `LogisticsPlan` into daily itinerary schedules.
+  - Party size cost scaling: Deterministically scales attraction tickets, dining expenses, and local transit across party headcount.
+  - Resilient execution: Zero crashes on places/weather tool exceptions with graceful category-heuristic fallbacks.
+- **100% Offline Test Harness**: 427 unit tests running completely offline with zero network reliance or live API key dependencies.
 
 ### Planned Capabilities (Future Phases)
 
-- **Experience Planning Node** (Attractions, Dining, Weather-Aware Pacing) — *Phase 9*
 - **Deterministic Budget Engine** (Category summation, buffer, variances) — *Phase 10*
 - **Optimizer Functionality** (Budget trade-offs, constraint satisfaction) — *Phase 11*
 - **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 12*
@@ -373,9 +380,9 @@ Phase 7: Visa Functionality [COMPLETED: Static Baseline + Semantic LLM Verificat
       ↓
 Phase 8: Logistics Functionality [COMPLETED: Transport Legs & Hotel Stays Planning]
       ↓
-Phase 9: Experience Functionality [NEXT PHASE: Attractions, Food & Weather Pacing]
+Phase 9: Experience Functionality [COMPLETED: Attractions, Dining & Weather Pacing]
       ↓
-Phase 10: Deterministic Budget Engine [PLANNED]
+Phase 10: Deterministic Budget Engine [NEXT PHASE: Aggregation, Variance & Contingency]
       ↓
 Phase 11: Optimizer Functionality [PLANNED]
       ↓
@@ -442,10 +449,16 @@ Phase 20: Production Hardening [PLANNED]
   - `src/models/visa.py`: Added `LiveVisaPolicyAnalysis` Pydantic model for structured, validated LLM extraction.
   - `src/nodes/visa_node.py`: Deterministic visa evaluation pipeline (`evaluate_country_visa`, `process_visa`, `visa_node`), automatic domestic bypass for all-India trips, semantic LLM policy reconciliation cascade (Gemini, Groq, NVIDIA NIM) with zero regex, date-aware expiration checking for temporary waivers, Schengen single-visa fee optimization, and total party headcount scaling.
   - 20 comprehensive unit tests in `tests/unit/test_visa_node.py`.
+- **Phase 8 (Logistics Functionality — Complete)**:
+  - `src/nodes/logistics_node.py`: Transport legs and accommodation planning (`logistics_node`, `process_logistics`), family-friendly room heuristics (`estimate_rooms_required`), continuous multi-city date allocations (`allocate_stay_dates`), travel style accommodation matching, per-person fare scaling across party headcount, and non-crashing fallback synthesis.
+  - 22 comprehensive unit tests in `tests/unit/test_logistics_node.py`.
+- **Phase 9 (Experience Functionality — Complete)**:
+  - `src/nodes/experience_node.py`: Daily activity and dining planning engine (`experience_node`, `process_experience`), pacing calibration (`RELAXED`: 1, `BALANCED`: 2, `PACKED`: 3 slots/day), weather-responsive indoor substitutions with transparent traveler notes, must-visit fulfillment tracking, hotel and booking URL association from `LogisticsPlan`, and party-scaled deterministic cost aggregation.
+  - 13 comprehensive unit tests in `tests/unit/test_experience_node.py`.
 
 ### Immediate Next Milestone
 
-- **Phase 8 — Logistics Functionality**: Implement `src/nodes/logistics_node.py` to plan transportation legs and accommodation stays independently across single- and multi-destination itineraries, estimating room configurations, evaluating travel styles and party counts, and handling provider fallbacks.
+- **Phase 10 — Deterministic Budget Engine**: Implement `src/nodes/budget_node.py` to aggregate logistics, experience, and visa cost breakdowns, evaluate contingency buffer configurations, and compute mathematical budget variances without LLM arithmetic.
 
 ---
 

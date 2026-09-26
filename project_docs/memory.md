@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 8 — Logistics Functionality complete.** `src/nodes/logistics_node.py` implemented with round-trip and multi-destination transport leg planning, hotel stay allocation, room requirement heuristics (`estimate_rooms_required`), travel style adaptation (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`), deterministic party headcount and room scaling, booking URL preservation, and zero-crash fallback estimation, backed by 22 unit tests (414 total passing). All lint/format checks pass.
+**Phase 9 — Experience Functionality complete.** `src/nodes/experience_node.py` implemented with daily activity scheduling and pacing calibration (`RELAXED`, `BALANCED`, `PACKED`), real dining discovery, weather forecast evaluation with automated indoor substitutions for adverse weather (with user-visible explanations and substitution accounting), must-visit fulfillment tracking, hotel stay and booking URL inheritance from `LogisticsPlan`, and deterministic party-scaled cost aggregation, backed by 13 unit tests (427 total passing). All lint/format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 8 — Logistics Functionality (Completed)
+Phase 9 — Experience Functionality (Completed)
 
 ## Completed functionality
 
@@ -112,6 +112,20 @@ Phase 8 — Logistics Functionality (Completed)
 - **`src/nodes/__init__.py`**: Re-exports `logistics_node`, `process_logistics`, `estimate_rooms_required`, `allocate_stay_dates`, `plan_transport_legs`, `plan_hotel_stays`, `LogisticsError`, and `LogisticsPlanningError`.
 - **`tests/unit/test_logistics_node.py`**: 22 unit tests covering room heuristics, date allocation, domestic single destination, multi-destination continuity, party size scaling, room count scaling, travel style sensitivity (budget vs luxury), provider failure resilience, booking URL preservation, budget feasibility warnings, LangGraph state interface, and error handling.
 
+### Phase 9 (Experience Functionality — 100% complete)
+- **`src/nodes/experience_node.py`**: Complete experience planning engine:
+  - Custom exceptions (`ExperienceError`, `ExperiencePlanningError`).
+  - Activity scheduling and pacing calibration: Schedules slots per day according to traveler pace (`RELAXED`: 1, `BALANCED`: 2, `PACKED`: 3 slots across `MORNING`, `AFTERNOON`, `EVENING`).
+  - Authentic dining recommendations: Integrates `search_places` to assign breakfast, lunch, and dinner to each day with appropriate meal costs scaled by party size.
+  - Weather-responsive indoor substitution: Retrieves multi-day weather forecasts via `get_weather_forecast`. When adverse weather (heavy rain, storms, `is_outdoor_friendly=False`) is forecasted, seamlessly substitutes outdoor attractions with indoor cultural venues (museums, art galleries) from the POI pool or synthetic category heuristics, appending transparent explanation notes and tracking `weather_substitutions`.
+  - Must-visit fulfillment tracking: Prioritizes user must-visit sights, tracks fulfillment, and issues clear feasibility warnings if constraints prevent inclusion.
+  - Logistics integration: Automatically associates hotel stay details and booking URLs from `LogisticsPlan` into daily itinerary schedules (final departure day has `hotel_name=None`).
+  - Party size cost scaling: Deterministically scales attraction tickets, dining expenses, and local transit across total traveler headcount (`party.total_travelers`).
+  - Resilient execution: Zero crashes on places/weather tool exceptions with graceful category-heuristic fallbacks.
+  - LangGraph node function `experience_node(state)` returning `{"experience_plan": plan}`.
+- **`src/nodes/__init__.py`**: Re-exports `experience_node`, `process_experience`, `ExperienceError`, and `ExperiencePlanningError`.
+- **`tests/unit/test_experience_node.py`**: 13 unit tests covering pacing calibration (RELAXED, BALANCED, PACKED), must-visit fulfillment and shortfall warnings, authentic dining, weather-responsive indoor substitutions, multi-destination day distribution, hotel stay inheritance from logistics, party size cost scaling, provider failure resilience, LangGraph interface, and error handling.
+
 ## Important files/modules
 
 | Path | Role |
@@ -129,6 +143,7 @@ Phase 8 — Logistics Functionality (Completed)
 | `src/nodes/intake_node.py` | Phase 6 intake node, geographic resolution, scope reconciliation, planning state generator |
 | `src/nodes/visa_node.py` | Phase 7 visa planning node, live verification, Schengen optimization, domestic bypass |
 | `src/nodes/logistics_node.py` | Phase 8 logistics planning node, transport legs, hotel stays, room estimation |
+| `src/nodes/experience_node.py` | Phase 9 experience planning node, attractions, dining, weather pacing |
 | `src/nodes/__init__.py` | Node exports |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
 | `src/prompts/visa_prompts.py` | Isolated prompt templates for visa enrichment and verification |
@@ -144,13 +159,14 @@ Phase 8 — Logistics Functionality (Completed)
 | `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
 | `tests/unit/test_visa_node.py` | 20 Phase 7 visa node unit tests |
 | `tests/unit/test_logistics_node.py` | 22 Phase 8 logistics node unit tests |
+| `tests/unit/test_experience_node.py` | 13 Phase 9 experience node unit tests |
 | `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
-- `uv run pytest`: **414 passed** (392 pre-Phase 8 + 22 logistics node tests)
+- `uv run pytest`: **427 passed** (414 pre-Phase 9 + 13 experience node tests)
 - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
 - `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
 
@@ -178,13 +194,17 @@ Phase 8 — Logistics Functionality (Completed)
 - In `logistics_node.py`, room requirement estimation follows family-friendly occupancy heuristics (2 adults + 1 child share 1 room; larger parties allocate ~2 persons per room).
 - Multi-destination stay dates are distributed sequentially with continuous checkout/checkin date alignment and return flight departure matching final stay checkout.
 - Fare and stay prices are scaled deterministically (`fare * travelers`, `rate * nights * rooms`). Fallbacks are explicitly labeled with `is_estimated=True`.
+- In `experience_node.py`, pacing strictly dictates slots/day (`RELAXED`: 1, `BALANCED`: 2, `PACKED`: 3).
+- Adverse weather automatically triggers indoor activity replacement from POI candidates or museum heuristics with transparent traveler notes and substitution accounting.
+- Hotel stays and booking URLs are inherited directly from `LogisticsPlan`, with `hotel_name=None` on final departure day.
+- Must-visit sights omitted due to pacing constraints produce user-visible feasibility warnings.
 
-## Phase 8 Completion Status
+## Phase 9 Completion Status
 
-Phase 8 — Logistics Functionality is **100% complete, fully tested, and verified**.
+Phase 9 — Experience Functionality is **100% complete, fully tested, and verified**.
 
 ## Next recommended phase
 
-**Phase 9 — Experience Functionality**:
-Implement `src/nodes/experience_node.py` to plan daily attractions, dining, and weather-aware itinerary pacing, generating validated `ExperiencePlan` models. Followed by Phase 10 (Deterministic Budget Engine), Phase 11 (Optimizer Functionality), and Phase 12 (LangGraph Orchestration) as specified in `project_docs/phases.md`.
+**Phase 10 — Deterministic Budget Engine**:
+Implement `src/nodes/budget_node.py` to aggregate logistics, experience, and visa cost breakdowns, evaluate contingency buffer configurations, and compute mathematical budget variances without LLM arithmetic. Followed by Phase 11 (Optimizer Functionality) and Phase 12 (LangGraph Orchestration) as specified in `project_docs/phases.md`.
 
