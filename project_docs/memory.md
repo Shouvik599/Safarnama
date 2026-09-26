@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 5 — Domain Models complete.** Five domain model files implemented in `src/models/` with 89 new unit tests (351 total passing). All lint/format checks pass.
+**Phase 6 — Intake Functionality complete.** `src/nodes/intake_node.py` and supporting models (`ResolvedLocation`, `InitialPlanningState` in `src/models/trip.py`) implemented with 21 new unit tests (372 total passing). All lint/format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 5 — Domain Models (Completed)
+Phase 6 — Intake Functionality (Completed)
 
 ## Completed functionality
 
@@ -64,6 +64,20 @@ Phase 5 — Domain Models (Completed)
 - **`src/models/__init__.py`** (updated): Exports all Phase 1–5 models with clear section comments.
 - **`tests/unit/test_domain_models.py`**: 89 unit tests covering all five model files — valid construction, defaults, field validation, cross-field validators, enum values, properties, and invalid state rejection.
 
+### Phase 6 (Intake Functionality — 100% complete)
+- **`src/models/trip.py`** (extended): Added `ResolvedLocation` (geocoded gateway, country, Schengen flag, timezone offset) and `InitialPlanningState` (immutable planning state container with route sequence, normalized budgets, and duration).
+- **`src/models/__init__.py`** (updated): Re-exported `ResolvedLocation` and `InitialPlanningState`.
+- **`src/nodes/intake_node.py`**: Complete intake processing engine with:
+  - Custom exceptions (`IntakeError`, `IntakeValidationError`, `IntakeScopeConflictError`).
+  - Alias mappings for Indian tourist hubs/states (`DOMESTIC_GATEWAY_ALIASES`) and international regions (`INTERNATIONAL_GATEWAY_ALIASES`).
+  - Hierarchical resolution pipeline (`resolve_location`): Aliases -> IATA / airport codes -> Country profiles (for destinations) -> City / municipality search -> Fallback error.
+  - Strict Indian origin enforcement (must resolve to an airport or city in India).
+  - Scope auto-detection and conflict enforcement (`TravelScope.DOMESTIC` vs `INTERNATIONAL`).
+  - Date normalization (calculates duration for EXACT, FLEXIBLE, FIND_BEST modes) and budget split calculations (per-person multiplier).
+  - LangGraph node function `intake_node(state)` returning state update dictionary.
+- **`src/nodes/__init__.py`**: Re-exports `intake_node`, `process_intake`, `resolve_location`, and exceptions.
+- **`tests/unit/test_intake_node.py`**: 21 unit tests covering domestic single/multi-destination, international single/multi-country, Schengen advisory, flexible dates, per-person budgets, invalid origins, foreign origins, and scope conflict exceptions.
+
 ## Important files/modules
 
 | Path | Role |
@@ -73,11 +87,13 @@ Phase 5 — Domain Models (Completed)
 | `src/api/routes.py` | FastAPI router endpoints |
 | `src/api/app.py` | FastAPI application factory, CORS & exception handlers |
 | `src/api/__init__.py` | Package re-exports |
-| `src/models/trip.py` | Trip context, party, dates, budget, food, preferences |
+| `src/models/trip.py` | Trip context, party, dates, budget, food, preferences, ResolvedLocation, InitialPlanningState |
 | `src/models/itinerary.py` | POIs, activity slots, day plans, experience plan |
 | `src/models/logistics.py` | Transport legs, hotel stays, logistics plan |
 | `src/models/visa.py` | Visa ingestion models + VisaVerdict planning domain |
 | `src/models/budget.py` | Cost breakdown, contingency, variance, optimization, budget breakdown |
+| `src/nodes/intake_node.py` | Phase 6 intake node, geographic resolution, scope reconciliation, planning state generator |
+| `src/nodes/__init__.py` | Node exports |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
 | `src/prompts/visa_prompts.py` | Isolated prompt templates for visa enrichment |
 | `src/tools/static_data.py` | In-memory indexed static data store |
@@ -89,13 +105,14 @@ Phase 5 — Domain Models (Completed)
 | `src/tools/hotels.py` | Multi-tier hotel search tool |
 | `src/tools/places.py` | Multi-tier points of interest and dining tool |
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
+| `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
 | `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
-- `uv run pytest`: **351 passed** (262 pre-Phase 5 + 89 new domain model tests)
+- `uv run pytest`: **372 passed** (351 pre-Phase 6 + 21 new intake node tests)
 - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
 - `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
 
@@ -113,12 +130,14 @@ Phase 5 — Domain Models (Completed)
 - `BudgetVariance` cross-field validator rejects inconsistent `variance_inr` values (must equal `projected_total - user_budget` within ₹1).
 - `TripDates` cross-field validator enforces required fields per `DateMode` (EXACT requires start+end; FLEXIBLE requires start+duration; FIND_BEST requires window+duration).
 - Environment Variable & Configuration Synchronization (Rule 46 in `rules.md`): Whenever an environment variable is added, modified, or removed in `.env`, `.env.example`, `README.md` (Section 11), and project documentation must be updated in lockstep without committing real secrets.
+- In `resolve_location()`, destination country profile lookup (`find_country()`) takes precedence over municipality substring search to prevent country names (e.g. France) from falsely matching foreign towns with substrings (e.g. Fort Frances, CA).
+- Departure origin must strictly resolve to a passenger airport or municipality located in India (`iso_country == "IN"`).
 
-## Phase 5 Completion Status
+## Phase 6 Completion Status
 
-Phase 5 — Domain Models is **100% complete, fully tested, and verified**.
+Phase 6 — Intake Functionality is **100% complete, fully tested, and verified**.
 
 ## Next recommended phase
 
-**Phase 6 — Intake Functionality**:
-Implement `src/nodes/intake_node.py` to validate/sanitize user input, resolve origin/destination, load coordinates, and create initial planning state from a `TripContext`. Test with domestic, international, multi-destination, and invalid-input scenarios.
+**Phase 7 — Visa Functionality**:
+Implement `src/nodes/visa_node.py` to evaluate international visa regulations using static baseline rules (`data/static/visa_rules_enriched.json`) combined with live Tavily verification where required, producing validated `VisaVerdict` models, with automatic domestic bypass for all-India itineraries.

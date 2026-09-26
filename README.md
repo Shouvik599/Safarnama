@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 5 — Domain Models (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete)
-Test Suite: 351 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 6 — Intake Functionality (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Functionality Complete)
+Test Suite: 372 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, and the core domain models. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, and the intake planning node. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
 
 | Phase | Description | Status |
 |---|---|---|
@@ -24,8 +24,8 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Transport, Hotels, Places, Estimator) | **Complete** |
 | **Phase 4** | API Layer (FastAPI endpoints, validation & SSE streaming) | **Complete** |
 | **Phase 5** | Domain Models (Trip context, Itinerary, Logistics, Visa verdict, Budget schemas) | **Complete** |
-| **Phase 6** | Individual Planning Functions (Intake, Visa, Logistics, Experience, Optimizer nodes) | Planned |
-| **Phase 7** | LangGraph Orchestration & Multi-Agent Graph | Planned |
+| **Phase 6** | Intake Functionality (Sanitization, Origin/Destination Resolution, Scope Reconciliation, Initial State) | **Complete** |
+| **Phase 7** | Visa Functionality (Static Baseline + Live Verification, Verdict Synthesizer) | Planned |
 | **Phase 8** | Budget Engine & Optimization | Planned |
 | **Phase 9** | Complete Planning Workflow & Verification | Planned |
 | **Phase 10** | Web Frontend (Vite / React) | Planned |
@@ -82,12 +82,18 @@ Generic conversational AI chatbots fail at this task because they:
 - **Domain Modeling Layer (`src/models/`)**:
   - Immutable, frozen Pydantic v2 domain schemas (`TripContext`, `TripDates`, `TripParty`, `TripBudget`, `FoodPreferences`, `ExperiencePlan`, `DayPlan`, `ActivitySlot`, `PointOfInterest`, `LogisticsPlan`, `TransportLeg`, `HotelStay`, `VisaVerdict`, `BudgetBreakdown`, `BudgetVariance`).
   - Strict cross-field validations enforcing mode-dependent date constraints and mathematical variance equality.
-- **100% Offline Test Harness**: 351 unit tests running completely offline with zero network reliance or live API key dependencies.
+- **Intake Functionality & Geographic Resolution (`src/nodes/intake_node.py`)**:
+  - Input validation and sanitization for domestic and international trip requests.
+  - Multi-tier geographic resolution: tourist hub & regional aliases, IATA airport codes, country profiles, and city/municipality indexed search.
+  - Strict Indian origin enforcement and domestic vs. international scope reconciliation.
+  - Date normalization (EXACT, FLEXIBLE, FIND_BEST modes), per-person budget splitting, and initial planning state assembly (`InitialPlanningState`).
+- **100% Offline Test Harness**: 372 unit tests running completely offline with zero network reliance or live API key dependencies.
 
 ### Planned Capabilities (Future Phases)
 
-- **Individual Planning Nodes** (Intake, Visa, Logistics, Experience, Optimizer) — *Phase 6*
+- **Visa Planning Node** (Static Baseline + Live Verification, Domestic Bypass) — *Phase 7*
 - **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 7*
+- **Logistics & Experience Planning Nodes** (Transport, Stays, Activities, Dining)
 - **Budget Engine & Optimization Loop** (Feasibility checking, cost cutbacks, trade-off proposals) — *Phase 8*
 - **Complete End-to-End Planning Workflow & Verification** — *Phase 9*
 - **Warm Indian-Inspired Web Frontend** (Vite / React / TypeScript / pnpm) — *Phase 10*
@@ -172,22 +178,25 @@ Generic conversational AI chatbots fail at this task because they:
 ### Current Implementation vs Planned Components
 
 ```text
-IMPLEMENTED & VERIFIED (Phases 0–5)            PLANNED (Upcoming Phases)
+IMPLEMENTED & VERIFIED (Phases 0–6)            PLANNED (Upcoming Phases)
 ┌─────────────────────────────────┐        ┌───────────────────────────────┐
 │ src/api/                        │        │ src/nodes/                    │
-│ - FastAPI endpoints, CORS & SSE │        │ - intake_node.py              │
-│ - Request/Response Pydantic     │        │ - visa_node.py                │
-├─────────────────────────────────┤        │ - logistics_node.py           │
-│ src/models/                     │        │ - experience_node.py          │
-│ - trip, itinerary, logistics    │        │ - optimizer_node.py           │
-│ - visa, budget, static models   │        ├───────────────────────────────┤
-├─────────────────────────────────┤        │ src/graph/                    │
-│ src/tools/ (All 8 Tools)        │        │ - LangGraph StateGraph        │
-│ - static_data.py (3 datasets)   │        │ - State transitions & routing │
-│ - calculator.py (Decimal math)  │        ├───────────────────────────────┤
-│ - forex.py (Multi-tier INR)     │        │ Frontend                      │
-│ - weather.py (Forecasts)        │        │ - Vite / React / pnpm UI      │
-│ - web_search.py (Search)        │        └───────────────────────────────┘
+│ - FastAPI endpoints, CORS & SSE │        │ - visa_node.py                │
+│ - Request/Response Pydantic     │        │ - logistics_node.py           │
+├─────────────────────────────────┤        │ - experience_node.py          │
+│ src/models/                     │        │ - optimizer_node.py           │
+│ - trip, itinerary, logistics    │        ├───────────────────────────────┤
+│ - visa, budget, static models   │        │ src/graph/                    │
+├─────────────────────────────────┤        │ - LangGraph StateGraph        │
+│ src/nodes/                      │        │ - State transitions & routing │
+│ - intake_node.py (Intake/Res)   │        ├───────────────────────────────┤
+├─────────────────────────────────┤        │ Frontend                      │
+│ src/tools/ (All 8 Tools)        │        │ - Vite / React / pnpm UI      │
+│ - static_data.py (3 datasets)   │        └───────────────────────────────┘
+│ - calculator.py (Decimal math)  │
+│ - forex.py (Multi-tier INR)     │
+│ - weather.py (Forecasts)        │
+│ - web_search.py (Search)        │
 │ - transport.py (Routes)         │
 │ - hotels.py (Accommodations)    │
 │ - places.py (Attractions/Food)  │
@@ -268,7 +277,9 @@ Safarnama/
 │   │   ├── logistics.py      # TransportLeg, HotelStay, LogisticsPlan
 │   │   ├── trip.py           # TripParty, TripDates, TripBudget, FoodPreferences, TripContext
 │   │   └── visa.py           # BaseVisaRule, VisaOption, EnrichedVisaRecord, VisaVerdict
-│   ├── nodes/                # LangGraph agent planning nodes (Phase 6–7 scaffold)
+│   ├── nodes/                # LangGraph agent planning nodes (Phases 6–7)
+│   │   ├── __init__.py       # Exports intake_node, process_intake, resolve_location
+│   │   └── intake_node.py    # Phase 6: Sanitization, gateway resolution, scope reconciliation
 │   ├── prompts/              # Isolated system prompts and prompt templates
 │   │   ├── estimator_prompts.py # Prompts for LLM fallback estimator
 │   │   └── visa_prompts.py   # Prompts for visa enrichment
@@ -285,7 +296,7 @@ Safarnama/
 └── tests/                    # Automated test suite
     ├── conftest.py           # Shared pytest fixtures
     ├── integration/          # Integration test suite (Phase 11 scaffold)
-    └── unit/                 # 351 passing offline unit tests
+    └── unit/                 # 372 passing offline unit tests
         ├── test_api.py       # API endpoint, validation & SSE streaming tests
         ├── test_calculator.py
         ├── test_domain_models.py # 89 tests for trip, itinerary, logistics, visa, budget
@@ -296,6 +307,7 @@ Safarnama/
         ├── test_fetch_visa_rules.py
         ├── test_forex.py
         ├── test_hotels.py
+        ├── test_intake_node.py # 21 tests for intake node, resolution, scope enforcement
         ├── test_places.py
         ├── test_project_foundation.py
         ├── test_static_data.py
@@ -323,9 +335,9 @@ Phase 4: API Layer [COMPLETED: FastAPI, Endpoints & SSE]
       ↓
 Phase 5: Domain Models [COMPLETED: Trip, Itinerary, Logistics, Visa, Budget]
       ↓
-Phase 6: Planning Functions [NEXT PHASE: Intake, Visa, Logistics, Experience, Optimizer]
+Phase 6: Intake Functionality [COMPLETED: Sanitization, Resolution, Initial State]
       ↓
-Phase 7: LangGraph Orchestration [PLANNED]
+Phase 7: Visa Functionality [NEXT PHASE: Static Baseline + Live Verification]
       ↓
 Phase 8: Budget Optimization [PLANNED]
       ↓
@@ -372,10 +384,13 @@ Phase 11: Integration & Hardening [PLANNED]
   - `src/models/visa.py`: Extended with planning domain types (`VisaRequirementStatus`, `VisaCountryVerdict`, `VisaVerdict`).
   - `src/models/budget.py`: Enums (`BudgetStatus`, `OptimizationAction`) and composites (`CostBreakdown`, `ContingencyConfig`, `BudgetVariance`, `OptimizationResult`, `BudgetBreakdown`).
   - 89 unit tests in `tests/unit/test_domain_models.py`.
+- **Phase 6 (Intake Functionality — Complete)**:
+  - `src/nodes/intake_node.py`: Request sanitization and validation, alias mapping (`DOMESTIC_GATEWAY_ALIASES`, `INTERNATIONAL_GATEWAY_ALIASES`), hierarchical location resolution (`resolve_location`), strict Indian origin enforcement, domestic vs. international scope reconciliation, and initial planning state assembly (`InitialPlanningState`).
+  - 21 unit tests in `tests/unit/test_intake_node.py`.
 
 ### Immediate Next Milestone
 
-- **Phase 6 — Individual Planning Functions**: Implement `src/nodes/intake_node.py` to validate/sanitize user input, resolve origin/destination, load coordinates, and create initial planning state from a `TripContext`. Test with domestic, international, multi-destination, and invalid-input scenarios.
+- **Phase 7 — Visa Functionality**: Implement `src/nodes/visa_node.py` to evaluate international visa regulations using static baseline rules (`data/static/visa_rules_enriched.json`) combined with live Tavily verification where required, producing validated `VisaVerdict` models, with automatic domestic bypass for all-India itineraries.
 
 ---
 
@@ -597,7 +612,7 @@ Safarnama adheres to a **fixture-first testing philosophy**. All unit tests must
 ### Executing Tests
 
 ```bash
-# Run the entire test suite (351 passing tests)
+# Run the entire test suite (372 passing tests)
 uv run pytest
 
 # Run tests with verbose output
@@ -608,6 +623,9 @@ uv run pytest tests/unit/test_api.py
 
 # Run domain model test suite (89 tests)
 uv run pytest tests/unit/test_domain_models.py
+
+# Run intake node test suite (21 tests)
+uv run pytest tests/unit/test_intake_node.py
 
 # Run tool-specific test suites
 uv run pytest tests/unit/test_calculator.py

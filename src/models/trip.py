@@ -422,3 +422,77 @@ class TripContext(BaseModel):
         # At least one destination always required (enforced by min_length=1 above)
         # For domestic trips, previous_travel is irrelevant but not an error.
         return self
+
+
+# ---------------------------------------------------------------------------
+# Intake & Planning State Models
+# ---------------------------------------------------------------------------
+
+
+class ResolvedLocation(BaseModel):
+    """Geographically and statically resolved location or passenger gateway.
+
+    Produced by the intake node to normalize origins and destinations
+    with canonical coordinates, gateway airport, and country metadata.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    query: str = Field(description="Original user-specified location string.")
+    name: str = Field(description="Canonical resolved name of the airport, city, or country.")
+    city: str | None = Field(default=None, description="City or municipality if known.")
+    country_code: str = Field(description="ISO 3166-1 alpha-2 country code.")
+    country_name: str | None = Field(default=None, description="Full English country name.")
+    iata_code: str | None = Field(
+        default=None,
+        description="Primary commercial passenger airport IATA code if available.",
+    )
+    latitude: float = Field(description="Latitude coordinate.")
+    longitude: float = Field(description="Longitude coordinate.")
+    is_schengen: bool = Field(
+        default=False,
+        description="Whether location is within the Schengen Area.",
+    )
+    ist_offset_hours: float = Field(
+        default=0.0,
+        description="Timezone difference in hours relative to IST.",
+    )
+
+
+class InitialPlanningState(BaseModel):
+    """The canonical initial state created by the intake node.
+
+    Conforms to the TravelPlannerState contract in architecture.md (Section 16).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    trip_context: TripContext = Field(description="Validated user trip context.")
+    travel_scope: TravelScope = Field(
+        description="Resolved travel scope (DOMESTIC or INTERNATIONAL)."
+    )
+    origin: ResolvedLocation = Field(description="Resolved departure airport/location.")
+    destinations: list[ResolvedLocation] = Field(
+        min_length=1,
+        description="Resolved destination locations/gateways in visit order.",
+    )
+    route: list[str] = Field(
+        min_length=2,
+        description="Sequence of airport/city waypoint codes from origin back to origin.",
+    )
+    effective_duration_days: int = Field(
+        ge=1,
+        description="Calculated duration of the trip in days.",
+    )
+    total_budget_inr: float = Field(
+        gt=0,
+        description="Total budget in INR for the entire party.",
+    )
+    daily_budget_per_person_inr: float = Field(
+        gt=0,
+        description="Daily budget ceiling per person in INR.",
+    )
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Non-fatal warnings or advisory notices.",
+    )
