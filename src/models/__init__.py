@@ -80,6 +80,7 @@ from src.models.trip import (
 from src.models.visa import (
     BaseVisaRule,
     EnrichedVisaRecord,
+    LiveVisaPolicyAnalysis,
     VisaCountryVerdict,
     VisaOption,
     VisaRequirementStatus,
@@ -140,6 +141,7 @@ __all__ = [
     "LogisticsPlan",
     "TransportLeg",
     # Phase 5 — visa planning
+    "LiveVisaPolicyAnalysis",
     "VisaCountryVerdict",
     "VisaRequirementStatus",
     "VisaVerdict",

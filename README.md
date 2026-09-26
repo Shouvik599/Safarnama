@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 6 — Intake Functionality (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Functionality Complete)
-Test Suite: 372 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 7 — Visa Functionality (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Functionality & Semantic LLM Reconciliation Complete)
+Test Suite: 392 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, and the intake planning node. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, and the visa planning node. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
 
 | Phase | Description | Status |
 |---|---|---|
@@ -25,8 +25,8 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 4** | API Layer (FastAPI endpoints, validation & SSE streaming) | **Complete** |
 | **Phase 5** | Domain Models (Trip context, Itinerary, Logistics, Visa verdict, Budget schemas) | **Complete** |
 | **Phase 6** | Intake Functionality (Sanitization, Origin/Destination Resolution, Scope Reconciliation, Initial State) | **Complete** |
-| **Phase 7** | Visa Functionality (Static Baseline + Live Verification, Verdict Synthesizer) | Planned |
-| **Phase 8** | Budget Engine & Optimization | Planned |
+| **Phase 7** | Visa Functionality (Static Baseline + Live Verification, Schengen Optimization, Verdict Synthesizer) | **Complete** |
+| **Phase 8** | Logistics Functionality (Transport Legs & Hotel Stays Planning) | Planned |
 | **Phase 9** | Complete Planning Workflow & Verification | Planned |
 | **Phase 10** | Web Frontend (Vite / React) | Planned |
 | **Phase 11** | Integration, Streaming & Hardening | Planned |
@@ -87,14 +87,21 @@ Generic conversational AI chatbots fail at this task because they:
   - Multi-tier geographic resolution: tourist hub & regional aliases, IATA airport codes, country profiles, and city/municipality indexed search.
   - Strict Indian origin enforcement and domestic vs. international scope reconciliation.
   - Date normalization (EXACT, FLEXIBLE, FIND_BEST modes), per-person budget splitting, and initial planning state assembly (`InitialPlanningState`).
-- **100% Offline Test Harness**: 372 unit tests running completely offline with zero network reliance or live API key dependencies.
+- **Visa Planning & Policy Synthesis (`src/nodes/visa_node.py`)**:
+  - Multi-tier entry policy evaluation combining static enriched datasets (199 destinations) and live web search verification.
+  - Semantic structured LLM policy reconciliation (`LiveVisaPolicyAnalysis`) with zero regex, date-aware expiration checking for temporary waivers, and rejection of foreign nationality exemptions.
+  - Automatic domestic bypass with zero cost and empty country verdicts for all-India itineraries.
+  - Schengen single uniform visa optimization preventing redundant fees across multi-country European itineraries.
+  - Accurate party headcount scaling on visa costs (`party.total_travelers`).
+  - Strict anti-hallucination compliance (never invents visa rules; falls back to verified static baselines).
+- **100% Offline Test Harness**: 392 unit tests running completely offline with zero network reliance or live API key dependencies.
 
 ### Planned Capabilities (Future Phases)
 
-- **Visa Planning Node** (Static Baseline + Live Verification, Domestic Bypass) — *Phase 7*
-- **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 7*
-- **Logistics & Experience Planning Nodes** (Transport, Stays, Activities, Dining)
-- **Budget Engine & Optimization Loop** (Feasibility checking, cost cutbacks, trade-off proposals) — *Phase 8*
+- **Logistics Planning Node** (Flight & Train Legs, Hotel Accommodations) — *Phase 8*
+- **Experience Planning Node** (Attractions, Dining, Weather-Aware Pacing) — *Phase 8*
+- **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 9*
+- **Budget Engine & Optimization Loop** (Feasibility checking, cost cutbacks, trade-off proposals) — *Phase 9*
 - **Complete End-to-End Planning Workflow & Verification** — *Phase 9*
 - **Warm Indian-Inspired Web Frontend** (Vite / React / TypeScript / pnpm) — *Phase 10*
 - **End-to-End Integration, SSE Client Hook & Hardening** — *Phase 11*
@@ -178,21 +185,22 @@ Generic conversational AI chatbots fail at this task because they:
 ### Current Implementation vs Planned Components
 
 ```text
-IMPLEMENTED & VERIFIED (Phases 0–6)            PLANNED (Upcoming Phases)
+IMPLEMENTED & VERIFIED (Phases 0–7)            PLANNED (Upcoming Phases)
 ┌─────────────────────────────────┐        ┌───────────────────────────────┐
 │ src/api/                        │        │ src/nodes/                    │
-│ - FastAPI endpoints, CORS & SSE │        │ - visa_node.py                │
-│ - Request/Response Pydantic     │        │ - logistics_node.py           │
-├─────────────────────────────────┤        │ - experience_node.py          │
-│ src/models/                     │        │ - optimizer_node.py           │
-│ - trip, itinerary, logistics    │        ├───────────────────────────────┤
-│ - visa, budget, static models   │        │ src/graph/                    │
-├─────────────────────────────────┤        │ - LangGraph StateGraph        │
-│ src/nodes/                      │        │ - State transitions & routing │
-│ - intake_node.py (Intake/Res)   │        ├───────────────────────────────┤
-├─────────────────────────────────┤        │ Frontend                      │
-│ src/tools/ (All 8 Tools)        │        │ - Vite / React / pnpm UI      │
-│ - static_data.py (3 datasets)   │        └───────────────────────────────┘
+│ - FastAPI endpoints, CORS & SSE │        │ - logistics_node.py           │
+│ - Request/Response Pydantic     │        │ - experience_node.py          │
+├─────────────────────────────────┤        │ - optimizer_node.py           │
+│ src/models/                     │        ├───────────────────────────────┤
+│ - trip, itinerary, logistics    │        │ src/graph/                    │
+│ - visa, budget, static models   │        │ - LangGraph StateGraph        │
+├─────────────────────────────────┤        │ - State transitions & routing │
+│ src/nodes/                      │        ├───────────────────────────────┤
+│ - intake_node.py (Intake/Res)   │        │ Frontend                      │
+│ - visa_node.py (Visa/Schengen)  │        │ - Vite / React / pnpm UI      │
+├─────────────────────────────────┤        └───────────────────────────────┘
+│ src/tools/ (All 8 Tools)        │
+│ - static_data.py (3 datasets)   │
 │ - calculator.py (Decimal math)  │
 │ - forex.py (Multi-tier INR)     │
 │ - weather.py (Forecasts)        │
@@ -278,11 +286,12 @@ Safarnama/
 │   │   ├── trip.py           # TripParty, TripDates, TripBudget, FoodPreferences, TripContext
 │   │   └── visa.py           # BaseVisaRule, VisaOption, EnrichedVisaRecord, VisaVerdict
 │   ├── nodes/                # LangGraph agent planning nodes (Phases 6–7)
-│   │   ├── __init__.py       # Exports intake_node, process_intake, resolve_location
-│   │   └── intake_node.py    # Phase 6: Sanitization, gateway resolution, scope reconciliation
+│   │   ├── __init__.py       # Exports intake_node, visa_node, process_visa, etc.
+│   │   ├── intake_node.py    # Phase 6: Sanitization, gateway resolution, scope reconciliation
+│   │   └── visa_node.py      # Phase 7: Static baseline + live policy reconciliation & verdict
 │   ├── prompts/              # Isolated system prompts and prompt templates
 │   │   ├── estimator_prompts.py # Prompts for LLM fallback estimator
-│   │   └── visa_prompts.py   # Prompts for visa enrichment
+│   │   └── visa_prompts.py   # Prompts for visa enrichment & live verification
 │   └── tools/                # Deterministic utilities and external tool wrappers (Phase 2–3)
 │       ├── calculator.py     # Tool 1: Deterministic budget calculator (Decimal)
 │       ├── fallback_estimator.py # Tool 8: Multi-provider LLM cost fallback estimator
@@ -296,7 +305,7 @@ Safarnama/
 └── tests/                    # Automated test suite
     ├── conftest.py           # Shared pytest fixtures
     ├── integration/          # Integration test suite (Phase 11 scaffold)
-    └── unit/                 # 372 passing offline unit tests
+    └── unit/                 # 392 passing offline unit tests
         ├── test_api.py       # API endpoint, validation & SSE streaming tests
         ├── test_calculator.py
         ├── test_domain_models.py # 89 tests for trip, itinerary, logistics, visa, budget
@@ -312,6 +321,7 @@ Safarnama/
         ├── test_project_foundation.py
         ├── test_static_data.py
         ├── test_transport.py
+        ├── test_visa_node.py # 20 tests for visa node, semantic LLM reconciliation, static baseline
         ├── test_weather.py
         └── test_web_search.py
 ```
@@ -337,15 +347,19 @@ Phase 5: Domain Models [COMPLETED: Trip, Itinerary, Logistics, Visa, Budget]
       ↓
 Phase 6: Intake Functionality [COMPLETED: Sanitization, Resolution, Initial State]
       ↓
-Phase 7: Visa Functionality [NEXT PHASE: Static Baseline + Live Verification]
+Phase 7: Visa Functionality [COMPLETED: Static Baseline + Live Verification]
       ↓
-Phase 8: Budget Optimization [PLANNED]
+Phase 8: Logistics Functionality [NEXT PHASE: Transport & Stays]
       ↓
-Phase 9: Complete Planning Workflow [PLANNED]
+Phase 9: Experience Functionality [PLANNED]
       ↓
-Phase 10: Web Frontend [PLANNED]
+Phase 10: Budget & Optimization [PLANNED]
       ↓
-Phase 11: Integration & Hardening [PLANNED]
+Phase 11: Complete Planning Workflow [PLANNED]
+      ↓
+Phase 12: Web Frontend [PLANNED]
+      ↓
+Phase 13: End-to-End Hardening [PLANNED]
 ```
 
 ---
@@ -387,10 +401,15 @@ Phase 11: Integration & Hardening [PLANNED]
 - **Phase 6 (Intake Functionality — Complete)**:
   - `src/nodes/intake_node.py`: Request sanitization and validation, alias mapping (`DOMESTIC_GATEWAY_ALIASES`, `INTERNATIONAL_GATEWAY_ALIASES`), hierarchical location resolution (`resolve_location`), strict Indian origin enforcement, domestic vs. international scope reconciliation, and initial planning state assembly (`InitialPlanningState`).
   - 21 unit tests in `tests/unit/test_intake_node.py`.
+- **Phase 7 (Visa Functionality — Complete)**:
+  - `src/prompts/visa_prompts.py`: Isolated prompt engineering for live visa verification and structured semantic policy reconciliation (`build_live_visa_verification_prompt`).
+  - `src/models/visa.py`: Added `LiveVisaPolicyAnalysis` Pydantic model for structured, validated LLM extraction.
+  - `src/nodes/visa_node.py`: Deterministic visa evaluation pipeline (`evaluate_country_visa`, `process_visa`, `visa_node`), automatic domestic bypass for all-India trips, semantic LLM policy reconciliation cascade (Gemini, Groq, NVIDIA NIM) with zero regex, date-aware expiration checking for temporary waivers, Schengen single-visa fee optimization, and total party headcount scaling.
+  - 20 comprehensive unit tests in `tests/unit/test_visa_node.py`.
 
 ### Immediate Next Milestone
 
-- **Phase 7 — Visa Functionality**: Implement `src/nodes/visa_node.py` to evaluate international visa regulations using static baseline rules (`data/static/visa_rules_enriched.json`) combined with live Tavily verification where required, producing validated `VisaVerdict` models, with automatic domestic bypass for all-India itineraries.
+- **Phase 8 — Logistics Functionality**: Implement `src/nodes/logistics_node.py` to plan transportation legs and accommodation stays independently across single- and multi-destination itineraries, estimating room configurations, evaluating travel styles and party counts, and handling provider fallbacks.
 
 ---
 
@@ -612,7 +631,7 @@ Safarnama adheres to a **fixture-first testing philosophy**. All unit tests must
 ### Executing Tests
 
 ```bash
-# Run the entire test suite (372 passing tests)
+# Run the entire test suite (392 passing tests)
 uv run pytest
 
 # Run tests with verbose output
@@ -626,6 +645,9 @@ uv run pytest tests/unit/test_domain_models.py
 
 # Run intake node test suite (21 tests)
 uv run pytest tests/unit/test_intake_node.py
+
+# Run visa node test suite (20 tests)
+uv run pytest tests/unit/test_visa_node.py
 
 # Run tool-specific test suites
 uv run pytest tests/unit/test_calculator.py

@@ -164,6 +164,59 @@ class VisaRequirementStatus(StrEnum):
     DOMESTIC_BYPASS = "DOMESTIC_BYPASS"
 
 
+class LiveVisaPolicyAnalysis(BaseModel):
+    """Structured extraction of live visa policy analysis performed by an LLM."""
+
+    model_config = ConfigDict(frozen=True)
+
+    applies_to_indian_passports: bool = Field(
+        default=False,
+        description=(
+            "True if search snippets confirm this rule applies to Indian passport holders."
+        ),
+    )
+    policy_change_confirmed: bool = Field(
+        default=False,
+        description=(
+            "True if official policy change/waiver/update is actively confirmed (not speculative)."
+        ),
+    )
+    status: VisaRequirementStatus | None = Field(
+        default=None,
+        description="The updated visa requirement status if policy change is confirmed.",
+    )
+    visa_type_label: str | None = Field(
+        default=None,
+        description="Human readable label for the pathway, e.g. 'Visa-Free Exemption (Temporary)'.",
+    )
+    permitted_stay_days: int | None = Field(
+        default=None,
+        description="Maximum permitted stay in days under the updated policy.",
+    )
+    visa_fee_inr: float | None = Field(
+        default=None,
+        description="Updated fee in INR (0.0 for visa-free).",
+    )
+    waiver_end_date: str | None = Field(
+        default=None,
+        description="ISO date (YYYY-MM-DD) when temporary waiver expires, if applicable.",
+    )
+    official_source_url: str | None = Field(
+        default=None,
+        description="Official government or embassy portal URL mentioned in snippets, if any.",
+    )
+    confidence: str = Field(
+        default="LOW",
+        description="Confidence level: 'HIGH', 'MEDIUM', or 'LOW'.",
+    )
+    reasoning: str = Field(
+        default="",
+        description=(
+            "Concise rationale explaining evidence in snippets or reasons for uncertainty."
+        ),
+    )
+
+
 class VisaCountryVerdict(BaseModel):
     """Visa verdict for a single destination country.
 
