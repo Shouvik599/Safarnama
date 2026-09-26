@@ -159,6 +159,48 @@ def test_indian_railways_search(monkeypatch):
         assert result.options[0].price_inr == 2850.0
 
 
+def test_indian_railways_duration_parsing_error(monkeypatch):
+    """Test Indian Railways search falls back to 480 minutes when duration string is malformed."""
+    monkeypatch.setenv("RAPIDAPI_KEY", "rapid-mock-key-123")
+
+    mock_sky_empty = MagicMock()
+    mock_sky_empty.status = 200
+    mock_sky_empty.read.return_value = json.dumps({}).encode("utf-8")
+    mock_sky_empty.__enter__.return_value = mock_sky_empty
+
+    mock_irctc_data = {
+        "data": [
+            {
+                "trainName": "Express Train",
+                "trainNumber": "12345",
+                "departureTime": "06:00",
+                "arrivalTime": "14:00",
+                "duration": "invalid:time",
+                "fare": 500.0,
+            }
+        ]
+    }
+    mock_irctc_resp = MagicMock()
+    mock_irctc_resp.status = 200
+    mock_irctc_resp.read.return_value = json.dumps(mock_irctc_data).encode("utf-8")
+    mock_irctc_resp.__enter__.return_value = mock_irctc_resp
+
+    def side_effect(req, timeout=8.0):
+        url = req.full_url if hasattr(req, "full_url") else str(req)
+        if "sky-scrapper" in url:
+            return mock_sky_empty
+        if "irctc" in url:
+            return mock_irctc_resp
+        raise ValueError(f"Unexpected URL: {url}")
+
+    with patch("urllib.request.urlopen", side_effect=side_effect):
+        result = search_transport("NDLS", "MMCT", travel_date="2026-10-15", mode="TRAIN")
+
+        assert result.provider_used == "irctc1"
+        assert len(result.options) == 1
+        assert result.options[0].duration_minutes == 480
+
+
 def test_transport_rest_search(monkeypatch):
     """Test live European train search via transport.rest open access API."""
     monkeypatch.delenv("RAPIDAPI_KEY", raising=False)
