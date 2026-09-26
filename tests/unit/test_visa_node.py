@@ -38,6 +38,7 @@ from src.models.visa import (
 from src.models.web_search import SearchResultItem, WebSearchResult
 from src.nodes.intake_node import process_intake
 from src.nodes.visa_node import (
+    _parse_llm_json_response,
     evaluate_country_visa,
     map_entry_type_to_status,
     process_visa,
@@ -72,6 +73,55 @@ def make_context(
 # ---------------------------------------------------------------------------
 # Unit Tests
 # ---------------------------------------------------------------------------
+
+
+def test_parse_llm_json_response_empty_inputs() -> None:
+    """Verify empty string or None text returns None."""
+    assert _parse_llm_json_response("") is None
+    assert _parse_llm_json_response(None) is None
+
+
+def test_parse_llm_json_response_valid_direct_json() -> None:
+    """Verify direct valid JSON string parses successfully."""
+    text = '{"status": "VISA_FREE", "visa_fee_inr": 0.0}'
+    parsed = _parse_llm_json_response(text)
+    assert parsed == {"status": "VISA_FREE", "visa_fee_inr": 0.0}
+
+
+def test_parse_llm_json_response_markdown_code_block() -> None:
+    """Verify JSON embedded in markdown ```json ... ``` code blocks parses successfully."""
+    text_with_lang = '```json\n{"status": "E_VISA", "permitted_stay_days": 30}\n```'
+    parsed1 = _parse_llm_json_response(text_with_lang)
+    assert parsed1 == {"status": "E_VISA", "permitted_stay_days": 30}
+
+    text_without_lang = '```\n{"status": "VISA_ON_ARRIVAL"}\n```'
+    parsed2 = _parse_llm_json_response(text_without_lang)
+    assert parsed2 == {"status": "VISA_ON_ARRIVAL"}
+
+
+def test_parse_llm_json_response_embedded_in_text() -> None:
+    """Verify JSON surrounded by extra explanatory text parses via curly brace extraction."""
+    text = (
+        'Here is the analysis:\n{"status": "STICKER_VISA_REQUIRED", "confidence": "HIGH"}\n'
+        "Hope this helps!"
+    )
+    parsed = _parse_llm_json_response(text)
+    assert parsed == {"status": "STICKER_VISA_REQUIRED", "confidence": "HIGH"}
+
+
+def test_parse_llm_json_response_invalid_json_handling() -> None:
+    """Verify invalid JSON strings fail gracefully and return None."""
+    # Malformed direct JSON
+    assert _parse_llm_json_response('{status: "VISA_FREE", invalid}') is None
+
+    # Malformed JSON inside markdown code block
+    assert _parse_llm_json_response("```json\n{invalid json content}\n```") is None
+
+    # Malformed text between curly braces
+    assert _parse_llm_json_response("Response: {not valid json} - end") is None
+
+    # Complete non-JSON string
+    assert _parse_llm_json_response("This is just plain text with no braces.") is None
 
 
 def test_map_entry_type_to_status() -> None:
