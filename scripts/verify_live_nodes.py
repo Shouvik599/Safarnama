@@ -26,9 +26,11 @@ from src.models.trip import (
     TripDates,
     TripParty,
 )
+from src.nodes.budget_node import process_budget
 from src.nodes.experience_node import process_experience
 from src.nodes.intake_node import process_intake
 from src.nodes.logistics_node import process_logistics
+from src.nodes.optimizer_node import process_optimizer
 from src.nodes.visa_node import process_visa
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -213,21 +215,104 @@ def test_live_experience_node(logistics_plan=None) -> None:
     assert experience.total_days == 5
     assert len(experience.days) == 5
     assert len(experience.days[0].meals) == 3
+    return state, experience
+
+
+def test_live_budget_node(state, logistics, experience) -> None:
+    print_banner("4. LIVE TEST: Deterministic Budget Engine (Phase 10)")
+    print("Aggregating live logistics, live experience, and domestic zero-visa breakdown...")
+
+    t0 = time.perf_counter()
+    budget = process_budget(
+        state_or_context=state,
+        logistics_plan=logistics,
+        experience_plan=experience,
+    )
+    elapsed = time.perf_counter() - t0
+
+    print(f"\n[OK] Budget Breakdown generated in {elapsed:.4f}s:")
+    cb = budget.cost_breakdown
+    print(f"  - Transport:        INR {cb.transport_inr:,.2f}")
+    print(f"  - Accommodation:    INR {cb.accommodation_inr:,.2f}")
+    print(f"  - Activities:       INR {cb.activities_inr:,.2f}")
+    print(f"  - Food & Dining:    INR {cb.food_inr:,.2f}")
+    print(f"  - Local Transit:    INR {cb.local_transport_inr:,.2f}")
+    print(f"  - Visa Fees:        INR {cb.visa_inr:,.2f}")
+    print(f"  - Miscellaneous:    INR {cb.misc_inr:,.2f}")
+    print("  -------------------------------------------")
+    print(f"  - Subtotal:         INR {budget.subtotal_inr:,.2f}")
+    print(
+        f"  - Contingency:      INR {budget.contingency.amount_inr:,.2f} "
+        f"({budget.contingency.percentage:.1f}%)"
+    )
+    print(f"  - Projected Total:  INR {budget.total_with_contingency_inr:,.2f}")
+    print(f"  - User Budget:      INR {budget.variance.user_budget_inr:,.2f}")
+    print(
+        f"  - Budget Variance:  INR {budget.variance.variance_inr:,.2f} "
+        f"({budget.variance.variance_percentage:+.1f}%)"
+    )
+    print(f"  - Health Status:    {budget.variance.status.value}")
+    print(f"  - Cost Per Person:  INR {budget.per_person_cost_inr:,.2f} (3 travelers)")
+    if budget.warnings:
+        print("  - Actionable Warnings:")
+        for w in budget.warnings:
+            print(f"    * {w}")
+
+    assert budget is not None
+    assert budget.subtotal_inr > 0.0
+    assert budget.total_with_contingency_inr >= budget.subtotal_inr
+    assert budget.per_person_cost_inr > 0.0
+    return budget
+
+
+def test_live_optimizer_node(state, budget, logistics, experience) -> None:
+    print_banner("5. LIVE TEST: Optimizer Functionality (Phase 11)")
+    print(f"Evaluating budget status ({budget.variance.status.value}) with real live plans...")
+
+    t0 = time.perf_counter()
+    output = process_optimizer(
+        state_or_context=state,
+        budget_breakdown=budget,
+        logistics_plan=logistics,
+        experience_plan=experience,
+    )
+    elapsed = time.perf_counter() - t0
+
+    res = output.optimization_result
+    print(f"\n[OK] Optimization Result generated in {elapsed:.4f}s:")
+    print(f"  - Action Taken:       {res.action.value}")
+    print(f"  - Achieved Savings:   INR {res.savings_inr:,.2f}")
+    print(f"  - Guardrails Kept:    {res.guardrails_respected}")
+    print(f"  - Description:        {res.description}")
+    if res.trade_offs:
+        print("  - Actionable Trade-offs:")
+        for to in res.trade_offs:
+            print(f"    * {to}")
+    if res.alternatives_presented:
+        print("  - Alternatives Presented:")
+        for alt in res.alternatives_presented:
+            print(f"    * {alt}")
+
+    assert output is not None
+    assert output.optimization_result.guardrails_respected is True
+    assert output.budget_breakdown is not None
 
 
 def main() -> None:
     print("\n" + "#" * 70)
     print("  SAFARNAMA LIVE EXTERNAL INTEGRATION TEST SUITE")
-    print("  Validates all 3 external-facing planning nodes against live APIs")
+    print("  Validates all 5 planning stages (Visa, Logistics, Experience, Budget, Optimizer)")
     print("#" * 70)
 
     try:
         test_live_visa_node()
         logistics = test_live_logistics_node()
-        test_live_experience_node(logistics)
+        state, experience = test_live_experience_node(logistics)
+        budget = test_live_budget_node(state, logistics, experience)
+        test_live_optimizer_node(state, budget, logistics, experience)
 
         print("\n" + "=" * 70)
-        print("  ALL 3 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("  ALL 5 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
         print("=" * 70 + "\n")
     except Exception as exc:
         print(f"\n[FAIL] Live test failed with error: {exc}", file=sys.stderr)
