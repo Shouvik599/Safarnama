@@ -1,5 +1,7 @@
 """Unit tests for Phase 4 — API Layer (FastAPI endpoints, validation & responses)."""
 
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 from src.api.app import app
@@ -85,6 +87,26 @@ def test_estimate_endpoint_validation_error(client: TestClient) -> None:
     assert data["status_code"] == 422
     assert data["error_type"] == "RequestValidationError"
     assert "Validation Error" in data["detail"]
+
+
+def test_estimate_endpoint_internal_error(client: TestClient) -> None:
+    """Verify estimate endpoint returns 400 when internal estimator raises an exception."""
+    payload = {
+        "destination": "Japan",
+        "category": "hotel",
+        "hotel_stars": 4,
+        "nights": 3,
+        "travelers": 2,
+        "budget_tier": "moderate",
+    }
+    with patch("src.api.routes.estimate_cost", side_effect=RuntimeError("Provider offline")):
+        response = client.post("/api/v1/estimate", json=payload)
+
+    assert response.status_code == 400
+    data = response.json()
+    assert data["status_code"] == 400
+    assert data["error_type"] == "HTTPException"
+    assert "Estimation failed: Provider offline" in data["detail"]
 
 
 def test_plan_preview_domestic(client: TestClient) -> None:
