@@ -22,6 +22,7 @@ import os
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
@@ -212,31 +213,42 @@ def _fetch_live_open_access() -> tuple[dict[str, float], str, bool, str]:
     return rates, "open-access", False, ts
 
 
+def _fetch_single_fawazahmed_url(url: str) -> tuple[dict[str, float], str, bool, str]:
+    """Helper to fetch rates from a single FawazAhmed CDN endpoint."""
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Safarnama/1.0", "Accept": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=6.0) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    raw_rates = data.get("usd", {})
+    if not raw_rates:
+        raise ValueError(f"Empty USD rates from {url}")
+    rates = {k.upper(): float(v) for k, v in raw_rates.items()}
+    rates["USD"] = 1.0
+    ts = data.get("date", datetime.now(UTC).isoformat())
+    return rates, "fawazahmed-cdn", False, ts
+
+
 def _fetch_live_fawazahmed() -> tuple[dict[str, float], str, bool, str]:
-    """Fetch live rates from FawazAhmed open-source currency API via jsDelivr CDN."""
+    """Fetch live rates from FawazAhmed open-source currency API via CDN endpoints concurrently."""
     urls = [
         "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
         "https://latest.currency-api.pages.dev/v1/currencies/usd.json",
     ]
     last_exc: Exception | None = None
-    for url in urls:
-        try:
-            req = urllib.request.Request(
-                url,
-                headers={"User-Agent": "Safarnama/1.0", "Accept": "application/json"},
-            )
-            with urllib.request.urlopen(req, timeout=6.0) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            raw_rates = data.get("usd", {})
-            if not raw_rates:
-                continue
-            rates = {k.upper(): float(v) for k, v in raw_rates.items()}
-            rates["USD"] = 1.0
-            ts = data.get("date", datetime.now(UTC).isoformat())
-            return rates, "fawazahmed-cdn", False, ts
-        except Exception as exc:
-            last_exc = exc
-            continue
+    executor = ThreadPoolExecutor(max_workers=len(urls))
+    try:
+        futures = [executor.submit(_fetch_single_fawazahmed_url, url) for url in urls]
+        for future in as_completed(futures):
+            try:
+                result = future.result()
+                executor.shutdown(wait=False, cancel_futures=True)
+                return result
+            except Exception as exc:
+                last_exc = exc
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
 
     raise RuntimeError(f"FawazAhmed CDN endpoints failed: {last_exc}")
 
