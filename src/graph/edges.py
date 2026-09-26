@@ -38,7 +38,7 @@ def route_scope(state: PlanGraphState) -> str | list[str]:
         ['logistics', 'experience'] for domestic itineraries (parallel fan-out),
         END if fatal errors aborted intake.
     """
-    if state.get("errors") and not state.get("trip_context"):
+    if state.get("errors"):
         log.warning("Intake node reported fatal errors; terminating workflow at END.")
         return END
 
@@ -72,8 +72,8 @@ def route_after_visa(state: PlanGraphState) -> str | list[str]:
         ['logistics', 'experience'] for parallel planning fan-out,
         or END if visa processing reported fatal errors.
     """
-    if state.get("errors") and not state.get("visa_verdict"):
-        log.warning("Visa node encountered fatal errors without verdict; routing to END.")
+    if state.get("errors"):
+        log.warning("Visa node encountered fatal errors; routing to END.")
         return END
 
     log.info("Visa node complete -> fanning out to ['logistics', 'experience'].")

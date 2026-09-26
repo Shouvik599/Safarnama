@@ -443,11 +443,14 @@ Responsibilities:
 - Query transport providers with multi-tier fallback cascade:
   1. Test Fixture: `data/fixtures/mock_flights.json` (offline testing)
   2. In-Memory Cache: 1-hour TTL per `(origin, destination, date, mode)` search
-  3. Live Aviation APIs: Sky Scraper / Flights Sky / Aviationstack (`RAPIDAPI_KEY` / `AVIATIONSTACK_API_KEY`)
-  4. Live Indian Railways APIs: Indian Railway IRCTC / eRail (`RAPIDAPI_KEY` / open access)
-  5. Live International Rail & Bus APIs: `transport.rest` / Transitland (Zero-auth open access)
-  6. Live Web Search Tool Fallback: `search_web()` for live route & ticket pricing snippets
-  7. Tier 5: Offline Distance & Speed Physics Engine (Haversine math guaranteeing zero-crash operation)
+  3. Live Tier 0 (Primary Flight Provider): SerpApi Google Flights (`SERPAPI_KEY` / `SERPER_API_KEY`) for live real-world flight schedules, live INR market fares, carrier codes, and direct booking links
+  4. Live Aviation APIs: Sky Scraper / Flights Sky / Aviationstack (`RAPIDAPI_KEY` / `AVIATIONSTACK_API_KEY`)
+  5. Live Indian Railways APIs: Indian Railway IRCTC / eRail (`RAPIDAPI_KEY` / open access)
+  6. Live International Rail & Bus APIs: `transport.rest` / Transitland (Zero-auth open access)
+  7. Live Web Search Tool Fallback: `search_web()` for live route & ticket pricing snippets
+  8. Tier 5: Offline Distance & Speed Physics Engine (Haversine math with deterministic seasonal demand multipliers)
+- Apply deterministic seasonal multiplier heuristic (Peak holiday ×1.35, shoulder ×1.15, off-peak ×1.00) to baseline/physics estimates when live pricing is unavailable
+- Generate canonical Google Flights search deep links (`google.com/travel/flights/search`) across all flight segments and fallbacks
 - Return structured transport models (`TransportSegment`, `TransportSearchResult` in `src/models/transport.py`)
 - Support fixture mode: `data/fixtures/mock_flights.json`
 - Convert all fares to Indian Rupee (INR) deterministically
@@ -1067,6 +1070,12 @@ followed by:
 ```text
 India → Country A → Country B
 ```
+
+## Exit criteria
+
+- International itineraries plan end-to-end via `POST /api/v1/plan` with verified Indian passport visa synthesis and Schengen uniform fee optimization.
+- Multi-tier transport routing features Tier-0 SerpApi Google Flights, deterministic seasonal demand multipliers, and canonical Google Flights deep links across all flight candidates.
+- Dual verification passing: hermetic offline tests (524 passed) and live network integration verification suite (`scripts/verify_live_nodes.py`).
 
 ---
 

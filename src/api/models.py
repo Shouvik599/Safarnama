@@ -176,9 +176,12 @@ class PlanRequest(BaseModel):
         default=None,
         description="Dietary requirements (e.g. 'vegetarian', 'vegan', 'halal').",
     )
-    scope: str = Field(
-        default="DOMESTIC",
-        description="Travel scope: 'DOMESTIC' or 'INTERNATIONAL'.",
+    scope: str | None = Field(
+        default=None,
+        description=(
+            "Travel scope: 'DOMESTIC' or 'INTERNATIONAL'. "
+            "If omitted, auto-detected from destinations."
+        ),
     )
 
     @model_validator(mode="after")
@@ -214,7 +217,23 @@ class PlanRequest(BaseModel):
         food = FoodPreferences(dietary_preference=self.dietary_preference)
         t_style = TravelStyle(self.travel_style.upper())
         t_pace = Pace(self.pace.upper())
-        t_scope = TravelScope(self.scope.upper())
+
+        if self.scope:
+            t_scope = TravelScope(self.scope.upper())
+        else:
+            is_intl = False
+            try:
+                from src.nodes.intake_node import resolve_location
+
+                for dest in self.destinations or []:
+                    dest_clean = dest.strip()
+                    loc = resolve_location(dest_clean, is_origin=False)
+                    if loc.country_code != "IN":
+                        is_intl = True
+                        break
+            except Exception:
+                pass
+            t_scope = TravelScope.INTERNATIONAL if is_intl else TravelScope.DOMESTIC
 
         return TripContext(
             origin=self.origin or "",

@@ -410,10 +410,70 @@ def test_live_vertical_slice() -> None:
     assert total_proj > 0
 
 
+def test_live_international_vertical_slice() -> None:
+    print_banner("8. LIVE TEST: International Vertical Slice (API & Live Visa - Phase 14)")
+    print(
+        "Controlled Scenario: Delhi -> Bangkok, Thailand, 2 adults, 4 days, "
+        "Comfortable, ₹150,000 budget"
+    )
+    print("Executing POST /api/v1/plan via FastAPI service...")
+
+    from fastapi.testclient import TestClient
+    from src.api.app import app
+
+    client = TestClient(app)
+    payload = {
+        "origin": "Delhi",
+        "destinations": ["Bangkok, Thailand"],
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-05",
+        "adults": 2,
+        "children": 0,
+        "budget_inr": 150000.0,
+        "travel_style": "COMFORTABLE",
+        "pace": "BALANCED",
+        "scope": "INTERNATIONAL",
+        "activity_preferences": ["temples", "street food", "culture"],
+    }
+
+    t0 = time.perf_counter()
+    resp = client.post("/api/v1/plan", json=payload)
+    elapsed = time.perf_counter() - t0
+
+    assert resp.status_code == 200, f"Expected 200 OK, got {resp.status_code}: {resp.text}"
+    data = resp.json()
+    itinerary = data["itinerary"]
+
+    print(f"\n[OK] International Vertical Slice API response received in {elapsed:.4f}s:")
+    print(f"  - Status:            {data['status']}")
+    print(f"  - Title:             {itinerary['title']}")
+    print(f"  - Trip ID:           {itinerary['trip_id']}")
+    print(f"  - Scope:             {itinerary['trip_context']['scope']}")
+    visa = itinerary["visa_verdict"]
+    print(f"  - Visa Bypass:       {visa['is_domestic_bypass']}")
+    print(f"  - Visa Countries:    {[c['country_name'] for c in visa['countries']]}")
+    print(f"  - Total Visa Cost:   INR {visa['total_visa_cost_inr']:,.2f}")
+    print(f"  - Transport Legs:    {len(itinerary['logistics_plan']['transport_legs'])}")
+    print(f"  - Hotel Stays:       {len(itinerary['logistics_plan']['hotel_stays'])}")
+    print(f"  - Experience Days:   {len(itinerary['experience_plan']['days'])}")
+    total_proj = itinerary["budget_breakdown"]["total_with_contingency_inr"]
+    print(f"  - Projected Total:   INR {total_proj:,.2f}")
+    print(f"  - Summary:           {itinerary['summary'][:160]}...")
+
+    assert itinerary["title"]
+    assert itinerary["summary"]
+    assert visa["is_domestic_bypass"] is False
+    assert len(visa["countries"]) >= 1
+    assert total_proj > 0
+
+
 def main() -> None:
     print("\n" + "#" * 70)
     print("  SAFARNAMA LIVE EXTERNAL INTEGRATION TEST SUITE")
-    print("  Validates all 7 stages (Visa, Logistics, Experience, Budget, Optimizer, Graph, Slice)")
+    print(
+        "  Validates all 8 stages "
+        "(Visa, Logistics, Experience, Budget, Optimizer, Graph, Slice, Intl Slice)"
+    )
     print("#" * 70)
 
     try:
@@ -424,9 +484,10 @@ def main() -> None:
         test_live_optimizer_node(state, budget, logistics, experience)
         test_live_langgraph_orchestration()
         test_live_vertical_slice()
+        test_live_international_vertical_slice()
 
         print("\n" + "=" * 70)
-        print("  ALL 7 LIVE PLANNING INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("  ALL 8 LIVE PLANNING INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
         print("=" * 70 + "\n")
     except Exception as exc:
         print(f"\n[FAIL] Live test failed with error: {exc}", file=sys.stderr)

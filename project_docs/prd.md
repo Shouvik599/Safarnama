@@ -328,6 +328,13 @@ The planner selects appropriate transportation based on:
 
 The user does not need to select the transport mode manually.
 
+#### Flight Discovery & Multi-Tier Routing
+- **Tier-0 Live Flights (SerpApi Google Flights)**: Primary live flight provider retrieving real-world flight schedules, live INR fares, carrier codes, and direct booking links.
+- **Tier-1/2 Live APIs**: RapidAPI Sky Scraper & Flights Sky, followed by Aviationstack route-based flight schedule queries.
+- **Rail Services**: Indian Railways IRCTC API (domestic) and `transport.rest` (European rail).
+- **Seasonal Pricing Multiplier Heuristic**: When live market prices are unavailable and the planner falls back to distance-based physics or baseline schedule estimation, a deterministic calendar-month seasonal multiplier is applied (peak holidays ×1.35 in Jan/Apr/May/Oct/Dec, shoulder ×1.15 in Mar/Jun/Sep/Nov, off-peak ×1.00 in Feb/Jul/Aug) to reflect realistic travel demand.
+- **Universal Google Flights Deep Linking**: To ensure zero-friction verification, every flight segment—whether discovered through live providers or calculated via physics fallback—is populated with a canonical Google Flights search deep link (`google.com/travel/flights/search`), replacing placeholder URLs with functional, 100% accurate live verification links.
+
 ### 6.3 Hotel planning
 
 The planner automatically selects suitable hotels using available live hotel/place data.

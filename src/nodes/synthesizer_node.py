@@ -78,6 +78,7 @@ def generate_itinerary_summary(
     logistics: LogisticsPlan,
     experience: ExperiencePlan,
     budget: BudgetBreakdown,
+    visa: VisaVerdict | None = None,
 ) -> str:
     """Synthesize an executive narrative summary covering all trip pillars.
 
@@ -86,9 +87,10 @@ def generate_itinerary_summary(
         logistics: Generated LogisticsPlan.
         experience: Generated ExperiencePlan.
         budget: Deterministic BudgetBreakdown.
+        visa: Optional VisaVerdict with visa requirements for Indian travelers.
 
     Returns:
-        Paragraph summarizing transport, stays, daily sights, dining, and budget health.
+        Paragraph summarizing transport, stays, daily sights, dining, visa rules, and budget health.
     """
     days = context.dates.duration_days or len(experience.days) or 1
     dests = ", ".join(d.title() for d in context.destinations)
@@ -108,6 +110,19 @@ def generate_itinerary_summary(
         if must_visits
         else f"covering {len(experience.days)} curated daily experiences"
     )
+
+    # Visa summary for international travel
+    visa_desc = ""
+    if visa and not visa.is_domestic_bypass and visa.countries:
+        visa_notes = []
+        for c in visa.countries:
+            status_desc = c.status.value.replace("_", " ").title()
+            fee_str = f"₹{c.visa_fee_inr:,.0f}" if c.visa_fee_inr > 0 else "Free"
+            stay_str = f", up to {c.permitted_stay_days} days" if c.permitted_stay_days else ""
+            visa_notes.append(f"{c.country_name} ({status_desc}, {fee_str}{stay_str})")
+        adv_note = " (Advance application required)" if visa.requires_advance_application else ""
+        schengen_note = " [Uniform Schengen Visa]" if visa.schengen_single_visa_applicable else ""
+        visa_desc = f" Indian passport visa: {'; '.join(visa_notes)}{adv_note}{schengen_note}."
 
     # Budget summary
     user_budget = budget.variance.user_budget_inr
@@ -137,7 +152,7 @@ def generate_itinerary_summary(
         f"for {party_desc} traveling from {context.origin}. The itinerary features {legs_cnt} "
         f"transport segments and quality lodging at {hotel_str}. Daily scheduling is tuned to a "
         f"{context.pace.value.lower()} pace {sight_str}, paired with authentic regional culinary "
-        f"spots. Financials: {budget_note}."
+        f"spots.{visa_desc} Financials: {budget_note}."
     )
     return summary
 
@@ -206,7 +221,9 @@ def process_synthesizer(
 
     # 2. Titles and Summaries
     title = generate_itinerary_title(context)
-    summary = generate_itinerary_summary(context, logistics_plan, experience_plan, budget_breakdown)
+    summary = generate_itinerary_summary(
+        context, logistics_plan, experience_plan, budget_breakdown, visa_verdict
+    )
 
     # 3. Consolidated Warnings
     combined_warnings: list[str] = []
@@ -216,6 +233,7 @@ def process_synthesizer(
         + logistics_plan.warnings
         + experience_plan.warnings
         + budget_breakdown.warnings
+        + (visa_verdict.warnings if visa_verdict else [])
         + (opt_result.trade_offs if opt_result else [])
     ):
         if w and w not in seen:
@@ -223,11 +241,17 @@ def process_synthesizer(
             combined_warnings.append(w)
 
     # 4. Provenance tracking
+    has_estimated_visa = (
+        any(getattr(c, "is_estimated", False) for c in visa_verdict.countries)
+        if visa_verdict
+        else False
+    )
     has_estimated = any(
         [
             logistics_plan.is_estimated,
             experience_plan.is_estimated,
             budget_breakdown.is_estimated,
+            has_estimated_visa,
         ]
     )
 

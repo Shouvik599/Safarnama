@@ -318,13 +318,92 @@ Phase 13 — First Complete Vertical Slice (Completed)
 - Hotel stays and booking URLs are inherited directly from `LogisticsPlan`, with `hotel_name=None` on final departure day.
 - Must-visit sights omitted due to pacing constraints produce user-visible feasibility warnings.
 - **Aviationstack Flight API Integration (`src/tools/transport.py`)**: When RapidAPI flight endpoints (`Sky Scraper` or `Flights Sky`) fail or time out, `_search_aviationstack` executes as the live flight schedule provider. It queries routes via `dep_iata` and `arr_iata` without sending `flight_date` (as `flight_date` throws 403 Forbidden on standard/free tiers), extracts real scheduled flight numbers and departure/arrival times, and assigns a calibrated distance-based pricing baseline labeled with `is_estimated=True` and `provider="aviationstack"`.
+- **International Travel Scope Auto-Detection (`src/api/models.py`)**: In `PlanRequest.to_trip_context()`, `resolve_location` inspects all requested destinations against canonical alias tables and static airport/country catalogs to accurately set `TravelScope.DOMESTIC` vs `TravelScope.INTERNATIONAL` when `scope` is omitted, avoiding false positives (e.g. distinguishing the Indian state Goa from the Genoa, Italy airport code 'GOA').
+- **Fatal Error Graph Routing (`src/graph/edges.py`)**: In `route_scope()` and `route_after_visa()`, conditional routing immediately terminates to `END` if `state.get("errors")` is non-empty, preventing errored intake requests from leaking into parallel planning nodes.
+- **Synthesizer Indian Passport Visa Advisory (`src/nodes/synthesizer_node.py`)**: `generate_itinerary_summary()` dynamically extracts `VisaVerdict` details for international trips and appends explicit Indian passport traveler advisories including country names, visa status (`VISA_FREE`, `E_VISA`, etc.), total fees in INR, stay allowances, advance application notices, and uniform Schengen Area rules.
 
-## Phase 13 Completion Status
+## Phase 14 Completion Status
 
-Phase 13 — First Complete Vertical Slice is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
+Phase 14 — International Vertical Slice is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
+
+### Completed Work:
+- Validated end-to-end international itineraries through `visa_node`, `logistics_node`, `experience_node`, `budget_node`, `optimizer_node`, and `synthesizer_node`.
+- Handled single international destinations (e.g. Delhi -> Bangkok, Thailand), multi-country Schengen trips with uniform single-visa optimization (e.g. Delhi -> Paris -> Rome), and multi-country non-Schengen journeys (e.g. Delhi -> Bangkok -> Singapore).
+- Verified deterministic visa fee integration into `BudgetBreakdown`, contingency buffer, and `FinalItinerary`.
+- Added auto-scope detection in `PlanRequest` and fixed conditional graph termination on intake error.
+- Created `tests/unit/test_international_slice.py` with 8 hermetic offline unit/integration tests (all passing in 25s).
+- Added Stage 8 to `scripts/verify_live_nodes.py` validating live international planning via FastAPI endpoint.
+- Full suite passing: 513 unit tests passed, 0 failures; Ruff check and formatting 100% clean.
+
+### Files Changed:
+- `src/api/models.py`
+- `src/graph/edges.py`
+- `src/nodes/synthesizer_node.py`
+- `tests/unit/test_international_slice.py`
+- `scripts/verify_live_nodes.py`
+- `README.md`
+- `project_docs/memory.md`
+
+## Post-Phase 14: Transport Enhancement (SerpApi Flights, Seasonal Multiplier, Deep Links)
+
+**Status: 100% complete. 24 transport unit tests passing, full suite 524 passed, 0 failures.**
+
+### What was implemented:
+
+#### 1. SerpApi Google Flights — Tier-0 Live Flight Provider (`src/tools/transport.py`)
+- Added `_search_serpapi_flights()` as the **first-priority live flight provider** in the `search_transport()` cascade (before Sky Scraper, Flights Sky, Aviationstack).
+- Queries `https://serpapi.com/search?engine=google_flights` with `departure_id`, `arrival_id`, `outbound_date`, `currency=INR`.
+- Parses `best_flights` and `other_flights` arrays; extracts `airline`, `flight_number`, departure/arrival times (from `"2026-10-15 09:30"` format → `"09:30"`), `total_duration`, `price`.
+- Deduplicates results by flight number using a `seen_codes` set.
+- Reuses existing `SERPAPI_KEY` / `SERPER_API_KEY` env var (same credential as hotels.py and places.py — **zero new env vars required**).
+- Returns `is_estimated=False`, `is_fallback=False` when live data is available.
+
+#### 2. Seasonal Pricing Multiplier (`src/tools/transport.py`)
+- Added `SEASONAL_MULTIPLIERS` dict (month → float): peak ×1.35 (Jan, Apr, May, Oct, Dec), shoulder ×1.15 (Mar, Jun, Sep, Nov), off-peak ×1.00 (Feb, Jul, Aug).
+- Added `_get_seasonal_multiplier(travel_date: str) -> float` helper — pure deterministic Python, returns 1.0 on any parse failure (conservative default).
+- Applied to physics-heuristic flight fares: `max(2800.0, round(dist_km * 5.80 * seasonal_mult, 2))`.
+- Applied to Aviationstack fallback pricing baseline: `max(2950.0, round(dist_km * 5.25 * seasonal_mult, 2))`.
+- **Never applied to live prices from SerpApi, Sky Scraper, or Flights Sky** (those carry real market prices).
+
+#### 3. Google Flights Deep Links — All Flight Segments (`src/tools/transport.py`)
+- Added `_make_google_flights_deep_link(dep_iata, arr_iata, travel_date) -> str` helper.
+- Produces canonical Google Travel URL: `https://www.google.com/travel/flights/search?q=flights%2B{DEP}%2Bto%2B{ARR}&tfs=CAA`.
+- Applied universally to **all** FLIGHT `TransportSegment` providers:
+  - Physics heuristic (was `safarnama.local/flights` — now real Google Flights URL)
+  - Sky Scraper (was `None` — now deep link)
+  - Flights Sky (was `None` — now deep link)
+  - Aviationstack (was basic `google.com/travel/flights?q=...` — now consistent format via helper)
+  - SerpApi Google Flights (prefers `book_url` from response; falls back to deep link if absent or not a full URL)
+
+#### 4. Updated `get_transport_status()`
+- Added `serpapi_configured` key to the provider status dict.
+
+#### 5. `.env.example`
+- Updated `SERPAPI_KEY` comment to mention Google Flights as the primary coverage in addition to Hotels/Places.
+
+### Tests added (`tests/unit/test_transport.py`):
+- `test_serpapi_flights_success` — SerpApi Tier-0 mock HTTP success, parses best_flights + other_flights.
+- `test_serpapi_flights_missing_key_falls_through` — No SERPAPI_KEY skips to Sky Scraper.
+- `test_serpapi_flights_empty_result_cascades` — Empty SerpApi response cascades to physics heuristic.
+- `test_seasonal_multiplier_peak_months` — Jan/Apr/May/Oct/Dec all return 1.35.
+- `test_seasonal_multiplier_shoulder_months` — Mar/Jun/Sep/Nov all return 1.15.
+- `test_seasonal_multiplier_offpeak_months` — Feb/Jul/Aug all return 1.00.
+- `test_seasonal_multiplier_invalid_date_returns_one` — Malformed dates return safe 1.0 default.
+- `test_physics_heuristic_applies_seasonal_multiplier` — Mocks haversine to 3000km; verifies Oct > Feb fare by 1.35× ratio.
+- `test_google_flights_deep_link_format` — Deep link URL contains `google.com/travel/flights/search`, DEP, ARR.
+- `test_physics_heuristic_flight_has_deep_link` — Physics fallback carries real Google Flights URL (not `safarnama.local`).
+- `test_serpapi_flights_booking_url_is_google_flights` — SerpApi segment defaults to deep link when no `book_url`.
+- `test_get_transport_status_includes_serpapi` — Status dict has `serpapi_configured=True`.
+- `test_get_transport_status_serpapi_fallback_serper_key` — SERPER_API_KEY accepted as SerpApi credential.
+
+### Key Decisions:
+- **Aviationstack constraint unchanged**: No `flight_date` query param (403 on free/standard tier). Still uses route-based active schedule matching with `is_estimated=True`. Seasonal multiplier applied to its calibrated price baseline.
+- **Zero new env vars**: SERPAPI_KEY was already documented in `.env.example` for hotels/places. No migration needed.
+- **Cascade priority**: SerpApi Google Flights → Sky Scraper → Flights Sky → Aviationstack → IRCTC → transport.rest → web_search → physics-heuristic.
+- **Deterministic principle preserved**: Seasonal multiplier is a lookup table + math, zero LLM involvement.
 
 ## Next recommended phase
 
-**Phase 14 — International Vertical Slice**:
-Extend the complete end-to-end planning slice to international destinations for Indian passport holders (India -> International destination, followed by India -> Country A -> Country B), integrating live visa verification, international flight/lodging logistics, foreign dining/activity recommendations, and multi-currency budget calculation.
+**Phase 15 — Flexible Dates**:
+Implement support for candidate date window evaluation, pricing and weather comparisons across flexible date options, selection of optimal departure/return dates, and structured trade-off reporting.
 

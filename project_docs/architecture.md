@@ -400,6 +400,29 @@ The weather forecasting tool (`src/tools/weather.py`) implements a 6-tier resili
 5. **Live Tier 3 (Fallback 2)**: OpenWeatherMap 5-Day/3-Hour Forecast API (`https://api.openweathermap.org/data/2.5/forecast` using `OPENWEATHERMAP_API_KEY`).
 6. **Tier 4 (Offline Baseline)**: Deterministic seasonal climate baseline heuristic based on destination latitude, hemisphere, and calendar month solar cycles.
 
+### 7.3 Transport Tool Multi-Tier Fallback Cascade
+
+The transport and flight discovery tool (`src/tools/transport.py`) implements a resilient multi-tier cascade for domestic and international transit routing:
+
+1. **Test Fixture**: `data/fixtures/mock_flights.json` (active when `use_fixture=True` or `SAFARNAMA_TEST_MODE=1`).
+2. **In-Memory Cache**: 1-hour TTL per `(origin, destination, travel_date, mode)` search.
+3. **Live Tier 0 (Primary Flight Provider — SerpApi Google Flights)**: Queries `https://serpapi.com/search?engine=google_flights` using `SERPAPI_KEY` (or `SERPER_API_KEY`). Retrieves real-world flight schedules, live market fares converted to INR, airline names, flight numbers, duration, layovers/stops, departure/arrival timestamps, and direct booking links.
+4. **Live Tier 1 (RapidAPI Flights)**: Sky Scraper and Flights Sky multi-modal flight query endpoints via `RAPIDAPI_KEY`.
+5. **Live Tier 2 (Aviationstack Route Schedules)**: Route-based active flight schedule matching (`dep_iata` + `arr_iata`) via `AVIATIONSTACK_API_KEY`. Retrieves scheduled flights and departure/arrival times, pairing them with a distance-based pricing baseline (`is_estimated=True`).
+6. **Live Tier 3 (Rail Endpoints)**: Indian Railways IRCTC API (domestic India via `RAPIDAPI_KEY`) and `transport.rest` / Transitland (European rail).
+7. **Live Tier 4 (Web Search Fallback)**: Multi-query search via `src/tools/web_search.py` for route options and fare snippets.
+8. **Tier 5 (Offline Physics Heuristic Engine)**: Great-circle Haversine distance, speed, and flight/transit physics calculation guaranteeing 100% offline crash-free operation.
+
+#### Deterministic Seasonal Multiplier Heuristic
+To prevent unrealistically flat pricing when falling back to distance-based physics or baseline schedule estimates, a deterministic seasonal demand multiplier (`_get_seasonal_multiplier`) adjusts flight baseline costs by travel month:
+- **Peak Holiday Season (×1.35)**: January, April, May, October, December (New Year, Spring breaks, Summer vacation, Diwali/Dussera, Year-end).
+- **Shoulder Season (×1.15)**: March, June, September, November.
+- **Off-Peak Season (×1.00)**: February, July, August.
+*Note: The seasonal multiplier is applied exclusively to estimated physics and baseline calculations. It is never applied to live quotes from SerpApi, Sky Scraper, or Flights Sky, which reflect actual market pricing.*
+
+#### Universal Google Flights Deep Linking
+Across all flight providers and fallbacks (including physics calculations), every `FLIGHT` segment is enriched with a canonical, valid Google Flights search URL (`https://www.google.com/travel/flights/search?q=flights%2B{DEP}%2Bto%2B{ARR}&tfs=CAA`). This replaces placeholder links with real, actionable, one-click verification URLs for the traveler.
+
 ---
 
 # 8. Fixture-First Offline Architecture

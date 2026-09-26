@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 13 — First Complete Vertical Slice (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete)
-Test Suite: 505 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 14 — International Vertical Slice (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete)
+Test Suite: 524 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, and the first complete vertical slice (`POST /api/v1/plan` generating unified `FinalItinerary`). **It is not yet production-ready**, nor is the full frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, the first complete domestic vertical slice (`POST /api/v1/plan`), and the international vertical slice with verified Indian passport visa synthesis and Schengen optimization. It also includes an enhanced transport layer featuring Tier-0 SerpApi Google Flights with real fares, deterministic seasonal demand multipliers, and universal live Google Flights deep linking. **It is not yet production-ready**, nor is the full frontend interface implemented.
 
 | Phase        | Description                                                                                             | Status       |
 | --------------| ---------------------------------------------------------------------------------------------------------| --------------|
@@ -32,7 +32,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 11** | Optimizer Functionality (Budget trade-offs, constraint satisfaction)                                    | **Complete** |
 | **Phase 12** | LangGraph Orchestration (StateGraph, parallel nodes, state reduction)                                   | **Complete** |
 | **Phase 13** | First Complete Vertical Slice (End-to-end domestic itinerary generation)                                | **Complete** |
-| **Phase 14** | International Vertical Slice (End-to-end international with visa integration)                           | Planned      |
+| **Phase 14** | International Vertical Slice (End-to-end international with visa integration)                           | **Complete** |
 | **Phase 15** | Flexible Dates (Candidate date window optimization)                                                     | Planned      |
 | **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution)                                | Planned      |
 | **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph)                                             | Planned      |
@@ -81,7 +81,12 @@ Generic conversational AI chatbots fail at this task because they:
 - **External Travel Tools Suite (8/8 Complete)**:
   - **Weather Tool (`src/tools/weather.py`)**: Multi-tier forecasts (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) with weather hazard detection.
   - **Web Search Tool (`src/tools/web_search.py`)**: Multi-tier travel search (Tavily, DuckDuckGo, Firecrawl, offline fixture).
-  - **Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, Aviationstack live flights, IRCTC rail, European rail, web search fallback, distance physics engine).
+  - **Transport Tool (`src/tools/transport.py`)**: Multi-tier route & flight search:
+    - **Tier-0 Live Flights (SerpApi Google Flights)**: Live flight schedules, real INR market fares, carrier codes, and direct booking links powered by `SERPAPI_KEY`.
+    - **Tier-1/2 Live APIs**: RapidAPI Sky Scraper & Flights Sky, followed by Aviationstack route-based flight schedule queries.
+    - **Rail Services**: Indian Railways IRCTC API (domestic) and `transport.rest` (European rail).
+    - **Deterministic Seasonal Multiplier**: Calendar-month demand heuristic (peak holiday ×1.35, shoulder ×1.15, off-peak ×1.00) applied to distance-based physics and schedule baseline flight estimates.
+    - **Universal Google Flights Deep Linking**: Canonical live Google Flights search URLs (`google.com/travel/flights/search`) generated across all flight candidates and fallbacks for instant, zero-friction verification.
   - **Hotel Tool (`src/tools/hotels.py`)**: Multi-tier lodging search (SerpApi Google Hotels, Booking.com, Nominatim OSM, web search fallback, location heuristic).
   - **Places & Dining Tool (`src/tools/places.py`)**: Points of interest and dining search (SerpApi Google Maps, Nominatim OSM, web search fallback, category baseline).
   - **Fallback Estimator (`src/tools/fallback_estimator.py`)**: Multi-provider LLM fallback cost estimation (Gemini, Groq, NVIDIA NIM, offline rule baseline) with isolated prompts in `src/prompts/estimator_prompts.py`.
@@ -131,13 +136,18 @@ Generic conversational AI chatbots fail at this task because they:
 - **First Complete Vertical Slice (`src/nodes/synthesizer_node.py`, `src/api/routes.py`)**:
   - Unified `FinalItinerary` synthesizer combining travel context, logistics, daily daypart activities, authentic dining, deterministic budget breakdown, and optimization notes into a cohesive travelogue narrative.
   - End-to-end `POST /api/v1/plan` API endpoint executing the full LangGraph workflow and returning validated plans.
+- **International Vertical Slice (`src/nodes/visa_node.py`, `src/nodes/synthesizer_node.py`, `src/api/models.py`)**:
+  - End-to-end planning slice for Indian passport holders traveling abroad: routes through `visa_node` with live policy analysis and static baseline fallback.
+  - Schengen optimization: Single uniform visa application advisory and fee consolidation for multi-destination trips within the Schengen Area.
+  - Multi-hop international transport legs and sequential hotel stays across foreign destinations.
+  - Deterministic visa cost summation and integration into `BudgetBreakdown`, contingency buffer, and `FinalItinerary`.
+  - Executive summary and traveler advisories dynamically enriched with Indian passport visa requirements, processing times, and advance notice rules.
 - **Dual Verification Testing Architecture**:
-  - **Hermetic Offline Test Harness**: 505 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
-  - **Live Network Integration Verification**: Automated 7-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes and end-to-end vertical slice.
+  - **Hermetic Offline Test Harness**: 524 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
+  - **Live Network Integration Verification**: Automated 8-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes, domestic vertical slice, and international vertical slice.
 
 ### Planned Capabilities (Future Phases)
 
-- **International Vertical Slice** (End-to-end international with live visa integration) — *Phase 14*
 - **Flexible Dates Optimization** (Candidate date window optimization) — *Phase 15*
 - **Budget Conflict & Human Decision Flow** (Interactive trade-off resolution) — *Phase 16*
 - **API Streaming Engine** (Real-time SSE event emission from LangGraph) — *Phase 17*
@@ -548,7 +558,7 @@ The project uses `.env` for local configuration. A documented template is provid
 | `TAVILY_VISA_ENRICHMENT_API_KEY` | 2. Visa Enrichment | Ingestion Script | Dedicated Tavily key for web research in `scripts/enrich_visa_rules.py`. |
 | `TAVILY_API_KEY` | 3. Web Search | Ingestion & Runtime | General Tavily search API key used by `src/tools/web_search.py` and tool search fallbacks. |
 | `FIRECRAWL_API_KEY` | 3. Web Search | Runtime Search | Optional Firecrawl Search API key (Tier 3). If omitted, Tavily, DuckDuckGo, and offline fixtures are used. |
-| `SERPAPI_KEY` | 4. Travel & Lodging | Hotels & Places | Google Hotels and Google Maps search for accommodations, POIs, and dining (`src/tools/hotels.py`, `src/tools/places.py`). Fallbacks to Nominatim/OSM. |
+| `SERPAPI_KEY` | 4. Travel & Lodging | Flights, Hotels & Places | Google Flights (primary Tier-0 flight provider with real fares), Google Hotels, and Google Maps search for accommodations, POIs, and dining (`src/tools/transport.py`, `src/tools/hotels.py`, `src/tools/places.py`). Fallbacks to Sky Scraper, Flights Sky, Aviationstack, Booking.com, Nominatim/OSM, and physics engine. |
 | `RAPIDAPI_KEY` | 4. Travel & Lodging | Transport & Hotels | Multi-modal travel endpoints: Sky Scraper flights, Flights Sky, and Indian Railways IRCTC (`src/tools/transport.py`), Booking.com (`src/tools/hotels.py`). Fallbacks to European rail, web search, and physics engine. |
 | `AVIATIONSTACK_API_KEY` | 4. Travel & Lodging | Flight Schedules | Optional live airline and flight schedule status tracking. |
 | `REST_COUNTRIES_API_KEY` | 4. Travel & Lodging | Ingestion Script | Ingestion API key for REST Countries v5 in `scripts/fetch_country_profiles.py` (free 1,000 req/mo). |
@@ -702,7 +712,7 @@ Safarnama adheres to a **fixture-first testing philosophy**. All unit tests must
 ### Executing Tests
 
 ```bash
-# Run the entire test suite (392 passing tests)
+# Run the entire test suite (524 passing tests)
 uv run pytest
 
 # Run tests with verbose output
@@ -775,7 +785,9 @@ Safarnama accesses external services through strict tool interfaces with fallbac
 | **Forex Providers** | Forex conversion | `src/tools/forex.py` | 24h cache $\rightarrow$ fixture mode $\rightarrow$ Open Access (`open.er-api.com`) $\rightarrow$ FawazAhmed CDN mirror $\rightarrow$ Frankfurter ECB rates $\rightarrow$ authenticated tier $\rightarrow$ offline table of ~40 currencies. |
 | **Weather Providers** | Meteorological forecast | `src/tools/weather.py` | 3h cache $\rightarrow$ fixture mode $\rightarrow$ Open-Meteo 16-day forecast $\rightarrow$ wttr.in fallback $\rightarrow$ OpenWeatherMap 5-day fallback $\rightarrow$ offline seasonal climate baseline heuristic. |
 | **Web Search Providers** | Travel & general search | `src/tools/web_search.py` | 1h cache $\rightarrow$ fixture mode $\rightarrow$ Tavily Search API $\rightarrow$ DuckDuckGo Open Access $\rightarrow$ Firecrawl Search API $\rightarrow$ offline search fixture. |
-| **Transport Providers** | Route, flight & train search | `src/tools/transport.py` | 1h cache $\rightarrow$ fixture mode $\rightarrow$ Sky Scraper & Flights Sky API $\rightarrow$ Indian Railways IRCTC API $\rightarrow$ transport.rest European rail $\rightarrow$ live web search fallback $\rightarrow$ distance & speed physics engine. |
+| **Transport Providers** | Route, flight & train search | `src/tools/transport.py` | 1h cache $\rightarrow$ fixture mode $\rightarrow$ SerpApi Google Flights (Tier 0 live fares & schedules) $\rightarrow$ Sky Scraper & Flights Sky API $\rightarrow$ Aviationstack live schedule API $\rightarrow$ Indian Railways IRCTC API $\rightarrow$ transport.rest European rail $\rightarrow$ live web search fallback $\rightarrow$ distance & speed physics engine with seasonal demand multipliers and universal Google Flights deep links. |
+| **Hotel Providers** | Lodging & accommodation search | `src/tools/hotels.py` | 1h cache $\rightarrow$ fixture mode $\rightarrow$ SerpApi Google Hotels $\rightarrow$ RapidAPI Booking.com $\rightarrow$ OpenStreetMap / Nominatim $\rightarrow$ live web search fallback $\rightarrow$ deterministic location heuristic. |
+| **Places & Dining Providers** | POI attractions & dining discovery | `src/tools/places.py` | 1h cache $\rightarrow$ fixture mode $\rightarrow$ SerpApi Google Maps $\rightarrow$ OpenStreetMap / Nominatim $\rightarrow$ live web search fallback $\rightarrow$ curated category heuristic. |
 | **REST Countries v5** | Country metadata | `scripts/fetch_country_profiles.py` | On-demand script; outputs preserved in `data/static/countries.json`. |
 | **OurAirports** | Airport directory | `scripts/fetch_airports.py` | Source CSV fetched and saved to `data/static/airports.json`. |
 | **Passport Index** | Visa baseline | `scripts/fetch_visa_rules.py` | Positional join of dual CSVs saved to `data/static/visa_rules.json`. |
