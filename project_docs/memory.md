@@ -4,21 +4,18 @@
 
 ## Current Status
 
-**Phase 12 — LangGraph Orchestration complete.** `src/graph/state.py`, `src/graph/edges.py`, `src/graph/workflow.py`, and `src/graph/__init__.py` implemented and verified. Implements the unified LangGraph `StateGraph(PlanGraphState)` orchestrating:
-1. `intake`: Normalization and route resolution.
-2. `route_scope`: Explicit conditional edge (Domestic bypasses Visa directly to parallel planning; International routes through Visa).
-3. `visa`: Evaluates visa requirements for international destinations.
-4. Parallel planning fan-out: `logistics` and `experience` execute concurrently with deterministic state reduction for warnings/errors via `merge_warnings` and `merge_errors`.
-5. Deterministic convergence: Parallel branches join at `budget` (Deterministic Budget Engine).
-6. Financial optimization: `optimizer` evaluates budget health and applies tiered optimizations or flags trade-offs.
-7. Selective re-planning: `replan_workflow()` deterministically isolates affected components via `determine_affected_components()`, maximizing the reuse of unaffected artifacts (Architecture Section 12).
-Dual-verified with 19 unit tests (496 total passing across project) and 6-stage live external API verification (`scripts/verify_live_nodes.py`). All lint and format checks pass.
+**Phase 13 — First Complete Vertical Slice complete.** `src/models/itinerary.py` (`FinalItinerary`), `src/nodes/synthesizer_node.py`, `src/graph/workflow.py`, `src/api/routes.py`, `src/api/models.py`, and `src/api/main.py` implemented and verified. Implements the first complete vertical slice connecting the FastAPI API layer, LangGraph orchestration, and final itinerary structured output:
+1. `FinalItinerary`: Comprehensive domain model synthesizing `trip_id`, `title`, `summary`, `trip_context`, `logistics_plan`, `experience_plan`, `budget_breakdown`, `visa_verdict`, `optimization_result`, `plan_status`, `warnings`, `is_estimated`, and `created_at`.
+2. `synthesizer_node`: LangGraph node assembling `FinalItinerary` with zero LLM math (financial metrics derived directly from `BudgetBreakdown`), auto-generating evocative titles and summaries based on destination, travelers, and travel style.
+3. StateGraph Integration: `optimizer -> synthesizer -> END` wired cleanly into `build_planning_graph()`, with full support for flat and nested trip context requests.
+4. FastAPI API Layer: `POST /api/v1/plan` endpoint executing the full LangGraph planning engine and returning validated `PlanResponse`.
+5. Dual-verified with 9 dedicated unit tests (505 total passing across project) and 7-stage live external API verification (`scripts/verify_live_nodes.py`, Stage 7 end-to-end live vertical slice execution in 4.14s). All lint and format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 12 — LangGraph Orchestration (Completed)
+Phase 13 — First Complete Vertical Slice (Completed)
 
 ## Completed functionality
 
@@ -187,6 +184,22 @@ Phase 12 — LangGraph Orchestration (Completed)
 - **`src/graph/__init__.py`**: Public module exports.
 - **`tests/unit/test_graph.py`**: 19 unit tests covering state creation, reducers, routing edges, graph compilation, domestic/international workflows, parallel branch aggregation, safe error handling, and selective re-planning with maximum artifact reuse.
 
+### Phase 13 (First Complete Vertical Slice — 100% complete)
+- **`src/models/itinerary.py`** (extended):
+  - Added `FinalItinerary` domain model consolidating `trip_id`, `title`, `summary`, `trip_context`, `logistics_plan`, `experience_plan`, `budget_breakdown`, `visa_verdict`, `optimization_result`, `plan_status`, `warnings`, `is_estimated`, and `created_at`.
+- **`src/models/__init__.py`**: Re-exported `FinalItinerary`.
+- **`src/nodes/synthesizer_node.py`**:
+  - Implemented `generate_itinerary_title()` and `generate_itinerary_summary()` generating contextual travelogue narratives.
+  - Implemented `process_synthesizer()` assembling the complete, validated `FinalItinerary` with zero LLM math (financial metrics derived directly from `BudgetBreakdown`).
+  - Implemented `synthesizer_node(state)` returning `{"final_itinerary": final_itinerary}`.
+- **`src/nodes/intake_node.py`**: Added `_coerce_trip_context()` allowing intake to accept flat dictionaries or nested `TripContext` seamlessly.
+- **`src/graph/state.py`**: Added `final_itinerary: FinalItinerary | None` to `PlanGraphState`.
+- **`src/graph/workflow.py`**: Wired `synthesizer` node into StateGraph topology (`optimizer -> synthesizer -> END`), updated `run_planning_graph()` to support both flat dictionary and `TripContext` inputs, and updated `replan_workflow()` to re-synthesize updated `FinalItinerary`.
+- **`src/api/models.py`**: Added `PlanRequest` (with canonical `.to_trip_context()` coercion supporting flat and nested structures) and `PlanResponse`.
+- **`src/api/routes.py`**: Added `POST /api/v1/plan` endpoint executing the full planning engine and returning validated `PlanResponse`.
+- **`src/api/main.py`**: Created FastAPI entrypoint exporting `app` and `create_app`.
+- **`tests/unit/test_vertical_slice.py`**: 9 unit tests covering title/summary synthesis, `FinalItinerary` assembly, StateGraph execution, zero-arithmetic guarantee, and FastAPI `POST /plan` validation and successful response generation.
+
 ## Important files/modules
 
 | Path | Role |
@@ -196,12 +209,13 @@ Phase 12 — LangGraph Orchestration (Completed)
 | `src/graph/edges.py` | Phase 12 routing edges, scope routing, and component isolation logic |
 | `src/graph/workflow.py` | Phase 12 StateGraph builder, execution runner, and selective re-planning workflow |
 | `src/graph/__init__.py` | Graph module re-exports |
-| `src/api/models.py` | API Request/Response models |
-| `src/api/routes.py` | FastAPI router endpoints |
+| `src/api/models.py` | API Request/Response models (`PlanRequest`, `PlanResponse`, preview, estimate, health) |
+| `src/api/routes.py` | FastAPI router endpoints including `POST /api/v1/plan` |
 | `src/api/app.py` | FastAPI application factory, CORS & exception handlers |
+| `src/api/main.py` | FastAPI application root entrypoint |
 | `src/api/__init__.py` | Package re-exports |
 | `src/models/trip.py` | Trip context, party, dates, budget, food, preferences, ResolvedLocation, InitialPlanningState |
-| `src/models/itinerary.py` | POIs, activity slots, day plans, experience plan |
+| `src/models/itinerary.py` | POIs, activity slots, day plans, experience plan, FinalItinerary |
 | `src/models/logistics.py` | Transport legs, hotel stays, logistics plan |
 | `src/models/visa.py` | Visa ingestion models + VisaVerdict planning domain |
 | `src/models/budget.py` | Cost breakdown, contingency, variance, optimization, budget breakdown |
@@ -211,6 +225,7 @@ Phase 12 — LangGraph Orchestration (Completed)
 | `src/nodes/experience_node.py` | Phase 9 experience planning node, attractions, dining, weather pacing |
 | `src/nodes/budget_node.py` | Phase 10 deterministic budget engine node, cost aggregation, contingency, variance |
 | `src/nodes/optimizer_node.py` | Phase 11 optimizer planning node, tiered optimization, guardrails, re-planning |
+| `src/nodes/synthesizer_node.py` | Phase 13 itinerary synthesizer node, final itinerary assembly |
 | `src/nodes/__init__.py` | Node exports |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
 | `src/prompts/visa_prompts.py` | Isolated prompt templates for visa enrichment and verification |
@@ -223,6 +238,7 @@ Phase 12 — LangGraph Orchestration (Completed)
 | `src/tools/hotels.py` | Multi-tier hotel search tool |
 | `src/tools/places.py` | Multi-tier points of interest and dining tool |
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
+| `tests/unit/test_vertical_slice.py` | 9 Phase 13 complete vertical slice unit tests |
 | `tests/unit/test_graph.py` | 19 Phase 12 LangGraph orchestration unit tests |
 | `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
 | `tests/unit/test_visa_node.py` | 20 Phase 7 visa node unit tests |
@@ -233,23 +249,24 @@ Phase 12 — LangGraph Orchestration (Completed)
 | `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
 | `tests/unit/test_calculator.py` | 56 Phase 3/10 calculator unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
-| `scripts/verify_live_nodes.py` | Live 6-stage node & graph integration test suite |
+| `scripts/verify_live_nodes.py` | Live 7-stage node, graph & vertical slice integration test suite |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
 - **Hermetic Offline Test Harness**:
-  - `uv run pytest`: **496 passed**, 3 warnings in 12.58s (100% offline, zero network reliance in test suite).
+  - `uv run pytest`: **505 passed**, 5 warnings in 8.44s (100% offline, zero network reliance in test suite).
   - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-  - `uv run ruff format --check src/ tests/ scripts/`: **72 files already formatted**.
+  - `uv run ruff format --check src/ tests/ scripts/`: **75 files already formatted**.
 - **Live Network Integration Verification**:
-  - `uv run python scripts/verify_live_nodes.py`: **ALL 6 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
-    - **Visa Node (Phase 7)**: Live Tavily web search + Gemini 3.5 structured reconciliation verified Thailand 60-day visa-free status in 6.64s.
+  - `uv run python scripts/verify_live_nodes.py`: **ALL 7 LIVE PLANNING STAGES COMPLETED SUCCESSFULLY**
+    - **Visa Node (Phase 7)**: Live Tavily web search + Gemini structured reconciliation verified Thailand 60-day visa-free status in 6.64s.
     - **Logistics Node (Phase 8)**: Live flights via Aviationstack fallback and live lodging via SerpApi Google Hotels (Holiday Inn Mumbai International Airport, 5-star with booking URL) in 3.26s.
     - **Experience Node (Phase 9)**: Live Open-Meteo weather ("Mainly clear, 30°C/22°C") + real venues (Prithvi Cafe, Trèsind, Ziya) with live hotel association in 1.79s.
     - **Budget Engine Node (Phase 10)**: Aggregated itemized costs across all upstream live plans (₹100,044.72 projected total vs ₹85,000.00 budget), applied 8% dynamic contingency, and classified as `INFEASIBLE` (+17.7%) in 0.0024s.
     - **Optimizer Node (Phase 11)**: Evaluated live budget breakdown, identified primary cost drivers, formulated trade-offs, and generated 4 structured alternatives in 0.0007s with `guardrails_respected=True`.
     - **LangGraph Orchestration (Phase 12)**: Executed full autonomous StateGraph workflow with live APIs in 7.73s (Terminal Status: COMPLETED, Scope: DOMESTIC, 2 Legs, 4 Days, Projected Total: ₹57,101.76). Tested selective re-planning with `INCREASE_BUDGET` reusing unaffected visa, logistics, and experience artifacts in 0.0004s.
+    - **Vertical Slice Domestic Planning (Phase 13)**: Executed live end-to-end `POST /api/v1/plan` (Delhi -> Goa, 2 adults, 4 days, balanced, comfortable, ₹100,000 budget) in 4.14s: generated `trip_delhi_goa_9ebbd1d4`, ₹61,939.08 total cost, status `COMPLETED`, 2 transport legs, 1 hotel stay with SerpApi booking URL, 4 day plans with 8 activity slots and 12 meals, zero arithmetic discrepancy, and synthesized title and narrative.
   - **Live Aviationstack Search Verification**: Direct live query to `http://api.aviationstack.com/v1/flights` verified scheduled operating flights with calibrated fares and 0 errors.
 
 ## Decisions that should not be changed without discussion
@@ -281,6 +298,7 @@ Phase 12 — LangGraph Orchestration (Completed)
 - Miscellaneous expenses scale based on travel style (`BUDGET`: ₹200/day/person, `COMFORTABLE`: ₹450, `LUXURY`: ₹1,000).
 - API routes validate all requests with Pydantic and return structured JSON errors (`APIErrorResponse`) on failures.
 - Domain models in `src/models/` are frozen (`model_config = ConfigDict(frozen=True)`) — they are value objects.
+- `FinalItinerary` consolidates all upstream planning artifacts into an immutable value object, computing financial summaries deterministically without LLM math.
 - `VisaVerdict` and related planning domain models live in `src/models/visa.py` alongside the data-ingestion models rather than a separate file, to keep all visa-related types co-located.
 - `BudgetVariance` cross-field validator rejects inconsistent `variance_inr` values (must equal `projected_total - user_budget` within ₹1).
 - `TripDates` cross-field validator enforces required fields per `DateMode` (EXACT requires start+end; FLEXIBLE requires start+duration; FIND_BEST requires window+duration).
@@ -301,12 +319,12 @@ Phase 12 — LangGraph Orchestration (Completed)
 - Must-visit sights omitted due to pacing constraints produce user-visible feasibility warnings.
 - **Aviationstack Flight API Integration (`src/tools/transport.py`)**: When RapidAPI flight endpoints (`Sky Scraper` or `Flights Sky`) fail or time out, `_search_aviationstack` executes as the live flight schedule provider. It queries routes via `dep_iata` and `arr_iata` without sending `flight_date` (as `flight_date` throws 403 Forbidden on standard/free tiers), extracts real scheduled flight numbers and departure/arrival times, and assigns a calibrated distance-based pricing baseline labeled with `is_estimated=True` and `provider="aviationstack"`.
 
-## Phase 12 Completion Status
+## Phase 13 Completion Status
 
-Phase 12 — LangGraph Orchestration is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
+Phase 13 — First Complete Vertical Slice is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
 
 ## Next recommended phase
 
-**Phase 13 — First Complete Vertical Slice**:
-Build one complete, reliable end-to-end scenario (Indian traveler -> one domestic destination -> fixed dates -> fixed budget -> balanced pace) connecting the FastAPI API layer, LangGraph orchestration, and final itinerary structured output. Followed by Phase 14 (International Vertical Slice) as specified in `project_docs/phases.md`.
+**Phase 14 — International Vertical Slice**:
+Extend the complete end-to-end planning slice to international destinations for Indian passport holders (India -> International destination, followed by India -> Country A -> Country B), integrating live visa verification, international flight/lodging logistics, foreign dining/activity recommendations, and multi-currency budget calculation.
 

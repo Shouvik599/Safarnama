@@ -34,6 +34,11 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.models.budget import BudgetBreakdown, OptimizationResult
+from src.models.logistics import LogisticsPlan
+from src.models.trip import TripContext
+from src.models.visa import VisaVerdict
+
 # ---------------------------------------------------------------------------
 # Enumerations
 # ---------------------------------------------------------------------------
@@ -351,4 +356,63 @@ class ExperiencePlan(BaseModel):
     )
     timestamp: str = Field(
         description="ISO 8601 timestamp when this experience plan was generated."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Final Consolidated Itinerary
+# ---------------------------------------------------------------------------
+
+
+class FinalItinerary(BaseModel):
+    """Complete, end-to-end trip itinerary produced by the Safarnama planning system.
+
+    Consolidates the validated trip context, logistics plan, daily experience schedule,
+    deterministic financial breakdown, visa verdict, and optimization trade-offs into
+    a single coherent, practical journey plan.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    trip_id: str = Field(
+        description="Unique identifier for the generated itinerary (e.g. 'trip_del_goi_4d_...')."
+    )
+    title: str = Field(
+        description="Display title for the journey narrative (e.g. '4-Day Vibrant Goa Getaway')."
+    )
+    summary: str = Field(
+        description="Executive trip summary highlighting key sights, dining, pace, and logistics."
+    )
+    trip_context: TripContext = Field(
+        description="Validated planning constraints and traveler preferences."
+    )
+    logistics_plan: LogisticsPlan = Field(
+        description="Transportation legs and hotel accommodation stays."
+    )
+    experience_plan: ExperiencePlan = Field(
+        description="Day-by-day sightseeing schedule, dining spots, and weather adjustments."
+    )
+    budget_breakdown: BudgetBreakdown = Field(
+        description="Deterministic itemized financial breakdown, dynamic contingency, and variance."
+    )
+    visa_verdict: VisaVerdict | None = Field(
+        default=None,
+        description="Visa evaluation and requirements (None or domestic bypass).",
+    )
+    optimization_result: OptimizationResult = Field(
+        description="Optimization status, actions taken, and trade-offs."
+    )
+    plan_status: str = Field(
+        description="Final execution status: 'COMPLETED', 'NEEDS_USER_DECISION', 'INFEASIBLE', etc."
+    )
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Consolidated traveler advisories, substitution notes, and warnings.",
+    )
+    is_estimated: bool = Field(
+        default=False,
+        description="True if any component relied on fallback estimation.",
+    )
+    created_at: str = Field(
+        description="ISO 8601 timestamp when this final itinerary was generated."
     )

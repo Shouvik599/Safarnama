@@ -14,7 +14,7 @@ import logging
 from typing import Annotated, Any, TypedDict
 
 from src.models.budget import BudgetBreakdown, OptimizationResult
-from src.models.itinerary import ExperiencePlan
+from src.models.itinerary import ExperiencePlan, FinalItinerary
 from src.models.logistics import LogisticsPlan
 from src.models.trip import TravelScope, TripContext
 from src.models.visa import VisaVerdict
@@ -89,6 +89,9 @@ class PlanGraphState(TypedDict, total=False):
     budget_breakdown: BudgetBreakdown | None
     optimization_result: OptimizationResult | None
 
+    # Synthesized Final Deliverable
+    final_itinerary: FinalItinerary | None
+
     # Graph Execution Metadata
     plan_status: str
     warnings: Annotated[list[str], merge_warnings]
@@ -131,6 +134,7 @@ def create_initial_state(
         "experience_plan": None,
         "budget_breakdown": None,
         "optimization_result": None,
+        "final_itinerary": None,
         "plan_status": "INITIALIZED",
         "warnings": [],
         "errors": [],

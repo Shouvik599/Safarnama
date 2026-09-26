@@ -362,10 +362,58 @@ def test_live_langgraph_orchestration() -> None:
     assert replanned["trip_context"].budget.amount_inr == 90000.0
 
 
+def test_live_vertical_slice() -> None:
+    print_banner("7. LIVE TEST: End-to-End Vertical Slice (API & Synthesizer - Phase 13)")
+    print("Controlled Scenario: Delhi -> Goa, 2 adults, 4 days, Comfortable, ₹100,000 budget")
+    print("Executing POST /api/v1/plan via FastAPI service...")
+
+    from fastapi.testclient import TestClient
+    from src.api.app import app
+
+    client = TestClient(app)
+    payload = {
+        "origin": "Delhi",
+        "destinations": ["Goa"],
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-04",
+        "adults": 2,
+        "children": 0,
+        "budget_inr": 100000.0,
+        "travel_style": "COMFORTABLE",
+        "pace": "BALANCED",
+        "activity_preferences": ["beaches", "relaxation"],
+        "must_visits": ["Baga Beach"],
+    }
+
+    t0 = time.perf_counter()
+    resp = client.post("/api/v1/plan", json=payload)
+    elapsed = time.perf_counter() - t0
+
+    assert resp.status_code == 200, f"Expected 200 OK, got {resp.status_code}: {resp.text}"
+    data = resp.json()
+    itinerary = data["itinerary"]
+
+    print(f"\n[OK] Vertical Slice API response received in {elapsed:.4f}s:")
+    print(f"  - Status:            {data['status']}")
+    print(f"  - Title:             {itinerary['title']}")
+    print(f"  - Trip ID:           {itinerary['trip_id']}")
+    print(f"  - Transport Legs:    {len(itinerary['logistics_plan']['transport_legs'])}")
+    print(f"  - Hotel Stays:       {len(itinerary['logistics_plan']['hotel_stays'])}")
+    print(f"  - Experience Days:   {len(itinerary['experience_plan']['days'])}")
+    total_proj = itinerary["budget_breakdown"]["total_with_contingency_inr"]
+    print(f"  - Projected Total:   INR {total_proj:,.2f}")
+    print(f"  - Estimated Flag:    {itinerary['is_estimated']}")
+    print(f"  - Summary:           {itinerary['summary'][:150]}...")
+
+    assert itinerary["title"]
+    assert itinerary["summary"]
+    assert total_proj > 0
+
+
 def main() -> None:
     print("\n" + "#" * 70)
     print("  SAFARNAMA LIVE EXTERNAL INTEGRATION TEST SUITE")
-    print("  Validates all 6 stages (Visa, Logistics, Experience, Budget, Optimizer, Graph)")
+    print("  Validates all 7 stages (Visa, Logistics, Experience, Budget, Optimizer, Graph, Slice)")
     print("#" * 70)
 
     try:
@@ -375,9 +423,10 @@ def main() -> None:
         budget = test_live_budget_node(state, logistics, experience)
         test_live_optimizer_node(state, budget, logistics, experience)
         test_live_langgraph_orchestration()
+        test_live_vertical_slice()
 
         print("\n" + "=" * 70)
-        print("  ALL 6 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("  ALL 7 LIVE PLANNING INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
         print("=" * 70 + "\n")
     except Exception as exc:
         print(f"\n[FAIL] Live test failed with error: {exc}", file=sys.stderr)

@@ -40,6 +40,12 @@ from src.nodes.optimizer_node import (
     optimizer_node,
     process_optimizer,
 )
+from src.nodes.synthesizer_node import (
+    SynthesizerError,
+    SynthesizerValidationError,
+    process_synthesizer,
+    synthesizer_node,
+)
 from src.nodes.visa_node import (
     VisaError,
     VisaProcessingError,
@@ -63,6 +69,8 @@ __all__ = [
     "OptimizerOutput",
     "OptimizerPlanningError",
     "OptimizerValidationError",
+    "SynthesizerError",
+    "SynthesizerValidationError",
     "VisaError",
     "VisaProcessingError",
     "allocate_stay_dates",
@@ -81,7 +89,9 @@ __all__ = [
     "process_intake",
     "process_logistics",
     "process_optimizer",
+    "process_synthesizer",
     "process_visa",
     "resolve_location",
+    "synthesizer_node",
     "visa_node",
 ]

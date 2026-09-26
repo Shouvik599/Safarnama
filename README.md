@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 12 — LangGraph Orchestration (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete)
-Test Suite: 496 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 13 — First Complete Vertical Slice (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete)
+Test Suite: 505 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, and the complete LangGraph StateGraph orchestration workflow. **It is not yet production-ready**, nor is the full frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, and the first complete vertical slice (`POST /api/v1/plan` generating unified `FinalItinerary`). **It is not yet production-ready**, nor is the full frontend interface implemented.
 
 | Phase        | Description                                                                                             | Status       |
 | --------------| ---------------------------------------------------------------------------------------------------------| --------------|
@@ -31,7 +31,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 10** | Deterministic Budget Engine (Category summation, buffer, variances)                                     | **Complete** |
 | **Phase 11** | Optimizer Functionality (Budget trade-offs, constraint satisfaction)                                    | **Complete** |
 | **Phase 12** | LangGraph Orchestration (StateGraph, parallel nodes, state reduction)                                   | **Complete** |
-| **Phase 13** | First Complete Vertical Slice (End-to-end domestic itinerary generation)                                | Planned      |
+| **Phase 13** | First Complete Vertical Slice (End-to-end domestic itinerary generation)                                | **Complete** |
 | **Phase 14** | International Vertical Slice (End-to-end international with visa integration)                           | Planned      |
 | **Phase 15** | Flexible Dates (Candidate date window optimization)                                                     | Planned      |
 | **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution)                                | Planned      |
@@ -118,17 +118,26 @@ Generic conversational AI chatbots fail at this task because they:
   - Logistics integration: Automatically associates hotel stay details and booking URLs from `LogisticsPlan` into daily itinerary schedules.
   - Party size cost scaling: Deterministically scales attraction tickets, dining expenses, and local transit across party headcount.
   - Resilient execution: Zero crashes on places/weather tool exceptions with graceful category-heuristic fallbacks.
+- **Deterministic Budget Engine (`src/nodes/budget_node.py`)**:
+  - Exact financial arithmetic with zero LLM math: Aggregates itemized costs across transport, accommodation, food, activities, visa, and miscellaneous daily expenses via `Decimal` calculations.
+  - Complexity-calibrated contingency buffer: Dynamically calculates buffer (3%–20%) factoring domestic vs. international, multi-country stops, fallback pricing presence, and date flexibility.
+  - 5-tier budget status classification: `EXACT`, `UNDER_BUDGET`, `MINOR_OVER` (≤5%), `SIGNIFICANT_OVER` (5%–15%), and `INFEASIBLE` (>15%).
+- **Optimizer Planning Engine (`src/nodes/optimizer_node.py`)**:
+  - Tiered optimization strategy: Automatic minor adjustments (hotel saver rate, dining adjustment) for ≤5% overage; user-visible trade-offs and alternatives for 5%–15%; cost-driver analysis and 4 structured alternatives for >15% infeasibility.
+  - Strict preservation of hard quality guardrails: Must-visit sights cannot be silently omitted, dietary preferences cannot be violated, pace cannot be violated, and no unreasonable lodging downgrades.
+- **LangGraph Multi-Agent Architecture (`src/graph/`)**:
+  - Unified `StateGraph(PlanGraphState)` orchestrating `intake`, conditional `route_scope`, `visa`, parallel `logistics` and `experience` fan-out with deterministic state reduction (`merge_warnings`, `merge_errors`), `budget` convergence, and `optimizer` re-planning.
+  - Selective re-planning engine (`replan_workflow`) isolating affected components and maximizing reuse of unaffected upstream artifacts.
+- **First Complete Vertical Slice (`src/nodes/synthesizer_node.py`, `src/api/routes.py`)**:
+  - Unified `FinalItinerary` synthesizer combining travel context, logistics, daily daypart activities, authentic dining, deterministic budget breakdown, and optimization notes into a cohesive travelogue narrative.
+  - End-to-end `POST /api/v1/plan` API endpoint executing the full LangGraph workflow and returning validated plans.
 - **Dual Verification Testing Architecture**:
-  - **Hermetic Offline Test Harness**: 427 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
-  - **Live Network Integration Verification**: Automated live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all external-facing planning nodes (`visa_node`, `logistics_node`, `experience_node`).
+  - **Hermetic Offline Test Harness**: 505 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
+  - **Live Network Integration Verification**: Automated 7-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes and end-to-end vertical slice.
 
 ### Planned Capabilities (Future Phases)
 
-- **Deterministic Budget Engine** (Category summation, buffer, variances) — *Phase 10*
-- **Optimizer Functionality** (Budget trade-offs, constraint satisfaction) — *Phase 11*
-- **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 12*
-- **First Complete Vertical Slice** (End-to-end domestic itinerary generation) — *Phase 13*
-- **International Vertical Slice** (End-to-end international with visa integration) — *Phase 14*
+- **International Vertical Slice** (End-to-end international with live visa integration) — *Phase 14*
 - **Flexible Dates Optimization** (Candidate date window optimization) — *Phase 15*
 - **Budget Conflict & Human Decision Flow** (Interactive trade-off resolution) — *Phase 16*
 - **API Streaming Engine** (Real-time SSE event emission from LangGraph) — *Phase 17*
@@ -214,20 +223,31 @@ Generic conversational AI chatbots fail at this task because they:
 ### Current Implementation vs Planned Components
 
 ```text
-IMPLEMENTED & VERIFIED (Phases 0–7)            PLANNED (Upcoming Phases)
+IMPLEMENTED & VERIFIED (Phases 0–13)           PLANNED (Upcoming Phases)
 ┌─────────────────────────────────┐        ┌───────────────────────────────┐
-│ src/api/                        │        │ src/nodes/                    │
-│ - FastAPI endpoints, CORS & SSE │        │ - logistics_node.py           │
-│ - Request/Response Pydantic     │        │ - experience_node.py          │
-├─────────────────────────────────┤        │ - optimizer_node.py           │
+│ src/api/                        │        │ Human Decision Flow           │
+│ - FastAPI endpoints, CORS & SSE │        │ - Interactive trade-offs      │
+│ - POST /api/v1/plan (Vertical)  │        ├───────────────────────────────┤
+│ - Request/Response Pydantic     │        │ Flexible Dates                │
+├─────────────────────────────────┤        │ - Candidate window evaluator  │
 │ src/models/                     │        ├───────────────────────────────┤
-│ - trip, itinerary, logistics    │        │ src/graph/                    │
-│ - visa, budget, static models   │        │ - LangGraph StateGraph        │
-├─────────────────────────────────┤        │ - State transitions & routing │
-│ src/nodes/                      │        ├───────────────────────────────┤
-│ - intake_node.py (Intake/Res)   │        │ Frontend                      │
-│ - visa_node.py (Visa/Schengen)  │        │ - Vite / React / pnpm UI      │
+│ - trip, itinerary, logistics    │        │ Frontend                      │
+│ - visa, budget, final itinerary │        │ - Vite / React / pnpm UI      │
 ├─────────────────────────────────┤        └───────────────────────────────┘
+│ src/nodes/                      │
+│ - intake_node.py (Intake/Res)   │
+│ - visa_node.py (Visa/Schengen)  │
+│ - logistics_node.py (Transport) │
+│ - experience_node.py (Pacing)   │
+│ - budget_node.py (Calculator)   │
+│ - optimizer_node.py (Trade-offs)│
+│ - synthesizer_node.py (Itinerary│
+├─────────────────────────────────┤
+│ src/graph/                      │
+│ - state.py (PlanGraphState)     │
+│ - edges.py (Routing & reduction)│
+│ - workflow.py (StateGraph)      │
+├─────────────────────────────────┤
 │ src/tools/ (All 8 Tools)        │
 │ - static_data.py (3 datasets)   │
 │ - calculator.py (Decimal math)  │

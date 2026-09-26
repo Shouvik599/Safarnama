@@ -43,6 +43,7 @@ from src.models.itinerary import (
     Daypart,
     DayPlan,
     ExperiencePlan,
+    FinalItinerary,
     PointOfInterest,
 )
 
@@ -135,6 +136,7 @@ __all__ = [
     "DayPlan",
     "Daypart",
     "ExperiencePlan",
+    "FinalItinerary",
     "PointOfInterest",
     # Phase 5 — logistics
     "HotelStay",

@@ -24,6 +24,7 @@ from src.graph.edges import (
     route_scope,
 )
 from src.graph.state import PlanGraphState, create_initial_state
+from src.models.trip import TripContext
 from src.nodes.budget_node import budget_node, process_budget
 from src.nodes.experience_node import experience_node, process_experience
 from src.nodes.intake_node import intake_node
@@ -33,6 +34,7 @@ from src.nodes.optimizer_node import (
     optimizer_node,
     process_optimizer,
 )
+from src.nodes.synthesizer_node import process_synthesizer, synthesizer_node
 from src.nodes.visa_node import process_visa, visa_node
 
 log = logging.getLogger(__name__)
@@ -79,7 +81,10 @@ def build_planning_graph() -> CompiledStateGraph:
                                  budget (Deterministic Budget Engine)
                                     │
                                     ▼
-                                optimizer
+                                 optimizer
+                                    │
+                                    ▼
+                               synthesizer
                                     │
                                    END
 
@@ -95,6 +100,7 @@ def build_planning_graph() -> CompiledStateGraph:
     builder.add_node("experience", _wrap_safe_node(experience_node, "experience"))
     builder.add_node("budget", _wrap_safe_node(budget_node, "budget"))
     builder.add_node("optimizer", _wrap_safe_node(optimizer_node, "optimizer"))
+    builder.add_node("synthesizer", _wrap_safe_node(synthesizer_node, "synthesizer"))
 
     # 2. Add edges and conditional routing
     builder.add_edge(START, "intake")
@@ -123,8 +129,11 @@ def build_planning_graph() -> CompiledStateGraph:
     # Budget Engine deterministically feeds the Optimizer
     builder.add_edge("budget", "optimizer")
 
-    # Optimizer concludes the core workflow
-    builder.add_edge("optimizer", END)
+    # Optimizer feeds the Synthesizer
+    builder.add_edge("optimizer", "synthesizer")
+
+    # Synthesizer concludes the core workflow
+    builder.add_edge("synthesizer", END)
 
     app = builder.compile()
     log.info("Safarnama planning StateGraph successfully compiled.")
@@ -143,22 +152,25 @@ def get_planning_graph() -> CompiledStateGraph:
 
 
 def run_planning_graph(
-    initial_input: dict[str, Any] | PlanGraphState,
+    initial_input: dict[str, Any] | PlanGraphState | TripContext,
 ) -> PlanGraphState:
     """Execute the complete Safarnama planning workflow end-to-end.
 
     Args:
-        initial_input: User request dictionary or partially populated PlanGraphState.
+        initial_input: User request dictionary, TripContext domain model,
+                       or partially populated PlanGraphState.
 
     Returns:
         Final PlanGraphState containing all generated plans, financial breakdown,
         optimization verdict, warnings, and status.
     """
-    if not isinstance(initial_input, dict):
-        raise TypeError(f"Expected dictionary or PlanGraphState, got: {type(initial_input)}")
-
-    # Ensure PlanGraphState structure
-    if "request" not in initial_input and "trip_context" not in initial_input:
+    if isinstance(initial_input, TripContext):
+        state = create_initial_state(trip_context=initial_input)
+    elif not isinstance(initial_input, dict):
+        raise TypeError(
+            f"Expected dictionary, PlanGraphState, or TripContext, got: {type(initial_input)}"
+        )
+    elif "request" not in initial_input and "trip_context" not in initial_input:
         state = create_initial_state(request=initial_input)
     else:
         state = create_initial_state(
@@ -295,5 +307,18 @@ def replan_workflow(
         new_state["plan_status"] = "INFEASIBLE"
     else:
         new_state["plan_status"] = "REPLANNED"
+
+    # Synthesizer Node (synthesizes final updated deliverable)
+    log.info("Re-planning: Synthesizing FinalItinerary.")
+    final_itinerary = process_synthesizer(
+        trip_context=updated_context,
+        logistics_plan=opt_output.logistics_plan or updated_logistics,
+        experience_plan=opt_output.experience_plan or updated_experience,
+        budget_breakdown=opt_output.budget_breakdown or updated_budget,
+        visa_verdict=updated_visa,
+        optimization_result=opt_output.optimization_result,
+        warnings=new_state.get("warnings") or [],
+    )
+    new_state["final_itinerary"] = final_itinerary
 
     return new_state

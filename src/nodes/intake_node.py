@@ -783,10 +783,27 @@ def process_intake(context: TripContext) -> InitialPlanningState:
     )
 
 
-def intake_node(state: TripContext | dict[str, Any]) -> dict[str, Any]:
-    """Execute the Intake planning step (LangGraph Node Interface).
+def _coerce_trip_context(raw: Any) -> TripContext:
+    """Coerce various input forms into a canonical TripContext."""
+    if isinstance(raw, TripContext):
+        return raw
+    if isinstance(raw, dict):
+        if "trip_context" in raw and raw["trip_context"] is not None:
+            tc = raw["trip_context"]
+            return tc if isinstance(tc, TripContext) else _coerce_trip_context(tc)
+        try:
+            return TripContext.model_validate(raw)
+        except Exception:
+            from src.api.models import PlanRequest
 
-    Accepts either:
+            return PlanRequest.model_validate(raw).to_trip_context()
+    raise IntakeValidationError(f"Invalid input type for intake_node: {type(raw).__name__}")
+
+
+def intake_node(state: InitialPlanningState | TripContext | dict[str, Any]) -> dict[str, Any]:
+    """LangGraph node interface wrapper for intake processing.
+
+    Accepts:
     1. A ``TripContext`` domain model directly.
     2. A dictionary containing a ``"trip_context"`` key or raw trip parameters.
 
@@ -797,13 +814,11 @@ def intake_node(state: TripContext | dict[str, Any]) -> dict[str, Any]:
         context = state
     elif isinstance(state, dict):
         if state.get("trip_context") is not None:
-            tc = state["trip_context"]
-            context = tc if isinstance(tc, TripContext) else TripContext.model_validate(tc)
+            context = _coerce_trip_context(state["trip_context"])
         elif state.get("request") is not None:
-            req = state["request"]
-            context = req if isinstance(req, TripContext) else TripContext.model_validate(req)
+            context = _coerce_trip_context(state["request"])
         else:
-            context = TripContext.model_validate(state)
+            context = _coerce_trip_context(state)
     else:
         raise IntakeValidationError(f"Invalid input type for intake_node: {type(state).__name__}")
 
