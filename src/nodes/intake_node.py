@@ -796,10 +796,12 @@ def intake_node(state: TripContext | dict[str, Any]) -> dict[str, Any]:
     if isinstance(state, TripContext):
         context = state
     elif isinstance(state, dict):
-        if "trip_context" in state and isinstance(state["trip_context"], TripContext):
-            context = state["trip_context"]
-        elif "trip_context" in state and isinstance(state["trip_context"], dict):
-            context = TripContext.model_validate(state["trip_context"])
+        if state.get("trip_context") is not None:
+            tc = state["trip_context"]
+            context = tc if isinstance(tc, TripContext) else TripContext.model_validate(tc)
+        elif state.get("request") is not None:
+            req = state["request"]
+            context = req if isinstance(req, TripContext) else TripContext.model_validate(req)
         else:
             context = TripContext.model_validate(state)
     else:

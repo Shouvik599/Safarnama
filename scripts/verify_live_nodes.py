@@ -15,6 +15,7 @@ import sys
 import time
 
 from dotenv import load_dotenv
+from src.graph import replan_workflow, run_planning_graph
 from src.models.trip import (
     BudgetMode,
     DateMode,
@@ -298,10 +299,73 @@ def test_live_optimizer_node(state, budget, logistics, experience) -> None:
     assert output.budget_breakdown is not None
 
 
+def test_live_langgraph_orchestration() -> None:
+    print_banner("6. LIVE TEST: LangGraph Orchestration (Phase 12)")
+    print("Executing full autonomous StateGraph workflow with live APIs...")
+
+    trip_request = {
+        "origin": "DEL",
+        "destinations": ["GOI"],
+        "scope": "DOMESTIC",
+        "dates": {
+            "mode": "EXACT",
+            "start_date": "2026-10-15",
+            "end_date": "2026-10-18",
+            "duration_days": 3,
+        },
+        "party": {"adults": 2, "children": 0},
+        "budget": {"amount_inr": 60000.0, "mode": "TOTAL"},
+        "travel_style": "COMFORTABLE",
+        "pace": "BALANCED",
+        "activity_preferences": ["BEACH", "HISTORICAL"],
+    }
+
+    t0 = time.perf_counter()
+    graph_output = run_planning_graph(trip_request)
+    elapsed = time.perf_counter() - t0
+
+    print(f"\n[OK] Full LangGraph StateGraph executed in {elapsed:.4f}s:")
+    print(f"  - Terminal Plan Status:   {graph_output.get('plan_status')}")
+    print(f"  - Scope Routed:           {graph_output.get('travel_scope')}")
+    print(f"  - Logistics Plan Legs:    {len(graph_output['logistics_plan'].transport_legs)}")
+    print(f"  - Logistics Hotel:        {graph_output['logistics_plan'].hotel_stays[0].hotel_name}")
+    print(f"  - Experience Days:        {len(graph_output['experience_plan'].days)}")
+    total_inr = graph_output["budget_breakdown"].total_with_contingency_inr
+    print(f"  - Budget Projected Total: INR {total_inr:,.2f}")
+    print(f"  - Optimization Action:    {graph_output['optimization_result'].action.value}")
+    print(f"  - Total Warnings Caught:  {len(graph_output.get('warnings', []))}")
+
+    assert graph_output.get("trip_context") is not None
+    assert graph_output.get("logistics_plan") is not None
+    assert graph_output.get("experience_plan") is not None
+    assert graph_output.get("budget_breakdown") is not None
+    assert graph_output.get("optimization_result") is not None
+
+    print("\nTesting Selective Re-planning with Reuse of Unaffected Work...")
+    t_replan = time.perf_counter()
+    replanned = replan_workflow(
+        current_state=graph_output,
+        proposal_type="INCREASE_BUDGET",
+        target_value=90000.0,
+    )
+    elapsed_replan = time.perf_counter() - t_replan
+
+    print(f"[OK] Re-planning completed in {elapsed_replan:.4f}s:")
+    print(f"  - Re-planning Proposal:   {replanned['replan_proposal']['proposal_type']}")
+    print(f"  - Reused Components:      {replanned['replan_proposal']['reused_components']}")
+    print(f"  - Rerun Components:       {replanned['replan_proposal']['rerun_components']}")
+    print(f"  - New Status:             {replanned.get('plan_status')}")
+
+    assert replanned["replan_requested"] is True
+    assert "logistics" in replanned["replan_proposal"]["reused_components"]
+    assert "experience" in replanned["replan_proposal"]["reused_components"]
+    assert replanned["trip_context"].budget.amount_inr == 90000.0
+
+
 def main() -> None:
     print("\n" + "#" * 70)
     print("  SAFARNAMA LIVE EXTERNAL INTEGRATION TEST SUITE")
-    print("  Validates all 5 planning stages (Visa, Logistics, Experience, Budget, Optimizer)")
+    print("  Validates all 6 stages (Visa, Logistics, Experience, Budget, Optimizer, Graph)")
     print("#" * 70)
 
     try:
@@ -310,9 +374,10 @@ def main() -> None:
         state, experience = test_live_experience_node(logistics)
         budget = test_live_budget_node(state, logistics, experience)
         test_live_optimizer_node(state, budget, logistics, experience)
+        test_live_langgraph_orchestration()
 
         print("\n" + "=" * 70)
-        print("  ALL 5 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("  ALL 6 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
         print("=" * 70 + "\n")
     except Exception as exc:
         print(f"\n[FAIL] Live test failed with error: {exc}", file=sys.stderr)

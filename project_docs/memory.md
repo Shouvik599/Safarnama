@@ -4,13 +4,21 @@
 
 ## Current Status
 
-**Phase 11 — Optimizer Functionality complete.** `src/nodes/optimizer_node.py` implemented and verified. Implements tiered budget optimization across 4 discrete outcome tiers (`UNDER_BUDGET`/`EXACT`, `MINOR_OVER` $\le 5\%$, `SIGNIFICANT_OVER` 5–15%, `INFEASIBLE` >15%), strictly enforcing hard quality guardrails (must-visits preserved, dietary preferences preserved, pacing preserved, no unreasonable hotel downgrades). Deterministically recalculates adjusted costs, contingency, and variance via `src/tools/calculator.py`. Provides structured re-planning proposals (`create_replanning_proposal`). Dual-verified with 18 unit tests (477 total passing across project) and 5-stage live external API verification (`scripts/verify_live_nodes.py`). All lint and format checks pass.
+**Phase 12 — LangGraph Orchestration complete.** `src/graph/state.py`, `src/graph/edges.py`, `src/graph/workflow.py`, and `src/graph/__init__.py` implemented and verified. Implements the unified LangGraph `StateGraph(PlanGraphState)` orchestrating:
+1. `intake`: Normalization and route resolution.
+2. `route_scope`: Explicit conditional edge (Domestic bypasses Visa directly to parallel planning; International routes through Visa).
+3. `visa`: Evaluates visa requirements for international destinations.
+4. Parallel planning fan-out: `logistics` and `experience` execute concurrently with deterministic state reduction for warnings/errors via `merge_warnings` and `merge_errors`.
+5. Deterministic convergence: Parallel branches join at `budget` (Deterministic Budget Engine).
+6. Financial optimization: `optimizer` evaluates budget health and applies tiered optimizations or flags trade-offs.
+7. Selective re-planning: `replan_workflow()` deterministically isolates affected components via `determine_affected_components()`, maximizing the reuse of unaffected artifacts (Architecture Section 12).
+Dual-verified with 19 unit tests (496 total passing across project) and 6-stage live external API verification (`scripts/verify_live_nodes.py`). All lint and format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 11 — Optimizer Functionality (Completed)
+Phase 12 — LangGraph Orchestration (Completed)
 
 ## Completed functionality
 
@@ -162,11 +170,32 @@ Phase 11 — Optimizer Functionality (Completed)
 - **`src/nodes/__init__.py`**: Re-exports `optimizer_node`, `process_optimizer`, `create_replanning_proposal`, `OptimizerOutput`, `OptimizerError`, `OptimizerValidationError`, and `OptimizerPlanningError`.
 - **`tests/unit/test_optimizer_node.py`**: 18 comprehensive unit tests covering all tiers, guardrails preservation, re-planning proposals, state interfaces, and validation errors.
 
+### Phase 12 (LangGraph Orchestration — 100% complete)
+- **`src/graph/state.py`**:
+  - `PlanGraphState`: Structured TypedDict encompassing `TripContext`, `LogisticsPlan`, `ExperiencePlan`, `BudgetBreakdown`, `VisaVerdict`, `OptimizationResult`, and execution metadata.
+  - `merge_warnings()` and `merge_errors()`: Deterministic reducer operators that deduplicate and aggregate warnings/errors across parallel branches.
+  - `create_initial_state()`: Clean state initialization helper.
+- **`src/graph/edges.py`**:
+  - `route_scope()`: Conditional edge routing domestic itineraries directly to parallel planning, and international itineraries through the Visa node.
+  - `route_after_visa()`: Conditional edge fanning out from Visa node to parallel planning branches.
+  - `route_optimizer_outcome()`: Evaluates optimization result into terminal status categories (`FEASIBLE`, `USER_DECISION_REQUIRED`, `INFEASIBLE`).
+  - `determine_affected_components()`: Architecture Section 12 component isolation mapping for re-planning workflows.
+- **`src/graph/workflow.py`**:
+  - `build_planning_graph()`: Constructs and compiles `StateGraph(PlanGraphState)` with safe node wrappers, parallel fan-out, budget convergence, and optimizer conclusion.
+  - `run_planning_graph()`: High-level invocation entrypoint returning fully resolved planning state.
+  - `replan_workflow()`: Selective re-planning engine isolating affected components and reusing unaffected artifacts (`visa`, `logistics`, `experience`).
+- **`src/graph/__init__.py`**: Public module exports.
+- **`tests/unit/test_graph.py`**: 19 unit tests covering state creation, reducers, routing edges, graph compilation, domestic/international workflows, parallel branch aggregation, safe error handling, and selective re-planning with maximum artifact reuse.
+
 ## Important files/modules
 
 | Path | Role |
 |---|---|
-| `pyproject.toml` | Project metadata, dependencies (`fastapi`, `httpx`), pytest & Ruff config |
+| `pyproject.toml` | Project metadata, dependencies (`langgraph`, `fastapi`, `httpx`), pytest & Ruff config |
+| `src/graph/state.py` | Phase 12 LangGraph state schema & reducers (`PlanGraphState`, `merge_warnings`, `merge_errors`) |
+| `src/graph/edges.py` | Phase 12 routing edges, scope routing, and component isolation logic |
+| `src/graph/workflow.py` | Phase 12 StateGraph builder, execution runner, and selective re-planning workflow |
+| `src/graph/__init__.py` | Graph module re-exports |
 | `src/api/models.py` | API Request/Response models |
 | `src/api/routes.py` | FastAPI router endpoints |
 | `src/api/app.py` | FastAPI application factory, CORS & exception handlers |
@@ -194,6 +223,7 @@ Phase 11 — Optimizer Functionality (Completed)
 | `src/tools/hotels.py` | Multi-tier hotel search tool |
 | `src/tools/places.py` | Multi-tier points of interest and dining tool |
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
+| `tests/unit/test_graph.py` | 19 Phase 12 LangGraph orchestration unit tests |
 | `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
 | `tests/unit/test_visa_node.py` | 20 Phase 7 visa node unit tests |
 | `tests/unit/test_logistics_node.py` | 22 Phase 8 logistics node unit tests |
@@ -203,22 +233,23 @@ Phase 11 — Optimizer Functionality (Completed)
 | `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
 | `tests/unit/test_calculator.py` | 56 Phase 3/10 calculator unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
-| `scripts/verify_live_nodes.py` | Live 5-stage node integration test suite |
+| `scripts/verify_live_nodes.py` | Live 6-stage node & graph integration test suite |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
 - **Hermetic Offline Test Harness**:
-  - `uv run pytest`: **477 passed**, 4 warnings in 8.31s (100% offline, zero network reliance in test suite).
+  - `uv run pytest`: **496 passed**, 3 warnings in 12.58s (100% offline, zero network reliance in test suite).
   - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-  - `uv run ruff format --check src/ tests/ scripts/`: **68 files already formatted**.
+  - `uv run ruff format --check src/ tests/ scripts/`: **72 files already formatted**.
 - **Live Network Integration Verification**:
-  - `uv run python scripts/verify_live_nodes.py`: **ALL 5 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
-    - **Visa Node (Phase 7)**: Live Tavily web search + Gemini 3.5 structured reconciliation verified Thailand 60-day visa-free status in 10.75s.
-    - **Logistics Node (Phase 8)**: Live flights via Aviationstack fallback and live lodging via SerpApi Google Hotels (Holiday Inn Mumbai International Airport, 5-star with booking URL) in 3.50s.
-    - **Experience Node (Phase 9)**: Live Open-Meteo weather ("Mainly clear, 30°C/22°C") + real venues (Prithvi Cafe, Trèsind, Ziya) with live hotel association in 1.96s.
-    - **Budget Engine Node (Phase 10)**: Aggregated itemized costs across all upstream live plans (₹100,044.72 projected total vs ₹85,000.00 budget), applied 8% dynamic contingency, and classified as `INFEASIBLE` (+17.7%) in 0.0007s.
-    - **Optimizer Node (Phase 11)**: Evaluated live budget breakdown, identified primary cost drivers (Accommodation: 48.2%, Dining: 26.7%, Transport: 19.1%), formulated concrete trade-offs, and generated 4 structured alternatives in 0.0002s with `guardrails_respected=True`.
+  - `uv run python scripts/verify_live_nodes.py`: **ALL 6 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
+    - **Visa Node (Phase 7)**: Live Tavily web search + Gemini 3.5 structured reconciliation verified Thailand 60-day visa-free status in 6.64s.
+    - **Logistics Node (Phase 8)**: Live flights via Aviationstack fallback and live lodging via SerpApi Google Hotels (Holiday Inn Mumbai International Airport, 5-star with booking URL) in 3.26s.
+    - **Experience Node (Phase 9)**: Live Open-Meteo weather ("Mainly clear, 30°C/22°C") + real venues (Prithvi Cafe, Trèsind, Ziya) with live hotel association in 1.79s.
+    - **Budget Engine Node (Phase 10)**: Aggregated itemized costs across all upstream live plans (₹100,044.72 projected total vs ₹85,000.00 budget), applied 8% dynamic contingency, and classified as `INFEASIBLE` (+17.7%) in 0.0024s.
+    - **Optimizer Node (Phase 11)**: Evaluated live budget breakdown, identified primary cost drivers, formulated trade-offs, and generated 4 structured alternatives in 0.0007s with `guardrails_respected=True`.
+    - **LangGraph Orchestration (Phase 12)**: Executed full autonomous StateGraph workflow with live APIs in 7.73s (Terminal Status: COMPLETED, Scope: DOMESTIC, 2 Legs, 4 Days, Projected Total: ₹57,101.76). Tested selective re-planning with `INCREASE_BUDGET` reusing unaffected visa, logistics, and experience artifacts in 0.0004s.
   - **Live Aviationstack Search Verification**: Direct live query to `http://api.aviationstack.com/v1/flights` verified scheduled operating flights with calibrated fares and 0 errors.
 
 ## Decisions that should not be changed without discussion
@@ -270,12 +301,12 @@ Phase 11 — Optimizer Functionality (Completed)
 - Must-visit sights omitted due to pacing constraints produce user-visible feasibility warnings.
 - **Aviationstack Flight API Integration (`src/tools/transport.py`)**: When RapidAPI flight endpoints (`Sky Scraper` or `Flights Sky`) fail or time out, `_search_aviationstack` executes as the live flight schedule provider. It queries routes via `dep_iata` and `arr_iata` without sending `flight_date` (as `flight_date` throws 403 Forbidden on standard/free tiers), extracts real scheduled flight numbers and departure/arrival times, and assigns a calibrated distance-based pricing baseline labeled with `is_estimated=True` and `provider="aviationstack"`.
 
-## Phase 11 Completion Status
+## Phase 12 Completion Status
 
-Phase 11 — Optimizer Functionality is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
+Phase 12 — LangGraph Orchestration is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
 
 ## Next recommended phase
 
-**Phase 12 — LangGraph Orchestration**:
-Connect all individual planning components (Intake, Visa, Logistics, Experience, Budget, Optimizer) into a unified LangGraph `StateGraph`, with structured graph state reduction, conditional routing, and deterministic decision edges. Followed by Phase 13 (First Complete Vertical Slice) as specified in `project_docs/phases.md`.
+**Phase 13 — First Complete Vertical Slice**:
+Build one complete, reliable end-to-end scenario (Indian traveler -> one domestic destination -> fixed dates -> fixed budget -> balanced pace) connecting the FastAPI API layer, LangGraph orchestration, and final itinerary structured output. Followed by Phase 14 (International Vertical Slice) as specified in `project_docs/phases.md`.
 
