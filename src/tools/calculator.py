@@ -392,3 +392,166 @@ def calculate_budget_breakdown(
         per_person=per_person,
         per_day=per_day,
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 10 Extended Deterministic Financial Logic
+# ---------------------------------------------------------------------------
+
+
+def classify_detailed_budget_status(
+    variance_inr: float | int | Decimal | str,
+    variance_percentage: float | int | Decimal | str,
+) -> str:
+    """Classify budget health into 5-tier status per architecture specifications.
+
+    Rules:
+    - variance within +/- ₹1.00 -> 'EXACT'
+    - negative variance -> 'UNDER_BUDGET'
+    - 0% < variance <= 5.0% -> 'MINOR_OVER' (automatic minor optimization)
+    - 5.0% < variance <= 15.0% -> 'SIGNIFICANT_OVER' (user-visible trade-off required)
+    - variance > 15.0% -> 'INFEASIBLE' (explain infeasibility + alternatives)
+
+    Args:
+        variance_inr: Difference (projected_total - user_budget) in INR.
+        variance_percentage: Percentage deviation from user budget.
+
+    Returns:
+        One of: 'EXACT', 'UNDER_BUDGET', 'MINOR_OVER', 'SIGNIFICANT_OVER', 'INFEASIBLE'.
+    """
+    try:
+        dec_var = Decimal(str(variance_inr))
+        dec_pct = Decimal(str(variance_percentage))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise InvalidAmountError(
+            f"Invalid variance values: {variance_inr!r}, {variance_percentage!r}"
+        ) from exc
+
+    if abs(dec_var) <= Decimal("1.00"):
+        return "EXACT"
+
+    if dec_var < Decimal("0.00"):
+        return "UNDER_BUDGET"
+
+    if dec_pct <= Decimal("5.00"):
+        return "MINOR_OVER"
+
+    if dec_pct <= Decimal("15.00"):
+        return "SIGNIFICANT_OVER"
+
+    return "INFEASIBLE"
+
+
+def calculate_dynamic_contingency(
+    subtotal: float | int | Decimal | str,
+    is_international: bool = False,
+    country_count: int = 1,
+    has_estimated_prices: bool = False,
+    has_flexible_dates: bool = False,
+) -> tuple[float, float, str]:
+    """Deterministically calculate contingency buffer percentage, amount, and reasoning.
+
+    The percentage adapts dynamically to trip scope, multi-country complexity,
+    estimation uncertainty, and date flexibility rather than a static 10%:
+    - Scope base: 5.0% for domestic trips; 10.0% for international trips.
+    - Multi-country: +2.0% per additional destination country beyond 1.
+    - Estimation uncertainty: +3.0% when fallback estimates are present.
+    - Date flexibility: +2.0% when dates are flexible or search-best mode.
+    - Clamped between 5.0% and 25.0%.
+
+    Args:
+        subtotal: Base cost sum across all categories in INR.
+        is_international: True if international travel scope.
+        country_count: Number of destination countries (>= 1).
+        has_estimated_prices: True if any cost relies on fallback estimation.
+        has_flexible_dates: True if flexible or best-date mode.
+
+    Returns:
+        Tuple of (percentage, amount_inr, reasoning).
+    """
+    rounded_subtotal = round_currency(subtotal)
+    factors: list[str] = []
+
+    if is_international:
+        base_pct = Decimal("10.00")
+        factors.append("International scope (+10.0%)")
+    else:
+        base_pct = Decimal("5.00")
+        factors.append("Domestic scope (+5.0%)")
+
+    effective_country_count = max(1, country_count)
+    if is_international and effective_country_count > 1:
+        add_country_pct = Decimal(str((effective_country_count - 1) * 2))
+        base_pct += add_country_pct
+        factors.append(
+            f"Multi-country itinerary ({effective_country_count} countries, +{add_country_pct}%)"
+        )
+
+    if has_estimated_prices:
+        base_pct += Decimal("3.00")
+        factors.append("Estimated pricing uncertainty (+3.0%)")
+
+    if has_flexible_dates:
+        base_pct += Decimal("2.00")
+        factors.append("Flexible date window (+2.0%)")
+
+    # Clamp between 5.0% and 25.0%
+    clamped_pct = max(Decimal("5.00"), min(Decimal("25.00"), base_pct))
+    final_pct_float = float(clamped_pct.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    amount_inr = calculate_contingency_buffer(rounded_subtotal, final_pct_float)
+    reasoning = "; ".join(factors) + f" -> {final_pct_float:.1f}% total buffer"
+
+    return final_pct_float, amount_inr, reasoning
+
+
+def calculate_miscellaneous_expenses(
+    is_international: bool,
+    total_travelers: int,
+    duration_days: int,
+    adults: int = 1,
+) -> float:
+    """Deterministically calculate realistic miscellaneous travel expenses in INR.
+
+    Domestic:
+    - Local transit passes, tips, and incidentals: ₹200 / traveler / day.
+
+    International:
+    - Travel medical insurance: ₹1,200 per traveler (one-time).
+    - International roaming / eSIM connectivity: ₹1,200 per adult (one-time).
+    - Local currency cash buffer, tips, and incidentals: ₹350 / traveler / day.
+
+    Args:
+        is_international: True if international travel scope.
+        total_travelers: Total traveler count (>= 1).
+        duration_days: Duration of the trip in days (>= 1).
+        adults: Count of adult travelers (>= 1).
+
+    Returns:
+        Total miscellaneous expense rounded to 2 decimal places.
+    """
+    if not isinstance(total_travelers, int) or total_travelers < 1:
+        raise InvalidTravelerCountError(
+            f"total_travelers must be an integer >= 1, received {total_travelers!r}"
+        )
+    if not isinstance(duration_days, int) or duration_days < 1:
+        raise InvalidDaysError(f"duration_days must be an integer >= 1, received {duration_days!r}")
+    if not isinstance(adults, int) or adults < 0:
+        raise InvalidTravelerCountError(f"adults must be an integer >= 0, received {adults!r}")
+
+    dec_travelers = Decimal(str(total_travelers))
+    dec_days = Decimal(str(duration_days))
+    dec_adults = Decimal(str(max(1, adults)))
+
+    if not is_international:
+        # Domestic: ₹200 per traveler per day
+        total = Decimal("200.00") * dec_travelers * dec_days
+    else:
+        # International: insurance (₹1,200/traveler) + eSIM (₹1,200/adult)
+        # plus daily incidentals (₹350/traveler/day)
+        insurance = Decimal("1200.00") * dec_travelers
+        esim = Decimal("1200.00") * dec_adults
+        daily_misc = Decimal("350.00") * dec_travelers * dec_days
+        total = insurance + esim + daily_misc
+
+    return float(total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))

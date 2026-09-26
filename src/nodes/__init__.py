@@ -1,5 +1,12 @@
 """Specialized planning nodes for Safarnama multi-agent workflow."""
 
+from src.nodes.budget_node import (
+    BudgetCalculationError,
+    BudgetError,
+    BudgetValidationError,
+    budget_node,
+    process_budget,
+)
 from src.nodes.experience_node import (
     ExperienceError,
     ExperiencePlanningError,
@@ -33,6 +40,9 @@ from src.nodes.visa_node import (
 )
 
 __all__ = [
+    "BudgetCalculationError",
+    "BudgetError",
+    "BudgetValidationError",
     "ExperienceError",
     "ExperiencePlanningError",
     "IntakeError",
@@ -43,6 +53,7 @@ __all__ = [
     "VisaError",
     "VisaProcessingError",
     "allocate_stay_dates",
+    "budget_node",
     "estimate_rooms_required",
     "evaluate_country_visa",
     "experience_node",
@@ -50,6 +61,7 @@ __all__ = [
     "logistics_node",
     "plan_hotel_stays",
     "plan_transport_legs",
+    "process_budget",
     "process_experience",
     "process_intake",
     "process_logistics",

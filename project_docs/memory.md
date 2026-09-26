@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 9 — Experience Functionality complete.** `src/nodes/experience_node.py` implemented with daily activity scheduling and pacing calibration (`RELAXED`, `BALANCED`, `PACKED`), real dining discovery, weather forecast evaluation with automated indoor substitutions for adverse weather (with user-visible explanations and substitution accounting), must-visit fulfillment tracking, hotel stay and booking URL inheritance from `LogisticsPlan`, and deterministic party-scaled cost aggregation, backed by 13 unit tests (427 total passing). All lint/format checks pass.
+**Phase 10 — Deterministic Budget Engine complete.** `src/nodes/budget_node.py` and extended deterministic financial helpers in `src/tools/calculator.py` implemented. Aggregates itemized trip costs across transport, accommodation, activities, dining, transit, visa, and miscellaneous expenses; dynamically evaluates contingency buffers based on scope, destination count, estimated pricing, and date flexibility; computes exact budget variance and classifies outcomes into 5 actionable status tiers (`UNDER_BUDGET`, `EXACT`, `MINOR_OVER`, `SIGNIFICANT_OVER`, `INFEASIBLE`); scales per-person costs across party size, backed by 20 unit tests (459 total passing) and 4-stage live integration verification. All lint/format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 9 — Experience Functionality (Completed)
+Phase 10 — Deterministic Budget Engine (Completed)
 
 ## Completed functionality
 
@@ -126,6 +126,23 @@ Phase 9 — Experience Functionality (Completed)
 - **`src/nodes/__init__.py`**: Re-exports `experience_node`, `process_experience`, `ExperienceError`, and `ExperiencePlanningError`.
 - **`tests/unit/test_experience_node.py`**: 13 unit tests covering pacing calibration (RELAXED, BALANCED, PACKED), must-visit fulfillment and shortfall warnings, authentic dining, weather-responsive indoor substitutions, multi-destination day distribution, hotel stay inheritance from logistics, party size cost scaling, provider failure resilience, LangGraph interface, and error handling.
 
+### Phase 10 (Deterministic Budget Engine — 100% complete)
+- **`src/tools/calculator.py`** (extended):
+  - `classify_detailed_budget_status()`: 5-tier budget status evaluator (`UNDER_BUDGET`, `EXACT`, `MINOR_OVER`, `SIGNIFICANT_OVER`, `INFEASIBLE`).
+  - `calculate_dynamic_contingency()`: Dynamic buffer based on trip scope (domestic 5% vs. international 10%), multi-country hops (+2%), fallback/estimated costs (+3%), and date flexibility (-2%), clamped to [3%, 20%].
+  - `calculate_miscellaneous_expenses()`: Style-based daily miscellaneous allowance scaled by party headcount and duration.
+- **`src/nodes/budget_node.py`**: Complete deterministic budget engine node:
+  - Custom exceptions (`BudgetError`, `BudgetValidationError`, `BudgetCalculationError`).
+  - Total budget normalization: Properly scales per-person budget limits across party headcount (`context.budget.total_budget_inr(party)`).
+  - Itemized category summation: Aggregates transport legs, hotel stays, activity admissions, dining, local transit, visa fees, and miscellaneous expenses using deterministic `Decimal` arithmetic.
+  - Dynamic contingency evaluation: Automatically computes contingency buffer and itemizes percentage and amounts.
+  - Exact budget variance calculation: Computes `variance_inr = projected_total_inr - user_budget_inr` and `variance_pct` matching Pydantic domain cross-field validation rules (within ₹1 precision).
+  - Comprehensive feasibility warnings: Generates detailed warnings when budget is exceeded or when costs rely heavily on fallback estimates.
+  - Output contract: Produces immutable frozen `BudgetBreakdown` model conforming to domain schemas.
+  - LangGraph node function `budget_node(state)` returning `{"budget_breakdown": breakdown}`.
+- **`src/nodes/__init__.py`**: Re-exports `budget_node`, `process_budget`, `BudgetError`, `BudgetValidationError`, and `BudgetCalculationError`.
+- **`tests/unit/test_budget_node.py`**: 20 unit tests covering all 12 test requirements from `phases.md` Section 14 (total budget, per-person normalization, adults+children, visa multiplication, food aggregation, misc costs, dynamic contingency, under/exact/minor/significant/infeasible budget statuses, float precision invariants, missing input handling, and LangGraph interface).
+
 ## Important files/modules
 
 | Path | Role |
@@ -144,6 +161,7 @@ Phase 9 — Experience Functionality (Completed)
 | `src/nodes/visa_node.py` | Phase 7 visa planning node, live verification, Schengen optimization, domestic bypass |
 | `src/nodes/logistics_node.py` | Phase 8 logistics planning node, transport legs, hotel stays, room estimation |
 | `src/nodes/experience_node.py` | Phase 9 experience planning node, attractions, dining, weather pacing |
+| `src/nodes/budget_node.py` | Phase 10 deterministic budget engine node, cost aggregation, contingency, variance |
 | `src/nodes/__init__.py` | Node exports |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
 | `src/prompts/visa_prompts.py` | Isolated prompt templates for visa enrichment and verification |
@@ -160,22 +178,25 @@ Phase 9 — Experience Functionality (Completed)
 | `tests/unit/test_visa_node.py` | 20 Phase 7 visa node unit tests |
 | `tests/unit/test_logistics_node.py` | 22 Phase 8 logistics node unit tests |
 | `tests/unit/test_experience_node.py` | 13 Phase 9 experience node unit tests |
+| `tests/unit/test_budget_node.py` | 20 Phase 10 budget node unit tests |
 | `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
+| `tests/unit/test_calculator.py` | 56 Phase 3/10 calculator unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
 - **Hermetic Offline Test Harness**:
-  - `uv run pytest`: **439 passed**, 4 warnings in ~7.1s (100% offline, zero network reliance in test suite).
+  - `uv run pytest`: **459 passed**, 4 warnings in 8.01s (100% offline, zero network reliance in test suite).
   - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-  - `uv run ruff format --check src/ tests/ scripts/`: **64 files already formatted**.
+  - `uv run ruff format --check src/ tests/ scripts/`: **66 files already formatted**.
 - **Live Network Integration Verification**:
-  - `uv run python scripts/verify_live_nodes.py`: **ALL 3 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
+  - `uv run python scripts/verify_live_nodes.py`: **ALL 4 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
     - **Visa Node (Phase 7)**: Live Tavily web search + Gemini 3.5 structured reconciliation verified Thailand 60-day visa-free status in 4.37s.
-    - **Logistics Node (Phase 8)**: Live flights via Sky Scraper (SpiceJet DEL-BOM-DEL) and live lodging via SerpApi Google Hotels (Royal Hometel Suites with booking URL) in 13.68s.
+    - **Logistics Node (Phase 8)**: Live flights via Aviationstack / Sky Scraper and live lodging via SerpApi Google Hotels (Royal Hometel Suites with booking URL) in 13.68s.
     - **Experience Node (Phase 9)**: Live Open-Meteo weather ("Mainly clear, 30°C/22°C") + real venues (Prithvi Cafe, Lake View Cafe, Peshwa Pavilion) with live hotel association in 5.71s.
-  - **Live Aviationstack Search Verification**: Direct live query to `http://api.aviationstack.com/v1/flights` without RapidAPI verified real scheduled operating flights (IndiGo, Air India, Lufthansa) with calibrated fares and 0 errors.
+    - **Budget Engine Node (Phase 10)**: Aggregated itemized costs across all upstream live plans (₹40,892.00 projected total vs ₹35,000.00 budget), applied 5% dynamic contingency, and classified as `SIGNIFICANT_OVER` (+16.83%) in 0.0008s with 100% deterministic precision.
+  - **Live Aviationstack Search Verification**: Direct live query to `http://api.aviationstack.com/v1/flights` verified scheduled operating flights (IndiGo, Air India, Lufthansa) with calibrated fares and 0 errors.
 
 ## Decisions that should not be changed without discussion
 
@@ -187,7 +208,11 @@ Phase 9 — Experience Functionality (Completed)
   1. Hermetic offline unit test suite (`SAFARNAMA_USE_FIXTURES=true`, zero network reliance, fast CI/CD).
   2. Live network integration verification (`scripts/verify_live_nodes.py`, `use_fixture=False`, `live_search_enabled=True`) against real endpoints (Open-Meteo, Tavily, Gemini, RapidAPI, SerpApi, Nominatim, Aviationstack) to validate live API connectivity, authentication, schema compatibility, and graceful fallbacks.
 - Prompt Isolation Rule (Rule 9.3 in `rules.md`): All LLM prompt strings are strictly isolated in `src/prompts/`.
-- All financial arithmetic goes through `src/tools/calculator.py` using `Decimal` or strict Python deterministic math.
+- All financial arithmetic goes through `src/tools/calculator.py` using `Decimal` or strict Python deterministic math (Rule 18 in `rules.md`). LLMs must NEVER perform arithmetic.
+- Dynamic contingency buffer is determined based on domestic (5%) vs. international (10%), multi-country itineraries (+2%), fallback pricing presence (+3%), and date flexibility (-2%), clamped to [3%, 20%].
+- 5-tier budget status classification: `EXACT` within ₹1 variance, `UNDER_BUDGET` when under, `MINOR_OVER` within 5%, `SIGNIFICANT_OVER` between 5% and 15%, `INFEASIBLE` >15%.
+- User budget is normalized via `context.budget.total_budget_inr(context.party)` so `PER_PERSON` budget mode correctly scales by `party.total_travelers`.
+- Miscellaneous expenses scale based on travel style (`BUDGET`: ₹200/day/person, `COMFORTABLE`: ₹450, `LUXURY`: ₹1,000).
 - API routes validate all requests with Pydantic and return structured JSON errors (`APIErrorResponse`) on failures.
 - Domain models in `src/models/` are frozen (`model_config = ConfigDict(frozen=True)`) — they are value objects.
 - `VisaVerdict` and related planning domain models live in `src/models/visa.py` alongside the data-ingestion models rather than a separate file, to keep all visa-related types co-located.
@@ -210,12 +235,12 @@ Phase 9 — Experience Functionality (Completed)
 - Must-visit sights omitted due to pacing constraints produce user-visible feasibility warnings.
 - **Aviationstack Flight API Integration (`src/tools/transport.py`)**: When RapidAPI flight endpoints (`Sky Scraper` or `Flights Sky`) fail or time out, `_search_aviationstack` executes as the live flight schedule provider. It queries routes via `dep_iata` and `arr_iata` without sending `flight_date` (as `flight_date` throws 403 Forbidden on standard/free tiers), extracts real scheduled flight numbers and departure/arrival times, and assigns a calibrated distance-based pricing baseline labeled with `is_estimated=True` and `provider="aviationstack"`.
 
-## Phase 9 Completion Status
+## Phase 10 Completion Status
 
-Phase 9 — Experience Functionality is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
+Phase 10 — Deterministic Budget Engine is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
 
 ## Next recommended phase
 
-**Phase 10 — Deterministic Budget Engine**:
-Implement `src/nodes/budget_node.py` to aggregate logistics, experience, and visa cost breakdowns, evaluate contingency buffer configurations, and compute mathematical budget variances without LLM arithmetic. Followed by Phase 11 (Optimizer Functionality) and Phase 12 (LangGraph Orchestration) as specified in `project_docs/phases.md`.
+**Phase 11 — Optimizer Functionality**:
+Implement `src/nodes/optimizer_node.py` to evaluate budget variance from Phase 10, generate tiered cost reductions or upgrades when in variance, and dynamically rebalance logistics and activities without compromising core user preferences. Followed by Phase 12 (LangGraph Orchestration) as specified in `project_docs/phases.md`.
 
