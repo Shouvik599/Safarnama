@@ -51,16 +51,16 @@ A phase is not considered complete merely because its code exists.
 
 Each phase must have:
 
-1. Implementation
-2. Unit tests where applicable
-3. Integration tests where applicable
+1. Implementation conforming to domain contracts
+2. Hermetic unit tests running 100% offline with zero external network reliance
+3. Live network integration verification (`use_fixture=False`, `live_search_enabled=True`) for all planning nodes and tools connecting to external APIs (validating real endpoint responses, provider schemas, and fallback behavior)
 4. Manual verification where useful
 5. Clear inputs and outputs
-6. Error handling
-7. Documentation of important behavior
+6. Comprehensive error handling and non-crashing resilience
+7. Documentation synchronized across `rules.md`, `phases.md`, `architecture.md`, `README.md`, and `memory.md`
 8. A working result that the next phase can safely depend on
 
-Do not proceed to the next major phase if the current foundation is unstable.
+Do not proceed to the next major phase if the current foundation is unstable or lacks verified live and offline testing.
 
 ---
 

@@ -778,6 +778,18 @@ Avoid tests that depend on:
 
 unless the test is explicitly an external integration test.
 
+## 28.1 Dual Verification: Hermetic Offline & Live Network Testing
+
+For all planning and tool functionalities that interact with external services (including Visa, Logistics, Experience, and future planning nodes):
+
+1. **Hermetic Offline Test Suite (`uv run pytest`)**:
+   - Must run 100% offline using fixtures and mocks (`SAFARNAMA_USE_FIXTURES=true`).
+   - Must be fast, reproducible, and run in CI/CD without network or API key dependencies.
+2. **Live Network Integration Test (`scripts/verify_live_nodes.py` or dedicated live runners)**:
+   - Must execute in live network mode (`use_fixture=False`, `live_search_enabled=True`) against real external endpoints (e.g. Open-Meteo, Tavily, Gemini, RapidAPI, SerpApi, Nominatim).
+   - Validates live API connectivity, API key authentication, real provider schema adherence, real-world pricing/policies, latency, and graceful error resilience.
+   - Every planning functionality milestone MUST include both hermetic unit tests and live external verification before completion sign-off.
+
 ---
 
 # 29. Test-Driven Development Preference

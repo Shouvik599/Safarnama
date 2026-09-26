@@ -108,8 +108,9 @@ def _query_gemini_reconciliation(prompt: str, timeout: float = DEFAULT_LLM_TIMEO
         return None
 
     models = [
-        os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
-        "gemini-2.5-flash-lite",
+        os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"),
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
     ]
 
     for model_name in models:

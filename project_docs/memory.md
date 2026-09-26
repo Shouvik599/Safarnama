@@ -166,16 +166,25 @@ Phase 9 — Experience Functionality (Completed)
 
 ## Tests completed and their status
 
-- `uv run pytest`: **427 passed** (414 pre-Phase 9 + 13 experience node tests)
-- `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-- `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
+- **Hermetic Offline Test Harness**:
+  - `uv run pytest`: **427 passed** (414 pre-Phase 9 + 13 experience node tests)
+  - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
+  - `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
+- **Live Network Integration Verification**:
+  - `uv run python scripts/verify_live_nodes.py`: **ALL 3 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
+    - **Visa Node (Phase 7)**: Live Tavily web search + Gemini 3.5 structured reconciliation verified Thailand 60-day visa-free status in 4.37s.
+    - **Logistics Node (Phase 8)**: Live flights via Sky Scraper (SpiceJet DEL-BOM-DEL) and live lodging via SerpApi Google Hotels (Royal Hometel Suites with booking URL) in 13.68s.
+    - **Experience Node (Phase 9)**: Live Open-Meteo weather ("Mainly clear, 30°C/22°C") + real venues (Prithvi Cafe, Lake View Cafe, Peshwa Pavilion) with live hotel association in 5.71s.
 
 ## Decisions that should not be changed without discussion
 
 - Use `uv` for Python deps; never pip.
 - Use `pnpm` for frontend later.
 - Import root is `src.*` matching `architecture.md`.
-- Fixture-first / no live API calls in unit tests.
+- Fixture-first / no live API calls in unit tests (`uv run pytest` runs 100% offline).
+- **Dual Verification Mandate (Rule 28.1 & Section 2 of `phases.md`)**: Every planning functionality and external-facing tool MUST be verified via both:
+  1. Hermetic offline unit test suite (`SAFARNAMA_USE_FIXTURES=true`, zero network reliance, fast CI/CD).
+  2. Live network integration verification (`scripts/verify_live_nodes.py`, `use_fixture=False`, `live_search_enabled=True`) against real endpoints (Open-Meteo, Tavily, Gemini, RapidAPI, SerpApi, Nominatim) to validate live API connectivity, authentication, schema compatibility, and graceful fallbacks.
 - Prompt Isolation Rule (Rule 9.3 in `rules.md`): All LLM prompt strings are strictly isolated in `src/prompts/`.
 - All financial arithmetic goes through `src/tools/calculator.py` using `Decimal` or strict Python deterministic math.
 - API routes validate all requests with Pydantic and return structured JSON errors (`APIErrorResponse`) on failures.
@@ -201,7 +210,7 @@ Phase 9 — Experience Functionality (Completed)
 
 ## Phase 9 Completion Status
 
-Phase 9 — Experience Functionality is **100% complete, fully tested, and verified**.
+Phase 9 — Experience Functionality is **100% complete, dual-verified (offline unit tests + live network verification), and synchronized across all project documentation**.
 
 ## Next recommended phase
 

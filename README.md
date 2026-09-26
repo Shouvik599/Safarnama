@@ -118,7 +118,9 @@ Generic conversational AI chatbots fail at this task because they:
   - Logistics integration: Automatically associates hotel stay details and booking URLs from `LogisticsPlan` into daily itinerary schedules.
   - Party size cost scaling: Deterministically scales attraction tickets, dining expenses, and local transit across party headcount.
   - Resilient execution: Zero crashes on places/weather tool exceptions with graceful category-heuristic fallbacks.
-- **100% Offline Test Harness**: 427 unit tests running completely offline with zero network reliance or live API key dependencies.
+- **Dual Verification Testing Architecture**:
+  - **Hermetic Offline Test Harness**: 427 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
+  - **Live Network Integration Verification**: Automated live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all external-facing planning nodes (`visa_node`, `logistics_node`, `experience_node`).
 
 ### Planned Capabilities (Future Phases)
 

@@ -1343,9 +1343,9 @@ The fallback LLM may estimate numerical data but must not fabricate specific tra
 
 Estimated or degraded data quality must be visible.
 
-### 6. Offline testability
+### 6. Dual Verification: Offline Testability & Live Network Validation
 
-External tools should support fixtures.
+External tools and planning nodes must support deterministic offline fixtures (`SAFARNAMA_USE_FIXTURES=true`) for CI/CD and rapid regression testing, while also undergoing live network integration verification against real provider endpoints (`use_fixture=False`, `live_search_enabled=True`) to validate live schema compatibility, authentication, latency, and graceful error recovery.
 
 ### 7. Replaceable providers
 
