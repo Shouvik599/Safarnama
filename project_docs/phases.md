@@ -69,41 +69,47 @@ Do not proceed to the next major phase if the current foundation is unstable.
 The project will follow this progression:
 
 ```text
-PHASE 0
-Project Foundation
+PHASE 0: Project Foundation
       ↓
-PHASE 1
-Static Data Ingestion
+PHASE 1: Static Data Ingestion
       ↓
-PHASE 2
-Static Data Tools
+PHASE 2: Static Data Access Layer
       ↓
-PHASE 3
-External Tool Layer
+PHASE 3: External Tool Layer
       ↓
-PHASE 4
-API Layer
+PHASE 4: API Foundation
       ↓
-PHASE 5
-Domain Models
+PHASE 5: Domain Models
       ↓
-PHASE 6
-Individual Planning Functions
+PHASE 6: Intake Functionality
       ↓
-PHASE 7
-LangGraph Orchestration
+PHASE 7: Visa Functionality
       ↓
-PHASE 8
-Budget + Optimization
+PHASE 8: Logistics Functionality
       ↓
-PHASE 9
-Complete Planning Workflow
+PHASE 9: Experience Functionality
       ↓
-PHASE 10
-Frontend
+PHASE 10: Deterministic Budget Engine
       ↓
-PHASE 11
-End-to-End Hardening
+PHASE 11: Optimizer Functionality
+      ↓
+PHASE 12: LangGraph Orchestration
+      ↓
+PHASE 13: First Complete Vertical Slice
+      ↓
+PHASE 14: International Vertical Slice
+      ↓
+PHASE 15: Flexible Dates
+      ↓
+PHASE 16: Budget Conflict & Human Decision Flow
+      ↓
+PHASE 17: API Streaming
+      ↓
+PHASE 18: Frontend
+      ↓
+PHASE 19: End-to-End Test Matrix
+      ↓
+PHASE 20: Production Hardening
 ```
 
 The order may be adjusted if implementation experience shows a better dependency order, but the principle of incremental verification remains mandatory.

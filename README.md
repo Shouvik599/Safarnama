@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 7 — Visa Functionality (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Functionality & Semantic LLM Reconciliation Complete)
-Test Suite: 392 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 8 — Logistics Functionality (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Functionality Complete)
+Test Suite: 414 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, and the visa planning node. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, and the logistics planning node. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
 
 | Phase | Description | Status |
 |---|---|---|
@@ -22,14 +22,23 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 1** | Static Data Ingestion (Airports, Countries, Visa Rules) | **Complete** |
 | **Phase 2** | Static Data Access Layer & In-Memory Store | **Complete** |
 | **Phase 3** | External Tool Layer (Calculator, Forex, Weather, Search, Transport, Hotels, Places, Estimator) | **Complete** |
-| **Phase 4** | API Layer (FastAPI endpoints, validation & SSE streaming) | **Complete** |
+| **Phase 4** | API Foundation (FastAPI endpoints, validation & SSE streaming) | **Complete** |
 | **Phase 5** | Domain Models (Trip context, Itinerary, Logistics, Visa verdict, Budget schemas) | **Complete** |
 | **Phase 6** | Intake Functionality (Sanitization, Origin/Destination Resolution, Scope Reconciliation, Initial State) | **Complete** |
 | **Phase 7** | Visa Functionality (Static Baseline + Live Verification, Schengen Optimization, Verdict Synthesizer) | **Complete** |
-| **Phase 8** | Logistics Functionality (Transport Legs & Hotel Stays Planning) | Planned |
-| **Phase 9** | Complete Planning Workflow & Verification | Planned |
-| **Phase 10** | Web Frontend (Vite / React) | Planned |
-| **Phase 11** | Integration, Streaming & Hardening | Planned |
+| **Phase 8** | Logistics Functionality (Transport Legs & Hotel Stays Planning) | **Complete** |
+| **Phase 9** | Experience Functionality (Attractions, Dining, Weather-Aware Pacing) | Planned |
+| **Phase 10** | Deterministic Budget Engine (Category summation, buffer, variances) | Planned |
+| **Phase 11** | Optimizer Functionality (Budget trade-offs, constraint satisfaction) | Planned |
+| **Phase 12** | LangGraph Orchestration (StateGraph, parallel nodes, state reduction) | Planned |
+| **Phase 13** | First Complete Vertical Slice (End-to-end domestic itinerary generation) | Planned |
+| **Phase 14** | International Vertical Slice (End-to-end international with visa integration) | Planned |
+| **Phase 15** | Flexible Dates (Candidate date window optimization) | Planned |
+| **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution) | Planned |
+| **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph) | Planned |
+| **Phase 18** | Frontend (Interactive web user interface) | Planned |
+| **Phase 19** | End-to-End Test Matrix (Full regression and test scenarios) | Planned |
+| **Phase 20** | Production Hardening (Observability, rate limits, deployment) | Planned |
 
 ---
 
@@ -94,17 +103,28 @@ Generic conversational AI chatbots fail at this task because they:
   - Schengen single uniform visa optimization preventing redundant fees across multi-country European itineraries.
   - Accurate party headcount scaling on visa costs (`party.total_travelers`).
   - Strict anti-hallucination compliance (never invents visa rules; falls back to verified static baselines).
-- **100% Offline Test Harness**: 392 unit tests running completely offline with zero network reliance or live API key dependencies.
+- **Logistics Planning & Route Execution (`src/nodes/logistics_node.py`)**:
+  - Deterministic round-trip and multi-destination transport leg planning (flight, rail, road) connecting origin, intermediate stops, and return.
+  - Multi-tier accommodation planning selecting optimal hotels based on travel style (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`).
+  - Party-aware room estimation heuristic (`estimate_rooms_required`) accurately sizing room requirements for adults and children.
+  - Sequential stay duration and checkin/checkout date allocation across multi-destination itineraries.
+  - Deterministic financial arithmetic scaling per-person transport fares across traveler party size and hotel costs across rooms and nights.
+  - Booking URL preservation and non-crashing fallback synthesis (`is_estimated=True`, `physics-heuristic`, `location-heuristic`).
+- **100% Offline Test Harness**: 414 unit tests running completely offline with zero network reliance or live API key dependencies.
 
 ### Planned Capabilities (Future Phases)
 
-- **Logistics Planning Node** (Flight & Train Legs, Hotel Accommodations) — *Phase 8*
-- **Experience Planning Node** (Attractions, Dining, Weather-Aware Pacing) — *Phase 8*
-- **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 9*
-- **Budget Engine & Optimization Loop** (Feasibility checking, cost cutbacks, trade-off proposals) — *Phase 9*
-- **Complete End-to-End Planning Workflow & Verification** — *Phase 9*
-- **Warm Indian-Inspired Web Frontend** (Vite / React / TypeScript / pnpm) — *Phase 10*
-- **End-to-End Integration, SSE Client Hook & Hardening** — *Phase 11*
+- **Experience Planning Node** (Attractions, Dining, Weather-Aware Pacing) — *Phase 9*
+- **Deterministic Budget Engine** (Category summation, buffer, variances) — *Phase 10*
+- **Optimizer Functionality** (Budget trade-offs, constraint satisfaction) — *Phase 11*
+- **LangGraph Multi-Agent Architecture** (StateGraph, conditional routing, state reduction) — *Phase 12*
+- **First Complete Vertical Slice** (End-to-end domestic itinerary generation) — *Phase 13*
+- **International Vertical Slice** (End-to-end international with visa integration) — *Phase 14*
+- **Flexible Dates Optimization** (Candidate date window optimization) — *Phase 15*
+- **Budget Conflict & Human Decision Flow** (Interactive trade-off resolution) — *Phase 16*
+- **API Streaming Engine** (Real-time SSE event emission from LangGraph) — *Phase 17*
+- **Warm Indian-Inspired Web Frontend** (Vite / React / TypeScript / pnpm) — *Phase 18*
+- **End-to-End Test Matrix & Hardening** — *Phases 19–20*
 
 ---
 
@@ -285,9 +305,10 @@ Safarnama/
 │   │   ├── logistics.py      # TransportLeg, HotelStay, LogisticsPlan
 │   │   ├── trip.py           # TripParty, TripDates, TripBudget, FoodPreferences, TripContext
 │   │   └── visa.py           # BaseVisaRule, VisaOption, EnrichedVisaRecord, VisaVerdict
-│   ├── nodes/                # LangGraph agent planning nodes (Phases 6–7)
-│   │   ├── __init__.py       # Exports intake_node, visa_node, process_visa, etc.
+│   ├── nodes/                # LangGraph agent planning nodes (Phases 6–8)
+│   │   ├── __init__.py       # Exports intake_node, visa_node, logistics_node, etc.
 │   │   ├── intake_node.py    # Phase 6: Sanitization, gateway resolution, scope reconciliation
+│   │   ├── logistics_node.py # Phase 8: Transport legs & hotel stays planning, room estimation
 │   │   └── visa_node.py      # Phase 7: Static baseline + live policy reconciliation & verdict
 │   ├── prompts/              # Isolated system prompts and prompt templates
 │   │   ├── estimator_prompts.py # Prompts for LLM fallback estimator
@@ -305,7 +326,7 @@ Safarnama/
 └── tests/                    # Automated test suite
     ├── conftest.py           # Shared pytest fixtures
     ├── integration/          # Integration test suite (Phase 11 scaffold)
-    └── unit/                 # 392 passing offline unit tests
+    └── unit/                 # 414 passing offline unit tests
         ├── test_api.py       # API endpoint, validation & SSE streaming tests
         ├── test_calculator.py
         ├── test_domain_models.py # 89 tests for trip, itinerary, logistics, visa, budget
@@ -317,6 +338,7 @@ Safarnama/
         ├── test_forex.py
         ├── test_hotels.py
         ├── test_intake_node.py # 21 tests for intake node, resolution, scope enforcement
+        ├── test_logistics_node.py # 22 tests for logistics planning, rooms, and routes
         ├── test_places.py
         ├── test_project_foundation.py
         ├── test_static_data.py
@@ -333,33 +355,47 @@ Safarnama/
 Safarnama uses an incremental delivery roadmap defined in `project_docs/phases.md`. Each phase must be fully implemented, tested, and verified before the next begins.
 
 ```text
-Phase 0: Foundation [COMPLETED]
+Phase 0: Project Foundation [COMPLETED]
       ↓
 Phase 1: Static Data Ingestion [COMPLETED]
       ↓
-Phase 2: Static Data Tools [COMPLETED]
+Phase 2: Static Data Access Layer [COMPLETED]
       ↓
 Phase 3: External Tool Layer [COMPLETED: 8/8 Tools Done]
       ↓
-Phase 4: API Layer [COMPLETED: FastAPI, Endpoints & SSE]
+Phase 4: API Foundation [COMPLETED: FastAPI, Endpoints & SSE]
       ↓
 Phase 5: Domain Models [COMPLETED: Trip, Itinerary, Logistics, Visa, Budget]
       ↓
 Phase 6: Intake Functionality [COMPLETED: Sanitization, Resolution, Initial State]
       ↓
-Phase 7: Visa Functionality [COMPLETED: Static Baseline + Live Verification]
+Phase 7: Visa Functionality [COMPLETED: Static Baseline + Semantic LLM Verification]
       ↓
-Phase 8: Logistics Functionality [NEXT PHASE: Transport & Stays]
+Phase 8: Logistics Functionality [COMPLETED: Transport Legs & Hotel Stays Planning]
       ↓
-Phase 9: Experience Functionality [PLANNED]
+Phase 9: Experience Functionality [NEXT PHASE: Attractions, Food & Weather Pacing]
       ↓
-Phase 10: Budget & Optimization [PLANNED]
+Phase 10: Deterministic Budget Engine [PLANNED]
       ↓
-Phase 11: Complete Planning Workflow [PLANNED]
+Phase 11: Optimizer Functionality [PLANNED]
       ↓
-Phase 12: Web Frontend [PLANNED]
+Phase 12: LangGraph Orchestration [PLANNED]
       ↓
-Phase 13: End-to-End Hardening [PLANNED]
+Phase 13: First Complete Vertical Slice [PLANNED]
+      ↓
+Phase 14: International Vertical Slice [PLANNED]
+      ↓
+Phase 15: Flexible Dates [PLANNED]
+      ↓
+Phase 16: Budget Conflict & Human Decision Flow [PLANNED]
+      ↓
+Phase 17: API Streaming [PLANNED]
+      ↓
+Phase 18: Frontend [PLANNED]
+      ↓
+Phase 19: End-to-End Test Matrix [PLANNED]
+      ↓
+Phase 20: Production Hardening [PLANNED]
 ```
 
 ---

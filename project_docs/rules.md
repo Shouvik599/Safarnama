@@ -896,7 +896,7 @@ Never fabricate:
 
 Static visa data is a baseline.
 
-Current policy should be live-verified where required.
+Current policy should be live-verified where required. Live policy reconciliation must use structured semantic LLM analysis rather than brittle regex or substring pattern matching, strictly rejecting foreign nationality exemptions, unconfirmed proposals, and waivers expired relative to planned travel dates.
 
 If reliable information is unavailable, clearly report the limitation.
 

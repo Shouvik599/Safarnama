@@ -4,13 +4,13 @@
 
 ## Current Status
 
-**Phase 7 — Visa Functionality complete (including Option 1 Semantic LLM Policy Reconciliation).** `src/nodes/visa_node.py` implemented with semantic LLM policy reconciliation (`LiveVisaPolicyAnalysis`, zero regex, date expiration checks, foreign nationality rejection), Schengen single-visa optimization, party scaling, and domestic bypass, backed by 20 unit tests (392 total passing). All lint/format checks pass.
+**Phase 8 — Logistics Functionality complete.** `src/nodes/logistics_node.py` implemented with round-trip and multi-destination transport leg planning, hotel stay allocation, room requirement heuristics (`estimate_rooms_required`), travel style adaptation (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`), deterministic party headcount and room scaling, booking URL preservation, and zero-crash fallback estimation, backed by 22 unit tests (414 total passing). All lint/format checks pass.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 7 — Visa Functionality (Completed)
+Phase 8 — Logistics Functionality (Completed)
 
 ## Completed functionality
 
@@ -99,6 +99,19 @@ Phase 7 — Visa Functionality (Completed)
 - **`src/nodes/__init__.py`**: Re-exports `visa_node`, `process_visa`, `evaluate_country_visa`, `VisaError`, and `VisaProcessingError`.
 - **`tests/unit/test_visa_node.py`**: 20 unit tests covering domestic bypass, single international countries, static baseline retrieval, live policy overrides, semantic waiver confirmation, foreign nationality rejection, speculative proposal rejection, expired waiver rejection, network error fallback, LLM unavailable fallback, multi-country summing, Schengen optimization, party scaling, advance application flag, and safety on unknown destinations.
 
+### Phase 8 (Logistics Functionality — 100% complete)
+- **`src/nodes/logistics_node.py`**: Complete logistics planning engine:
+  - Custom exceptions (`LogisticsError`, `LogisticsPlanningError`).
+  - Party-aware room estimation heuristic (`estimate_rooms_required`): Accurately estimates rooms for adults and children (couples with 1 young child share 1 room, 2 adults + 2 children allocate 2 rooms, larger parties allocate $\lceil \text{total}/2 \rceil$).
+  - Sequential stay allocation (`allocate_stay_dates`): Evenly distributes nights across destinations, ensuring seamless continuity where checkout date of destination $i$ matches checkin date of destination $i+1$.
+  - Transport leg planning (`plan_transport_legs`): Plans round-trip (origin $\rightarrow$ dest $\rightarrow$ origin) or multi-destination (origin $\rightarrow$ dest 1 $\rightarrow$ dest 2 $\rightarrow$ ... $\rightarrow$ origin) hops via flights and trains. Adapts to travel styles (`BUDGET` favors lower fares/trains, `LUXURY` favors premium cabin/fastest routes). Scales per-person fares across total party headcount (`total_travelers`).
+  - Accommodation planning (`plan_hotel_stays`): Queries live/fixture hotels via `search_hotels`. Matches star ratings and guest scores to user travel style (`BUDGET` 2-3 stars, `COMFORTABLE` 3-4 stars, `LUXURY` 5 stars). Deterministically calculates `total_accommodation_cost_inr = rate * nights * rooms_required`.
+  - Resilience & provenance: Gracefully handles provider exceptions or empty search results without crashing by synthesizing labeled fallback records (`is_estimated=True`, `physics-heuristic`, `location-heuristic`). Preserves booking URLs.
+  - Feasibility warnings: Emits non-fatal warnings when combined transport and accommodation costs exceed the user's budget ceiling.
+  - LangGraph node function `logistics_node(state)` returning `{"logistics_plan": plan}`.
+- **`src/nodes/__init__.py`**: Re-exports `logistics_node`, `process_logistics`, `estimate_rooms_required`, `allocate_stay_dates`, `plan_transport_legs`, `plan_hotel_stays`, `LogisticsError`, and `LogisticsPlanningError`.
+- **`tests/unit/test_logistics_node.py`**: 22 unit tests covering room heuristics, date allocation, domestic single destination, multi-destination continuity, party size scaling, room count scaling, travel style sensitivity (budget vs luxury), provider failure resilience, booking URL preservation, budget feasibility warnings, LangGraph state interface, and error handling.
+
 ## Important files/modules
 
 | Path | Role |
@@ -115,6 +128,7 @@ Phase 7 — Visa Functionality (Completed)
 | `src/models/budget.py` | Cost breakdown, contingency, variance, optimization, budget breakdown |
 | `src/nodes/intake_node.py` | Phase 6 intake node, geographic resolution, scope reconciliation, planning state generator |
 | `src/nodes/visa_node.py` | Phase 7 visa planning node, live verification, Schengen optimization, domestic bypass |
+| `src/nodes/logistics_node.py` | Phase 8 logistics planning node, transport legs, hotel stays, room estimation |
 | `src/nodes/__init__.py` | Node exports |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
 | `src/prompts/visa_prompts.py` | Isolated prompt templates for visa enrichment and verification |
@@ -129,13 +143,14 @@ Phase 7 — Visa Functionality (Completed)
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
 | `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
 | `tests/unit/test_visa_node.py` | 20 Phase 7 visa node unit tests |
+| `tests/unit/test_logistics_node.py` | 22 Phase 8 logistics node unit tests |
 | `tests/unit/test_domain_models.py` | 89 Phase 5 domain model unit tests |
 | `tests/unit/test_api.py` | 10 API unit tests |
 | `README.md` | Developer and AI agent entry point |
 
 ## Tests completed and their status
 
-- `uv run pytest`: **392 passed** (372 pre-Phase 7 + 20 visa node tests)
+- `uv run pytest`: **414 passed** (392 pre-Phase 8 + 22 logistics node tests)
 - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
 - `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
 
@@ -146,7 +161,7 @@ Phase 7 — Visa Functionality (Completed)
 - Import root is `src.*` matching `architecture.md`.
 - Fixture-first / no live API calls in unit tests.
 - Prompt Isolation Rule (Rule 9.3 in `rules.md`): All LLM prompt strings are strictly isolated in `src/prompts/`.
-- All financial arithmetic goes through `src/tools/calculator.py` using `Decimal`.
+- All financial arithmetic goes through `src/tools/calculator.py` using `Decimal` or strict Python deterministic math.
 - API routes validate all requests with Pydantic and return structured JSON errors (`APIErrorResponse`) on failures.
 - Domain models in `src/models/` are frozen (`model_config = ConfigDict(frozen=True)`) — they are value objects.
 - `VisaVerdict` and related planning domain models live in `src/models/visa.py` alongside the data-ingestion models rather than a separate file, to keep all visa-related types co-located.
@@ -160,12 +175,16 @@ Phase 7 — Visa Functionality (Completed)
 - Destination country deduplication ensures multiple city stops in the same nation (e.g. Rome + Milan) evaluate the country visa rule once.
 - Zero regex in live policy reconciliation (Option 1): Live policy updates are verified via LLM structured analysis (`LiveVisaPolicyAnalysis`) with strict validation against foreign nationalities, speculative proposals, and expired waiver end dates vs planned travel dates.
 - Live search or LLM failures fall back gracefully to the verified static baseline without raising unhandled network errors.
+- In `logistics_node.py`, room requirement estimation follows family-friendly occupancy heuristics (2 adults + 1 child share 1 room; larger parties allocate ~2 persons per room).
+- Multi-destination stay dates are distributed sequentially with continuous checkout/checkin date alignment and return flight departure matching final stay checkout.
+- Fare and stay prices are scaled deterministically (`fare * travelers`, `rate * nights * rooms`). Fallbacks are explicitly labeled with `is_estimated=True`.
 
-## Phase 7 Completion Status
+## Phase 8 Completion Status
 
-Phase 7 — Visa Functionality (including Option 1) is **100% complete, fully tested, and verified**.
+Phase 8 — Logistics Functionality is **100% complete, fully tested, and verified**.
 
 ## Next recommended phase
 
-**Phase 8 — Logistics Functionality**:
-Implement `src/nodes/logistics_node.py` to plan transportation (flight/rail legs) and accommodations (hotel stays) for the itinerary using `src/tools/transport.py` and `src/tools/hotels.py`, generating validated `LogisticsPlan` models.
+**Phase 9 — Experience Functionality**:
+Implement `src/nodes/experience_node.py` to plan daily attractions, dining, and weather-aware itinerary pacing, generating validated `ExperiencePlan` models. Followed by Phase 10 (Deterministic Budget Engine), Phase 11 (Optimizer Functionality), and Phase 12 (LangGraph Orchestration) as specified in `project_docs/phases.md`.
+

@@ -1247,112 +1247,75 @@ At minimum, the test suite should eventually cover:
 
 Safarnama will **not** be built all at once.
 
-The implementation sequence is intentionally incremental.
+The project follows the canonical 21-phase delivery roadmap defined in `project_docs/phases.md` (Phases 0 through 20), progressing through the following verified architectural stages:
 
-## Phase 1 — Static Data Foundation
+## Stage 1 — Foundation & Static Data (Phases 0–2)
 
-First build and validate:
+- Phase 0: Project Foundation (`pyproject.toml`, `uv`, hatchling, Ruff, pytest)
+- Phase 1: Static Data Ingestion (`fetch_airports.py`, `fetch_visa_rules.py`, `fetch_country_profiles.py`)
+- Phase 2: Static Data Access Layer & In-Memory Store (`src/tools/static_data.py`)
 
-- Project environment
-- `fetch_airports.py`
-- `fetch_visa_rules.py`
-- Static JSON generation
-- Static-data lookup helpers
-- Unit tests
-
-Goal:
-
-> Prove that the application's baseline travel datasets can be generated and consumed correctly.
+Goal: Prove that the application's baseline travel datasets can be ingested, indexed, and queried with zero disk I/O.
 
 ---
 
-## Phase 2 — Domain Models and Deterministic Tools
+## Stage 2 — External Tools & API Foundation (Phases 3–4)
 
-Build:
+- Phase 3: External Tool Layer (Calculator, Forex, Weather, Web Search, Transport, Hotels, Places, Fallback Estimator)
+- Phase 4: API Foundation (FastAPI application factory, routers, request/response models, SSE streaming scaffold)
 
-- Trip models
-- Itinerary models
-- Logistics models
-- Visa models
-- Budget models
-- Calculator
-- Static-data utilities
-
-Goal:
-
-> Establish reliable contracts before adding agent behavior.
+Goal: Establish robust, multi-tier data retrieval tools with offline mock fallback and API endpoints before connecting the planning graph.
 
 ---
 
-## Phase 3 — External Tools
+## Stage 3 — Domain Models (Phase 5)
 
-Build and test:
+- Phase 5: Pydantic v2 Value Contracts (`trip.py`, `itinerary.py`, `logistics.py`, `visa.py`, `budget.py`)
 
-- Weather
-- Search
-- Places
-- Hotels
-- Transport
-- Visa verification
-- Fallback estimation
-
-Goal:
-
-> Establish reliable data acquisition independently of the planning graph.
+Goal: Establish strict, validated domain contracts before implementing complex planning nodes.
 
 ---
 
-## Phase 4 — Individual Nodes
+## Stage 4 — Specialized Planning Nodes (Phases 6–9)
 
-Build one node at a time:
+- Phase 6: Intake Functionality (`src/nodes/intake_node.py` — resolution, sanitization, scope reconciliation)
+- Phase 7: Visa Functionality (`src/nodes/visa_node.py` — static baseline + semantic LLM verification, domestic bypass)
+- Phase 8: Logistics Functionality (`src/nodes/logistics_node.py` — transport legs, hotel stays, room estimation)
+- Phase 9: Experience Functionality (`src/nodes/experience_node.py` — attractions, food, weather-aware pacing)
 
-1. Intake
-2. Visa
-3. Logistics
-4. Experience
-5. Optimizer
-
-Each node should be testable independently.
+Goal: Build and test each major planning capability independently with zero network reliance in unit tests.
 
 ---
 
-## Phase 5 — LangGraph Workflow
+## Stage 5 — Deterministic Budget Engine & Optimizer (Phases 10–11)
 
-Connect the validated nodes into the complete graph.
+- Phase 10: Deterministic Budget Engine (`src/tools/calculator.py` summation, contingency, variances)
+- Phase 11: Optimizer Functionality (constraint satisfaction, trade-offs, replanning proposals)
 
-Validate:
-
-- Routing
-- Parallel execution
-- State reducers
-- Budget decisions
-- Replanning
-- Error/warning propagation
+Goal: Enforce budget as a hard mathematical constraint without allowing LLM arithmetic hallucinations.
 
 ---
 
-## Phase 6 — API and CLI
+## Stage 6 — LangGraph Orchestration & Vertical Slices (Phases 12–16)
 
-Expose the validated workflow through:
+- Phase 12: LangGraph Orchestration (StateGraph, parallel node branches, state reduction)
+- Phase 13: First Complete Vertical Slice (End-to-end domestic itinerary generation)
+- Phase 14: International Vertical Slice (End-to-end international with visa integration)
+- Phase 15: Flexible Dates (Candidate travel window evaluation)
+- Phase 16: Budget Conflict & Human Decision Flow (Interactive trade-off resolution)
 
-- CLI
-- FastAPI
-- Streaming events
+Goal: Connect all planning nodes into a resilient, cyclical LangGraph execution workflow.
 
 ---
 
-## Phase 7 — Frontend
+## Stage 7 — API Streaming, Frontend & Hardening (Phases 17–20)
 
-Connect the static UI to the API and present:
+- Phase 17: API Streaming (Real-time LangGraph event emission via SSE)
+- Phase 18: Frontend (Interactive web UI in Vite / React / TypeScript / pnpm)
+- Phase 19: End-to-End Test Matrix (Full regression and integration test matrix)
+- Phase 20: Production Hardening (Security, rate limiting, observability, packaging)
 
-- Inputs
-- Planning progress
-- Route
-- Itinerary
-- Budget
-- Visa information
-- Warnings
-- Estimates
+Goal: Deliver a production-grade, warm Indian-inspired travel planner.
 
 ---
 
