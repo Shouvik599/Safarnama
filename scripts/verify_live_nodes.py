@@ -30,6 +30,7 @@ from src.nodes.budget_node import process_budget
 from src.nodes.experience_node import process_experience
 from src.nodes.intake_node import process_intake
 from src.nodes.logistics_node import process_logistics
+from src.nodes.optimizer_node import process_optimizer
 from src.nodes.visa_node import process_visa
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -261,22 +262,57 @@ def test_live_budget_node(state, logistics, experience) -> None:
     assert budget.subtotal_inr > 0.0
     assert budget.total_with_contingency_inr >= budget.subtotal_inr
     assert budget.per_person_cost_inr > 0.0
+    return budget
+
+
+def test_live_optimizer_node(state, budget, logistics, experience) -> None:
+    print_banner("5. LIVE TEST: Optimizer Functionality (Phase 11)")
+    print(f"Evaluating budget status ({budget.variance.status.value}) with real live plans...")
+
+    t0 = time.perf_counter()
+    output = process_optimizer(
+        state_or_context=state,
+        budget_breakdown=budget,
+        logistics_plan=logistics,
+        experience_plan=experience,
+    )
+    elapsed = time.perf_counter() - t0
+
+    res = output.optimization_result
+    print(f"\n[OK] Optimization Result generated in {elapsed:.4f}s:")
+    print(f"  - Action Taken:       {res.action.value}")
+    print(f"  - Achieved Savings:   INR {res.savings_inr:,.2f}")
+    print(f"  - Guardrails Kept:    {res.guardrails_respected}")
+    print(f"  - Description:        {res.description}")
+    if res.trade_offs:
+        print("  - Actionable Trade-offs:")
+        for to in res.trade_offs:
+            print(f"    * {to}")
+    if res.alternatives_presented:
+        print("  - Alternatives Presented:")
+        for alt in res.alternatives_presented:
+            print(f"    * {alt}")
+
+    assert output is not None
+    assert output.optimization_result.guardrails_respected is True
+    assert output.budget_breakdown is not None
 
 
 def main() -> None:
     print("\n" + "#" * 70)
     print("  SAFARNAMA LIVE EXTERNAL INTEGRATION TEST SUITE")
-    print("  Validates all 4 planning stages (Visa, Logistics, Experience, Budget)")
+    print("  Validates all 5 planning stages (Visa, Logistics, Experience, Budget, Optimizer)")
     print("#" * 70)
 
     try:
         test_live_visa_node()
         logistics = test_live_logistics_node()
         state, experience = test_live_experience_node(logistics)
-        test_live_budget_node(state, logistics, experience)
+        budget = test_live_budget_node(state, logistics, experience)
+        test_live_optimizer_node(state, budget, logistics, experience)
 
         print("\n" + "=" * 70)
-        print("  ALL 4 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("  ALL 5 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
         print("=" * 70 + "\n")
     except Exception as exc:
         print(f"\n[FAIL] Live test failed with error: {exc}", file=sys.stderr)

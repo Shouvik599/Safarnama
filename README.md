@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 10 — Deterministic Budget Engine (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete)
-Test Suite: 459 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 11 — Optimizer Functionality (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete)
+Test Suite: 477 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, and the deterministic budget engine. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, and the optimizer planning node. **It is not yet production-ready**, nor is the end-to-end multi-agent orchestration or frontend interface implemented.
 
 | Phase | Description | Status |
 |---|---|---|
@@ -29,7 +29,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 8** | Logistics Functionality (Transport Legs & Hotel Stays Planning) | **Complete** |
 | **Phase 9** | Experience Functionality (Attractions, Dining, Weather-Aware Pacing) | **Complete** |
 | **Phase 10** | Deterministic Budget Engine (Category summation, buffer, variances) | **Complete** |
-| **Phase 11** | Optimizer Functionality (Budget trade-offs, constraint satisfaction) | Planned |
+| **Phase 11** | Optimizer Functionality (Budget trade-offs, constraint satisfaction) | **Complete** |
 | **Phase 12** | LangGraph Orchestration (StateGraph, parallel nodes, state reduction) | Planned |
 | **Phase 13** | First Complete Vertical Slice (End-to-end domestic itinerary generation) | Planned |
 | **Phase 14** | International Vertical Slice (End-to-end international with visa integration) | Planned |
