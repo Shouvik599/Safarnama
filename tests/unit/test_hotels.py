@@ -220,3 +220,30 @@ def test_get_hotels_status():
     assert "nominatim_available" in status
     assert status["nominatim_available"] is True
     assert status["fixture_available"] is True
+
+
+def test_date_parsing_fallback_invalid_checkin_no_checkout():
+    """Test date parsing fallback when checkin_date is invalid and checkout_date is not provided."""
+    result = search_hotels("Tokyo", checkin_date="invalid-date-format", nights=3, use_fixture=True)
+
+    assert isinstance(result, HotelSearchResult)
+    assert result.nights == 3
+    assert result.checkout_date is not None
+    assert len(result.options) >= 1
+
+
+def test_date_parsing_fallback_invalid_dates_with_checkout():
+    """Test date parsing fallback when checkin/checkout date is invalid but checkout is given."""
+    # Test invalid checkout_date string
+    result1 = search_hotels(
+        "Tokyo", checkin_date="2026-10-15", checkout_date="invalid-date", nights=3, use_fixture=True
+    )
+    assert isinstance(result1, HotelSearchResult)
+    assert result1.nights == 3
+
+    # Test invalid checkin_date string with a checkout_date string
+    result2 = search_hotels(
+        "Tokyo", checkin_date="invalid-date", checkout_date="2026-10-20", nights=4, use_fixture=True
+    )
+    assert isinstance(result2, HotelSearchResult)
+    assert result2.nights == 4
