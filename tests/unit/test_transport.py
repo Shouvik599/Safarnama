@@ -262,3 +262,79 @@ def test_get_transport_status(monkeypatch):
     assert status["transport_rest_available"] is True
     assert status["web_search_available"] is True
     assert status["fixture_available"] is True
+
+
+def test_aviationstack_search_success(monkeypatch):
+    """Test live flight lookup via Aviationstack API mock."""
+    monkeypatch.delenv("RAPIDAPI_KEY", raising=False)
+    monkeypatch.setenv("AVIATIONSTACK_API_KEY", "test-aviation-key")
+    clear_transport_cache()
+
+    mock_aviation_data = {
+        "pagination": {"limit": 5, "offset": 0, "count": 2, "total": 2},
+        "data": [
+            {
+                "flight_date": "2026-10-15",
+                "flight_status": "scheduled",
+                "departure": {
+                    "airport": "Indira Gandhi International",
+                    "iata": "DEL",
+                    "scheduled": "2026-10-15T09:30:00+00:00",
+                },
+                "arrival": {
+                    "airport": "Chhatrapati Shivaji International",
+                    "iata": "BOM",
+                    "scheduled": "2026-10-15T11:45:00+00:00",
+                },
+                "airline": {"name": "IndiGo", "iata": "6E"},
+                "flight": {"number": "395", "iata": "6E395"},
+            },
+            {
+                "flight_date": "2026-10-15",
+                "flight_status": "scheduled",
+                "departure": {
+                    "airport": "Indira Gandhi International",
+                    "iata": "DEL",
+                    "scheduled": "2026-10-15T14:00:00+00:00",
+                },
+                "arrival": {
+                    "airport": "Chhatrapati Shivaji International",
+                    "iata": "BOM",
+                    "scheduled": "2026-10-15T16:10:00+00:00",
+                },
+                "airline": {"name": "Air India", "iata": "AI"},
+                "flight": {"number": "805", "iata": "AI805"},
+            },
+        ],
+    }
+
+    mock_resp = MagicMock()
+    mock_resp.status = 200
+    mock_resp.read.return_value = json.dumps(mock_aviation_data).encode("utf-8")
+    mock_resp.__enter__.return_value = mock_resp
+
+    with patch("urllib.request.urlopen", return_value=mock_resp):
+        res = search_transport("DEL", "BOM", travel_date="2026-10-15", mode="FLIGHT")
+
+        assert res.provider_used == "aviationstack"
+        assert res.is_fallback is True
+        assert res.is_estimated is True
+        assert len(res.options) == 2
+        assert res.options[0].carrier == "IndiGo"
+        assert res.options[0].transport_code == "6E395"
+        assert res.options[0].departure_time == "09:30"
+        assert res.options[0].arrival_time == "11:45"
+        assert res.options[0].duration_minutes == 135
+        assert res.options[1].carrier == "Air India"
+        assert res.options[1].transport_code == "AI805"
+
+
+def test_aviationstack_missing_key_falls_back(monkeypatch):
+    """Test that missing AVIATIONSTACK_API_KEY gracefully cascades without crashing."""
+    monkeypatch.delenv("RAPIDAPI_KEY", raising=False)
+    monkeypatch.delenv("AVIATIONSTACK_API_KEY", raising=False)
+    clear_transport_cache()
+
+    with patch("src.tools.transport.search_web", return_value=None):
+        res = search_transport("DEL", "BOM", travel_date="2026-10-15", mode="FLIGHT")
+        assert res.provider_used == "physics-heuristic"

@@ -38,7 +38,7 @@ Phase 9 — Experience Functionality (Completed)
 - **Tool 2: Forex Tool (`src/tools/forex.py`)**: Multi-tier currency converter (cache -> fixture -> open access -> FawazAhmed CDN -> Frankfurter -> authenticated -> ~40 offline rates).
 - **Tool 3: Weather Tool (`src/tools/weather.py`)**: Multi-tier weather forecast (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline).
 - **Tool 4: Web Search Tool (`src/tools/web_search.py`)**: Multi-tier web search (Tavily, DuckDuckGo, Firecrawl, offline fixture).
-- **Tool 5: Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, IRCTC, transport.rest, web search fallback, distance physics engine).
+- **Tool 5: Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, Aviationstack live flights, IRCTC, transport.rest, web search fallback, distance physics engine).
 - **Tool 6: Hotel Tool (`src/tools/hotels.py`)**: Multi-tier hotel search (SerpApi Google Hotels, Booking.com on RapidAPI, OpenStreetMap Nominatim, web search fallback, location heuristic).
 - **Tool 7: Places & Dining Tool (`src/tools/places.py`)**: Points of interest & dining adapter (SerpApi Google Maps, Nominatim OSM, web search fallback, offline category baseline).
 - **Tool 8: Fallback Estimator (`src/tools/fallback_estimator.py`)**: Multi-provider LLM fallback cost estimation (Gemini, Groq, NVIDIA NIM, offline rule baseline) with isolated prompts in `src/prompts/estimator_prompts.py`.
@@ -167,14 +167,15 @@ Phase 9 — Experience Functionality (Completed)
 ## Tests completed and their status
 
 - **Hermetic Offline Test Harness**:
-  - `uv run pytest`: **427 passed** (414 pre-Phase 9 + 13 experience node tests)
+  - `uv run pytest`: **439 passed**, 4 warnings in ~7.1s (100% offline, zero network reliance in test suite).
   - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-  - `uv run ruff format --check src/ tests/ scripts/`: **All files formatted**
+  - `uv run ruff format --check src/ tests/ scripts/`: **64 files already formatted**.
 - **Live Network Integration Verification**:
   - `uv run python scripts/verify_live_nodes.py`: **ALL 3 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY**
     - **Visa Node (Phase 7)**: Live Tavily web search + Gemini 3.5 structured reconciliation verified Thailand 60-day visa-free status in 4.37s.
     - **Logistics Node (Phase 8)**: Live flights via Sky Scraper (SpiceJet DEL-BOM-DEL) and live lodging via SerpApi Google Hotels (Royal Hometel Suites with booking URL) in 13.68s.
     - **Experience Node (Phase 9)**: Live Open-Meteo weather ("Mainly clear, 30°C/22°C") + real venues (Prithvi Cafe, Lake View Cafe, Peshwa Pavilion) with live hotel association in 5.71s.
+  - **Live Aviationstack Search Verification**: Direct live query to `http://api.aviationstack.com/v1/flights` without RapidAPI verified real scheduled operating flights (IndiGo, Air India, Lufthansa) with calibrated fares and 0 errors.
 
 ## Decisions that should not be changed without discussion
 
@@ -184,7 +185,7 @@ Phase 9 — Experience Functionality (Completed)
 - Fixture-first / no live API calls in unit tests (`uv run pytest` runs 100% offline).
 - **Dual Verification Mandate (Rule 28.1 & Section 2 of `phases.md`)**: Every planning functionality and external-facing tool MUST be verified via both:
   1. Hermetic offline unit test suite (`SAFARNAMA_USE_FIXTURES=true`, zero network reliance, fast CI/CD).
-  2. Live network integration verification (`scripts/verify_live_nodes.py`, `use_fixture=False`, `live_search_enabled=True`) against real endpoints (Open-Meteo, Tavily, Gemini, RapidAPI, SerpApi, Nominatim) to validate live API connectivity, authentication, schema compatibility, and graceful fallbacks.
+  2. Live network integration verification (`scripts/verify_live_nodes.py`, `use_fixture=False`, `live_search_enabled=True`) against real endpoints (Open-Meteo, Tavily, Gemini, RapidAPI, SerpApi, Nominatim, Aviationstack) to validate live API connectivity, authentication, schema compatibility, and graceful fallbacks.
 - Prompt Isolation Rule (Rule 9.3 in `rules.md`): All LLM prompt strings are strictly isolated in `src/prompts/`.
 - All financial arithmetic goes through `src/tools/calculator.py` using `Decimal` or strict Python deterministic math.
 - API routes validate all requests with Pydantic and return structured JSON errors (`APIErrorResponse`) on failures.
@@ -207,6 +208,7 @@ Phase 9 — Experience Functionality (Completed)
 - Adverse weather automatically triggers indoor activity replacement from POI candidates or museum heuristics with transparent traveler notes and substitution accounting.
 - Hotel stays and booking URLs are inherited directly from `LogisticsPlan`, with `hotel_name=None` on final departure day.
 - Must-visit sights omitted due to pacing constraints produce user-visible feasibility warnings.
+- **Aviationstack Flight API Integration (`src/tools/transport.py`)**: When RapidAPI flight endpoints (`Sky Scraper` or `Flights Sky`) fail or time out, `_search_aviationstack` executes as the live flight schedule provider. It queries routes via `dep_iata` and `arr_iata` without sending `flight_date` (as `flight_date` throws 403 Forbidden on standard/free tiers), extracts real scheduled flight numbers and departure/arrival times, and assigns a calibrated distance-based pricing baseline labeled with `is_estimated=True` and `provider="aviationstack"`.
 
 ## Phase 9 Completion Status
 

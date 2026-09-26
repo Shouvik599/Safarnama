@@ -8,9 +8,9 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 8 — Logistics Functionality (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Functionality Complete)
-Test Suite: 414 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 9 — Experience Functionality (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete)
+Test Suite: 439 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
@@ -27,7 +27,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 6** | Intake Functionality (Sanitization, Origin/Destination Resolution, Scope Reconciliation, Initial State) | **Complete** |
 | **Phase 7** | Visa Functionality (Static Baseline + Live Verification, Schengen Optimization, Verdict Synthesizer) | **Complete** |
 | **Phase 8** | Logistics Functionality (Transport Legs & Hotel Stays Planning) | **Complete** |
-| **Phase 9** | Experience Functionality (Attractions, Dining, Weather-Aware Pacing) | Planned |
+| **Phase 9** | Experience Functionality (Attractions, Dining, Weather-Aware Pacing) | **Complete** |
 | **Phase 10** | Deterministic Budget Engine (Category summation, buffer, variances) | Planned |
 | **Phase 11** | Optimizer Functionality (Budget trade-offs, constraint satisfaction) | Planned |
 | **Phase 12** | LangGraph Orchestration (StateGraph, parallel nodes, state reduction) | Planned |
@@ -81,7 +81,7 @@ Generic conversational AI chatbots fail at this task because they:
 - **External Travel Tools Suite (8/8 Complete)**:
   - **Weather Tool (`src/tools/weather.py`)**: Multi-tier forecasts (Open-Meteo, wttr.in, OpenWeatherMap, Climate Baseline) with weather hazard detection.
   - **Web Search Tool (`src/tools/web_search.py`)**: Multi-tier travel search (Tavily, DuckDuckGo, Firecrawl, offline fixture).
-  - **Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, IRCTC rail, European rail, web search fallback, distance physics engine).
+  - **Transport Tool (`src/tools/transport.py`)**: Multi-tier route search (Sky Scraper, Flights Sky, Aviationstack live flights, IRCTC rail, European rail, web search fallback, distance physics engine).
   - **Hotel Tool (`src/tools/hotels.py`)**: Multi-tier lodging search (SerpApi Google Hotels, Booking.com, Nominatim OSM, web search fallback, location heuristic).
   - **Places & Dining Tool (`src/tools/places.py`)**: Points of interest and dining search (SerpApi Google Maps, Nominatim OSM, web search fallback, category baseline).
   - **Fallback Estimator (`src/tools/fallback_estimator.py`)**: Multi-provider LLM fallback cost estimation (Gemini, Groq, NVIDIA NIM, offline rule baseline) with isolated prompts in `src/prompts/estimator_prompts.py`.

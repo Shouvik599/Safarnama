@@ -30,7 +30,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from src.models.transport import TransportSearchResult, TransportSegment
-from src.tools.static_data import get_airport_coordinates, get_country
+from src.tools.static_data import (
+    get_airport_coordinates,
+    get_airports_by_city,
+    get_country,
+)
 from src.tools.web_search import search_web
 
 load_dotenv()
@@ -521,6 +525,147 @@ def _search_flights_sky(
     return None
 
 
+def _resolve_iata_code(location: str) -> str:
+    """Resolve an input string to a 3-letter IATA code if possible."""
+    clean = location.strip().upper()
+    if len(clean) == 3 and clean.isalpha():
+        return clean
+    try:
+        airports = get_airports_by_city(location)
+        if airports and airports[0].iata_code:
+            return airports[0].iata_code.upper()
+    except Exception:
+        pass
+    return clean[:3].upper()
+
+
+def _search_aviationstack(
+    origin: str,
+    destination: str,
+    travel_date: str,
+    timeout: float = DEFAULT_TIMEOUT_SECONDS,
+) -> TransportSearchResult | None:
+    """Execute live flight search via Aviationstack API."""
+    api_key = os.getenv("AVIATIONSTACK_API_KEY")
+    if not api_key:
+        return None
+
+    dep_iata = _resolve_iata_code(origin)
+    arr_iata = _resolve_iata_code(destination)
+
+    if len(dep_iata) != 3 or len(arr_iata) != 3:
+        return None
+
+    query_params: dict[str, str] = {
+        "access_key": api_key,
+        "dep_iata": dep_iata,
+        "arr_iata": arr_iata,
+        "limit": "5",
+    }
+
+    url = f"http://api.aviationstack.com/v1/flights?{urllib.parse.urlencode(query_params)}"
+
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Safarnama/0.1.0",
+                "Accept": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if resp.status == 200:
+                body = json.loads(resp.read().decode("utf-8"))
+                flights_data = body.get("data", [])
+                if not flights_data or not isinstance(flights_data, list):
+                    return None
+
+                # Calculate route distance for calibrated pricing baseline
+                lat1, lon1 = _resolve_coordinates(dep_iata)
+                lat2, lon2 = _resolve_coordinates(arr_iata)
+                dist_km = _haversine_distance_km(lat1, lon1, lat2, lon2)
+                base_price = max(2950.0, round(dist_km * 5.25, 2))
+
+                options: list[TransportSegment] = []
+                seen_flights: set[str] = set()
+
+                for item in flights_data:
+                    flight_info = item.get("flight", {})
+                    airline_info = item.get("airline", {})
+                    dep_info = item.get("departure", {})
+                    arr_info = item.get("arrival", {})
+
+                    f_num = str(flight_info.get("number") or "100")
+                    f_iata = flight_info.get("iata") or f"{airline_info.get('iata', 'FL')}{f_num}"
+                    flight_code = f_iata.strip()
+
+                    if flight_code in seen_flights:
+                        continue
+                    seen_flights.add(flight_code)
+
+                    carrier_name = airline_info.get("name") or "Commercial Airline"
+
+                    dep_sched = dep_info.get("scheduled")
+                    arr_sched = arr_info.get("scheduled")
+
+                    dep_time = "09:00"
+                    arr_time = "11:30"
+                    dur_mins = max(45, int((dist_km / 650.0) * 60) + 40)
+
+                    if dep_sched and "T" in dep_sched:
+                        try:
+                            dep_dt = datetime.fromisoformat(dep_sched.replace("Z", "+00:00"))
+                            dep_time = dep_dt.strftime("%H:%M")
+                            if arr_sched and "T" in arr_sched:
+                                arr_dt = datetime.fromisoformat(arr_sched.replace("Z", "+00:00"))
+                                arr_time = arr_dt.strftime("%H:%M")
+                                diff_mins = int((arr_dt - dep_dt).total_seconds() / 60)
+                                if 30 <= diff_mins <= 1440:
+                                    dur_mins = diff_mins
+                        except Exception:
+                            pass
+
+                    booking_url = f"https://www.google.com/travel/flights?q=flights+from+{dep_iata}+to+{arr_iata}"
+
+                    options.append(
+                        TransportSegment(
+                            mode="FLIGHT",
+                            carrier=carrier_name,
+                            transport_code=flight_code,
+                            origin=dep_iata,
+                            destination=arr_iata,
+                            departure_time=dep_time,
+                            arrival_time=arr_time,
+                            duration_minutes=dur_mins,
+                            price_inr=base_price,
+                            cabin_class="ECONOMY",
+                            booking_url=booking_url,
+                            provider="aviationstack",
+                        )
+                    )
+
+                if options:
+                    log.info(
+                        "Fetched %d real scheduled flights from Aviationstack API", len(options)
+                    )
+                    return TransportSearchResult(
+                        origin=dep_iata,
+                        destination=arr_iata,
+                        travel_date=travel_date,
+                        mode_requested="FLIGHT",
+                        options=options,
+                        provider_used="aviationstack",
+                        total_found=len(options),
+                        is_fallback=True,
+                        is_estimated=True,
+                        timestamp=datetime.now(UTC).isoformat(),
+                    )
+    except Exception as exc:
+        log.warning("Aviationstack API request failed for %s->%s: %s", origin, destination, exc)
+
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Provider Implementation 4: Live Indian Railways API (RapidAPI / eRail)
 # ---------------------------------------------------------------------------
@@ -829,7 +974,7 @@ def search_transport(
         _TRANSPORT_CACHE.set(clean_orig, clean_dest, travel_date, clean_mode, res)
         return res
 
-    # 1. Live Flights (Sky Scraper / Flights Sky)
+    # 1. Live Flights (Sky Scraper / Flights Sky / Aviationstack)
     if clean_mode in ("ALL", "FLIGHT"):
         res = _search_sky_scraper(clean_orig, clean_dest, travel_date, timeout=timeout)
         if res and res.options:
@@ -837,6 +982,11 @@ def search_transport(
             return res
 
         res = _search_flights_sky(clean_orig, clean_dest, travel_date, timeout=timeout)
+        if res and res.options:
+            _TRANSPORT_CACHE.set(clean_orig, clean_dest, travel_date, clean_mode, res)
+            return res
+
+        res = _search_aviationstack(clean_orig, clean_dest, travel_date, timeout=timeout)
         if res and res.options:
             _TRANSPORT_CACHE.set(clean_orig, clean_dest, travel_date, clean_mode, res)
             return res
