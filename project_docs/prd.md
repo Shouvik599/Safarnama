@@ -524,6 +524,27 @@ When an itinerary requires traveler input (`NEEDS_USER_DECISION` or `INFEASIBLE`
 
 ---
 
+### 6.14 Real-time Planning Progress Streaming (SSE)
+
+Planning complex domestic or international journeys across multiple agents and providers can take 5–15 seconds. To provide a responsive, reassuring traveler experience:
+
+1. The API provides real-time Server-Sent Events (SSE) via `POST /api/v1/plan/stream` and `GET /api/v1/plan/stream`.
+2. The stream delivers step-by-step progress events:
+   - `planning_started`: Workflow initialization with travel parameters.
+   - `intake_completed`: Input validation and travel scope determination.
+   - `date_optimization_started` & `date_optimization_completed`: Multi-factor candidate window evaluation.
+   - `visa_started` & `visa_completed`: Indian passport visa analysis and entry requirements.
+   - `logistics_started` & `logistics_completed`: Multi-tier transport routes and lodging options.
+   - `experience_started` & `experience_completed`: Daily itineraries and curated culinary options.
+   - `budget_calculated`: Itemized financial breakdown and variance status.
+   - `optimization_started` & `optimization_completed`: Feasibility assessment and trade-offs.
+   - `planning_completed`: Final synthesized `FinalItinerary` delivered to the client.
+   - `warning` & `error`: Non-fatal warnings and graceful failure notifications.
+3. Information Hygiene: The stream communicates human-readable milestone messages and structured summaries without exposing raw internal prompts, LangChain IDs, or technical stack traces.
+
+---
+
+
 ## 7. Data and Tool Architecture Requirements
 
 The product will use specialized tools/adapters rather than assuming one API provides all travel data.

@@ -4,24 +4,23 @@
 
 ## Current Status
 
-**Phase 16 — Budget Conflict and Human Decision Flow complete.** `src/nodes/optimizer_node.py` (proposals & date alignment), `src/graph/edges.py` (`determine_affected_components`), `src/graph/workflow.py` (`replan_workflow`), `src/nodes/synthesizer_node.py` (re-planned plan status & narrative), `src/api/models.py` (`ReplanRequest`, `ReplanResponse`), and `src/api/routes.py` (`POST /api/v1/plan/replan`, alias `POST /api/v1/plan/decision`) implemented and verified. Implements the complete human-in-the-loop decision flow:
-1. 4 Discrete Budget Conflict Tiers:
-   - Budget sufficient: `OptimizationAction.NONE`, plan status `COMPLETED`.
-   - ≤5% over: Automated minor optimization (`CHEAPER_HOTEL`, `LOWER_FOOD_BUDGET`, `MULTIPLE_MINOR`), deterministic recalculation, plan status `COMPLETED`.
-   - 5%–15% over: Halts automated changes, plan status `NEEDS_USER_DECISION`, explicit trade-offs and alternatives presented.
-   - >15% over: Halts automated changes, plan status `INFEASIBLE`, isolates top cost drivers with percentages, calculates realistic budget, provides alternative paths.
-2. Re-planning Engine & Proposal Execution (`replan_workflow`):
-   - Supports `INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`, `REDUCE_DURATION` (with EXACT calendar date realignment), `ADJUST_TRAVEL_STYLE`, `ADJUST_PACE`, and `REMOVE_DESTINATION`.
-   - Component isolation & maximum reuse: budget updates reuse visa, logistics, and experience artifacts without rerun; travel style changes reuse visa; destination removals rerun downstream.
-3. API Endpoints (`POST /api/v1/plan/replan` and alias `POST /api/v1/plan/decision`):
-   - Accepts `ReplanRequest` with previous `itinerary` (or `trip_context`), extracts state, runs selective re-planning, and returns `ReplanResponse` with `replan_summary` provenance.
-4. Dual-verified with 15 dedicated unit tests in `tests/unit/test_human_decision_flow.py` (560 total passing across project) and 100% clean formatting and linting.
+**Phase 17 — API Streaming complete.** `src/graph/streaming.py` (LangGraph SSE streaming engine & `PlanningEvent`), `src/api/models.py` (`PlanningEvent` export), `src/api/routes.py` (`POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), and `tests/unit/test_api_streaming.py` implemented and verified. Implements real-time milestone streaming for travel planning and re-planning workflows:
+1. Milestone Lifecycle Streaming:
+   - Emits structured SSE events: `planning_started`, `intake_completed`, `date_optimization_started`, `date_optimization_completed`, `visa_started`, `visa_completed`, `logistics_started`, `logistics_completed`, `experience_started`, `experience_completed`, `budget_calculated`, `optimization_started`, `optimization_completed`, `planning_completed`, `warning`, `error`.
+   - Streaming payloads deliver clean, high-level summaries for UI consumption without internal LangGraph/LangChain execution metadata or stack traces.
+2. Browser & Client Friendly Endpoints:
+   - `POST /api/v1/plan/stream`: Full planning stream taking JSON `PlanRequest`.
+   - `GET /api/v1/plan/stream`: Browser-native `EventSource` compatible endpoint taking URL query parameters.
+   - `POST /api/v1/plan/replan/stream` (and alias `POST /api/v1/plan/decision/stream`): Streams re-planning workflows with maximum artifact reuse.
+3. Hermetic Verification:
+   - 12 comprehensive unit tests in `tests/unit/test_api_streaming.py`.
+   - Entire test suite passes (572 passing unit tests across repository), 100% clean formatting and linting.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 16 — Budget Conflict and Human Decision Flow (Completed)
+Phase 17 — API Streaming (Completed)
 
 ## Completed functionality
 
@@ -509,10 +508,44 @@ Phase 16 — Budget Conflict and Human Decision Flow is **100% complete, verifie
 - `README.md`
 - `project_docs/memory.md`
 
+## Phase 17 Completion Status
+
+Phase 17 — API Streaming is **100% complete, verified via 12 dedicated unit tests (572 passing in full suite), and synchronized across all project documentation**.
+
+### Completed Work:
+- Created real-time streaming engine in `src/graph/streaming.py`:
+  - `PlanningEvent` model with standard SSE serialization (`to_sse()`).
+  - `stream_planning_graph(initial_input)` generating milestone events from LangGraph `astream_events(..., version="v2")`.
+  - Sequential milestone emission: `planning_started`, `intake_completed`, `date_optimization_started`, `date_optimization_completed`, `visa_started`, `visa_completed`, `logistics_started`, `logistics_completed`, `experience_started`, `experience_completed`, `budget_calculated`, `optimization_started`, `optimization_completed`, `planning_completed`, `warning`, `error`.
+  - Client information hygiene: Sanitizes internal engine IDs and traces; produces user-facing milestone summaries (dates, transport, hotels, daily activities, budget subtotals, optimization trade-offs).
+  - Selective re-planning streaming (`stream_replan_workflow`) emitting only affected recomputed components with maximum artifact reuse.
+- Updated API models & routes:
+  - `src/api/models.py`: Exported `PlanningEvent`.
+  - `src/api/routes.py`: Implemented `POST /api/v1/plan/stream`, browser `EventSource` compatible `GET /api/v1/plan/stream`, and `POST /api/v1/plan/replan/stream` (with alias `POST /api/v1/plan/decision/stream`).
+  - `src/api/__init__.py`: Public package exports updated.
+- Created `tests/unit/test_api_streaming.py`:
+  - 12 hermetic offline unit tests covering domestic lifecycle, international visa events, flexible date summaries, failure handling, re-planning stream reuse, SSE formatting, FastAPI streaming endpoints, and error handling.
+  - All 572 tests passing across repository in 137.7s.
+  - 100% clean formatting and linting (`ruff check` and `ruff format`).
+
+### Files Changed:
+- `src/graph/streaming.py`
+- `src/api/models.py`
+- `src/api/routes.py`
+- `src/api/__init__.py`
+- `tests/unit/test_api_streaming.py`
+- `project_docs/phases.md`
+- `project_docs/architecture.md`
+- `project_docs/prd.md`
+- `project_docs/rules.md`
+- `README.md`
+- `project_docs/memory.md`
+
 ## Next recommended phase
 
-**Phase 17 — API Streaming**:
-Expose real-time progress notifications and planning milestones from LangGraph execution through Server-Sent Events (SSE), including node start/completion events (`intake_completed`, `visa_completed`, `logistics_completed`, `experience_completed`, `budget_calculated`, `optimization_completed`, `planning_completed`), warnings, and errors.
+**Phase 18 — Frontend**:
+Build responsive modern web interface with Vite, React, TypeScript, and modern styling, featuring interactive trip intake forms, live SSE milestone streaming indicators, rich day-by-day itinerary views, budget breakdown visualizers, and interactive budget conflict resolution cards.
+
 
 
 

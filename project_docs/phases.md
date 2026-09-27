@@ -1164,7 +1164,7 @@ Also test changing the budget and ensuring unaffected work is reused.
 
 ---
 
-# 21. Phase 17 — API Streaming
+# 21. Phase 17 — API Streaming (Completed)
 
 Once the workflow is reliable, expose useful progress through the API.
 
@@ -1173,6 +1173,8 @@ Potential events:
 ```text
 planning_started
 intake_completed
+date_optimization_started
+date_optimization_completed
 visa_started
 visa_completed
 logistics_started
@@ -1190,6 +1192,28 @@ error
 Do not expose internal implementation details unnecessarily.
 
 The client should receive meaningful planning progress.
+
+## Scope & Implementation
+- Dedicated workflow streaming engine in `src/graph/streaming.py` converting LangGraph `astream_events` into strongly-typed `PlanningEvent` models.
+- Support both full planning workflows (`stream_planning_graph`) and iterative re-planning flows (`stream_replan_workflow`).
+- Dual endpoint exposure:
+  - `POST /api/v1/plan/stream`: Accepts JSON `PlanRequest` and streams SSE events.
+  - `GET /api/v1/plan/stream`: Accepts query parameters and streams SSE events for browser `EventSource` compatibility.
+  - `POST /api/v1/plan/replan/stream`: Accepts `ReplanRequest` and streams selective re-planning events.
+- Structured SSE wire format:
+  ```text
+  event: <event_name>
+  data: {"event": "...", "stage": "...", "message": "...", "data": {...}, "timestamp": "..."}
+  ```
+- Client Information Hygiene: Leaking internal LangChain run IDs, state internals, or raw Python stack traces is strictly avoided; payloads supply human-readable summaries and structured milestone metrics.
+
+## Exit criteria (Met)
+- Real-time SSE streaming implemented and operational across domestic, international, and flexible-date trips.
+- All milestone events (`planning_started` through `planning_completed`, plus `warning` and `error`) emitted reliably.
+- Final `planning_completed` event contains the full synthesized `FinalItinerary`.
+- 100% offline fixture-based unit and integration tests passing in `tests/unit/test_api_streaming.py` (12 passing tests, 572 passing repo-wide).
+
+
 
 ---
 

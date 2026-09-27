@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 16 — Budget Conflict and Human Decision Flow (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete)
-Test Suite: 560 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 17 — API Streaming (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete), Phase 17 (API Streaming — Real-time LangGraph SSE Event Emission & Endpoints Complete)
+Test Suite: 572 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, complete domestic and international vertical slices (`POST /api/v1/plan`), flexible date optimization (`DateMode.FLEXIBLE`, `FIND_BEST`), and human-in-the-loop budget conflict resolution with selective re-planning (`replan_workflow` and `POST /api/v1/plan/replan`). **It is not yet production-ready**, nor is the full frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, complete domestic and international vertical slices (`POST /api/v1/plan`), flexible date optimization (`DateMode.FLEXIBLE`, `FIND_BEST`), human-in-the-loop budget conflict resolution with selective re-planning (`replan_workflow` and `POST /api/v1/plan/replan`), and real-time planning progress streaming via Server-Sent Events (`src/graph/streaming.py` and `POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`). **It is not yet production-ready**, nor is the full frontend interface implemented.
 
 | Phase        | Description                                                                                             | Status       |
 | --------------| ---------------------------------------------------------------------------------------------------------| --------------|
@@ -35,10 +35,11 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 14** | International Vertical Slice (End-to-end international with visa integration)                           | **Complete** |
 | **Phase 15** | Flexible Dates (Candidate date window optimization, multi-factor scoring)                                | **Complete** |
 | **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution, re-planning API)               | **Complete** |
-| **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph)                                             | Planned      |
-| **Phase 18** | Frontend (Interactive web user interface)                                                               | Planned      |
+| **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph & dual POST/GET endpoints)                   | **Complete** |
+| **Phase 18** | Frontend (Interactive web user interface in Vite / React / TypeScript / pnpm)                            | Planned      |
 | **Phase 19** | End-to-End Test Matrix (Full regression and test scenarios)                                             | Planned      |
 | **Phase 20** | Production Hardening (Observability, rate limits, deployment)                                           | Planned      |
+
 
 ---
 

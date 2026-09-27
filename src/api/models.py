@@ -376,3 +376,22 @@ class ReplanResponse(BaseModel):
         description="Aggregated planning warnings across all nodes.",
     )
     timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+
+
+# Re-export PlanningEvent for API consumers
+from src.graph.streaming import PlanningEvent  # noqa: E402
+
+__all__ = [
+    "HealthResponse",
+    "ToolStatusItem",
+    "ToolStatusResponse",
+    "EstimateRequest",
+    "EstimateResponse",
+    "PlanPreviewRequest",
+    "PlanPreviewResponse",
+    "PlanRequest",
+    "PlanResponse",
+    "ReplanRequest",
+    "ReplanResponse",
+    "PlanningEvent",
+]

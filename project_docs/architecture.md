@@ -972,12 +972,41 @@ Primary files:
 ```text
 src/api/
 ├── app.py
+├── models.py
 └── routes.py
+src/graph/
+└── streaming.py
 ```
 
-The API should not contain planning logic.
+The API should not contain planning logic. It translates between external requests/responses and the planning workflow.
 
-It translates between external requests/responses and the planning workflow.
+### Streaming Endpoints & Contracts (Phase 17)
+
+To provide real-time visibility into multi-agent decision steps:
+
+1. **`POST /api/v1/plan/stream`**:
+   - Request Body: `PlanRequest` (JSON)
+   - Response: `text/event-stream` (Server-Sent Events)
+   - Lifecycle: Streams progress events as nodes execute, terminating with `planning_completed` (containing the final `itinerary`) or `error`.
+
+2. **`GET /api/v1/plan/stream`**:
+   - Query Parameters: `origin`, `destination`, `start_date`, `end_date`, `duration_days`, `budget_inr`, `travel_style`, `pace`, `num_travelers`, `date_mode`.
+   - Response: `text/event-stream` for native browser `EventSource` consumption.
+
+3. **`POST /api/v1/plan/replan/stream`**:
+   - Request Body: `ReplanRequest` (JSON)
+   - Response: `text/event-stream` streaming selective re-planning events for only affected components.
+
+### SSE Message Specification
+
+Every message adheres to the SSE standard:
+```text
+event: <event_name>
+data: {"event": "<event_name>", "stage": "<stage>", "message": "<human_message>", "data": {...}, "timestamp": "<iso8601>"}
+```
+
+- **Information Hygiene:** Internal LangChain run IDs, execution metadata, and raw Python tracebacks are strictly excluded from client payloads. Only human-facing messages and structured stage summaries are broadcast.
+
 
 ---
 
@@ -1360,10 +1389,11 @@ Goal: Connect all planning nodes into a resilient, cyclical LangGraph execution 
 
 ## Stage 7 — API Streaming, Frontend & Hardening (Phases 17–20)
 
-- Phase 17: API Streaming (Real-time LangGraph event emission via SSE)
+- Phase 17: API Streaming (Completed — Real-time LangGraph event emission via SSE with dual POST/GET endpoints)
 - Phase 18: Frontend (Interactive web UI in Vite / React / TypeScript / pnpm)
 - Phase 19: End-to-End Test Matrix (Full regression and integration test matrix)
 - Phase 20: Production Hardening (Security, rate limiting, observability, packaging)
+
 
 Goal: Deliver a production-grade, warm Indian-inspired travel planner.
 
