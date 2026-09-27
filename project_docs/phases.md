@@ -1109,7 +1109,7 @@ Return:
 
 ---
 
-# 20. Phase 16 — Budget Conflict and Human Decision Flow
+# 20. Phase 16 — Budget Conflict and Human Decision Flow (Completed)
 
 Add the complete human-in-the-loop behavior.
 
@@ -1146,6 +1146,21 @@ User decision
 ```
 
 Also test changing the budget and ensuring unaffected work is reused.
+
+## Exit Criteria (Met)
+- Handled all 4 budget tiers deterministically:
+  - Budget sufficient: `OptimizationAction.NONE`, `COMPLETED` plan status.
+  - ≤5% over: Automated minor optimization (`CHEAPER_HOTEL`, `LOWER_FOOD_BUDGET`, `MULTIPLE_MINOR`), deterministic recalculation brings total within budget, `COMPLETED`.
+  - 5%–15% over: Halts automated mutation, `NEEDS_USER_DECISION`, explicit trade-offs and alternatives presented.
+  - >15% over: Halts automated mutation, `INFEASIBLE`, isolates top cost drivers with percentage shares, calculates realistic budget, provides alternative paths.
+- Re-planning proposal generation and execution (`replan_workflow`):
+  - Supported proposal types: `INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`, `REDUCE_DURATION` (with EXACT calendar date realignment), `ADJUST_TRAVEL_STYLE`, `ADJUST_PACE`, and `REMOVE_DESTINATION`.
+  - Component isolation and maximum reuse of unaffected work verified: budget changes reuse visa, logistics, and experience artifacts without rerun; travel style changes reuse visa; destination removals rerun downstream.
+- API endpoints `POST /api/v1/plan/replan` and alias `POST /api/v1/plan/decision`:
+  - Accepts `ReplanRequest` with previous `itinerary` or `trip_context`, extracts state, runs selective re-planning, and returns `ReplanResponse` with `replan_summary` provenance.
+  - Validates proposal types, target values, and input completeness with structured HTTP 400 errors.
+- 100% offline unit tests verified in `tests/unit/test_human_decision_flow.py` (15 passing tests, 560 passing tests repository-wide).
+
 
 ---
 

@@ -8,6 +8,10 @@ from src.api.models import (
     HealthResponse,
     PlanPreviewRequest,
     PlanPreviewResponse,
+    PlanRequest,
+    PlanResponse,
+    ReplanRequest,
+    ReplanResponse,
     ToolStatusItem,
     ToolStatusResponse,
 )
@@ -24,5 +28,9 @@ __all__ = [
     "EstimateResponse",
     "PlanPreviewRequest",
     "PlanPreviewResponse",
+    "PlanRequest",
+    "PlanResponse",
+    "ReplanRequest",
+    "ReplanResponse",
     "APIErrorResponse",
 ]

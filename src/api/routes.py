@@ -14,10 +14,13 @@ from src.api.models import (
     PlanPreviewResponse,
     PlanRequest,
     PlanResponse,
+    ReplanRequest,
+    ReplanResponse,
     ToolStatusItem,
     ToolStatusResponse,
 )
-from src.graph.workflow import run_planning_graph
+from src.graph.workflow import replan_workflow, run_planning_graph
+from src.nodes.optimizer_node import OptimizerError
 from src.tools.calculator import (
     calculate_budget_breakdown,
     calculate_budget_variance,
@@ -337,6 +340,82 @@ def create_trip_plan(request: PlanRequest) -> PlanResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal trip planning error: {str(exc)}",
+        ) from exc
+
+
+@router.post("/plan/replan", response_model=ReplanResponse)
+@router.post("/plan/decision", response_model=ReplanResponse, include_in_schema=False)
+def replan_trip(request: ReplanRequest) -> ReplanResponse:
+    """Submit a traveler trade-off decision and re-plan affected components.
+
+    Reuses unaffected work wherever valid.
+    """
+    try:
+        # 1. Resolve starting state
+        if request.itinerary:
+            itin = request.itinerary
+            target_val = request.target_value
+            if (
+                request.proposal_type.upper().strip()
+                in ("ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET")
+                and target_val is None
+            ):
+                target_val = itin.budget_breakdown.total_with_contingency_inr
+
+            current_state = {
+                "trip_context": itin.trip_context,
+                "logistics_plan": itin.logistics_plan,
+                "experience_plan": itin.experience_plan,
+                "budget_breakdown": itin.budget_breakdown,
+                "visa_verdict": itin.visa_verdict,
+                "date_options": itin.date_options,
+                "optimization_result": itin.optimization_result,
+                "warnings": itin.warnings,
+                "errors": [],
+            }
+        elif request.trip_context:
+            target_val = request.target_value
+            base_state = run_planning_graph(request.trip_context)
+            if (
+                request.proposal_type.upper().strip()
+                in ("ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET")
+                and target_val is None
+                and base_state.get("budget_breakdown")
+            ):
+                target_val = base_state["budget_breakdown"].total_with_contingency_inr
+            current_state = base_state
+        else:
+            raise ValueError("Either 'itinerary' or 'trip_context' must be provided to re-plan.")
+
+        # 2. Execute selective re-planning
+        replanned_state = replan_workflow(
+            current_state=current_state,  # type: ignore
+            proposal_type=request.proposal_type,
+            target_value=target_val,
+        )
+
+        final_itinerary = replanned_state.get("final_itinerary")
+        if not final_itinerary:
+            errors = replanned_state.get("errors") or [
+                "Re-planning workflow failed to synthesize an updated itinerary."
+            ]
+            raise ValueError("; ".join(errors))
+
+        return ReplanResponse(
+            status=replanned_state.get("plan_status", "REPLANNED"),
+            itinerary=final_itinerary,
+            replan_summary=replanned_state.get("replan_proposal") or {},
+            warnings=replanned_state.get("warnings", []),
+        )
+    except (ValueError, OptimizerError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal trip re-planning error: {str(exc)}",
         ) from exc
 
 

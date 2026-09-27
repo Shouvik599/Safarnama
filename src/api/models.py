@@ -327,3 +327,52 @@ class PlanResponse(BaseModel):
         description="Aggregated planning warnings across all nodes.",
     )
     timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+
+
+class ReplanRequest(BaseModel):
+    """Request model for submitting a traveler trade-off decision or re-planning proposal."""
+
+    proposal_type: str = Field(
+        ...,
+        description=(
+            "Type of modification: 'INCREASE_BUDGET', 'ACCEPT_REALISTIC_BUDGET', "
+            "'REDUCE_DURATION', 'ADJUST_TRAVEL_STYLE', 'ADJUST_PACE', 'REMOVE_DESTINATION'."
+        ),
+    )
+    target_value: Any = Field(
+        default=None,
+        description=(
+            "Parameter value: numeric budget amount (float), duration in days (int), "
+            "travel style string (e.g. 'BUDGET'), pace string, or destination to remove."
+        ),
+    )
+    itinerary: FinalItinerary | None = Field(
+        default=None,
+        description="Previous FinalItinerary from which context and artifacts can be extracted.",
+    )
+    trip_context: TripContext | None = Field(
+        default=None,
+        description="TripContext domain model if re-planning directly from context.",
+    )
+
+
+class ReplanResponse(BaseModel):
+    """Response model for re-planning execution following a traveler trade-off decision."""
+
+    status: str = Field(
+        ...,
+        description="Execution status (e.g. REPLANNED, COMPLETED, NEEDS_USER_DECISION).",
+    )
+    itinerary: FinalItinerary = Field(
+        ...,
+        description="Updated synthesized trip itinerary artifact.",
+    )
+    replan_summary: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Provenance of re-planning: proposal type, reused and rerun components.",
+    )
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Aggregated planning warnings across all nodes.",
+    )
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())

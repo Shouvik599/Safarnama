@@ -30,7 +30,7 @@ Evaluates budget variance and executes tiered optimization policies:
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
@@ -52,6 +52,7 @@ from src.models.logistics import HotelStay, LogisticsPlan
 from src.models.trip import (
     DateMode,
     InitialPlanningState,
+    Pace,
     TravelScope,
     TravelStyle,
     TripContext,
@@ -850,7 +851,7 @@ def create_replanning_proposal(
     """
     pt = proposal_type.upper().strip()
 
-    if pt == "INCREASE_BUDGET":
+    if pt in ("INCREASE_BUDGET", "ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET"):
         if target_value is None or float(target_value) <= 0:
             raise OptimizerValidationError(
                 f"Valid positive budget amount required, got: {target_value!r}"
@@ -863,7 +864,19 @@ def create_replanning_proposal(
         new_days = int(target_value) if target_value is not None else max(1, current_days - 1)
         if new_days < 1:
             raise OptimizerValidationError("Trip duration cannot be less than 1 day.")
-        new_dates = context.dates.model_copy(update={"duration_days": new_days})
+
+        # If EXACT dates, synchronize end_date with the shortened duration
+        if context.dates.mode == DateMode.EXACT and context.dates.start_date:
+            try:
+                s_dt = datetime.strptime(context.dates.start_date, "%Y-%m-%d")
+                new_end = (s_dt + timedelta(days=new_days)).strftime("%Y-%m-%d")
+                new_dates = context.dates.model_copy(
+                    update={"duration_days": new_days, "end_date": new_end}
+                )
+            except Exception:
+                new_dates = context.dates.model_copy(update={"duration_days": new_days})
+        else:
+            new_dates = context.dates.model_copy(update={"duration_days": new_days})
         return context.model_copy(update={"dates": new_dates})
 
     if pt == "ADJUST_TRAVEL_STYLE":
@@ -878,6 +891,18 @@ def create_replanning_proposal(
             new_style = TravelStyle.BUDGET
 
         return context.model_copy(update={"travel_style": new_style})
+
+    if pt == "ADJUST_PACE":
+        if isinstance(target_value, Pace):
+            new_pace = target_value
+        elif isinstance(target_value, str):
+            try:
+                new_pace = Pace(target_value.upper())
+            except ValueError as exc:
+                raise OptimizerValidationError(f"Unknown pace: {target_value!r}") from exc
+        else:
+            new_pace = Pace.RELAXED
+        return context.model_copy(update={"pace": new_pace})
 
     if pt == "REMOVE_DESTINATION":
         if not target_value and len(context.destinations) > 1:

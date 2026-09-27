@@ -665,28 +665,21 @@ User intervention is appropriate when:
 
 The system should not silently make a major compromise.
 
-If the user changes a constraint, the graph should reuse unaffected work where possible.
+If the user changes a constraint, the re-planning engine (`replan_workflow`) reuses unaffected work where possible (Phase 16).
 
-Example:
+### Component Isolation Matrix
 
-```text
-Existing plan
-     │
-User changes budget
-     │
-     ▼
-Determine affected components
-     │
-     ├── Route unchanged
-     ├── Visa unchanged
-     ├── Attractions unchanged
-     │
-     └── Recalculate:
-           Hotels
-           Transport
-           Budget
-           Optimization
-```
+| Proposal Type | Reused Components | Rerun Components |
+|---|---|---|
+| `INCREASE_BUDGET` / `ACCEPT_REALISTIC_BUDGET` | Route, Visa, Logistics, Experience | Budget Engine, Optimizer |
+| `ADJUST_TRAVEL_STYLE` | Route, Visa | Logistics (hotels tier), Experience (dining tier), Budget, Optimizer |
+| `REDUCE_DURATION` | Route, Visa | Logistics (nights), Experience (days), Budget, Optimizer (aligns `end_date`) |
+| `ADJUST_PACE` | Route, Visa, Logistics | Experience (slots/day), Budget, Optimizer |
+| `REMOVE_DESTINATION` | None (context modified) | Visa, Logistics, Experience, Budget, Optimizer |
+
+### Re-planning Workflow & API Endpoint
+
+Re-planning is exposed via `POST /api/v1/plan/replan` (and alias `POST /api/v1/plan/decision`). Clients submit `ReplanRequest` containing previous `itinerary` (or `trip_context`), `proposal_type`, and `target_value`. The backend returns `ReplanResponse` containing updated `FinalItinerary` and `replan_summary` detailing component reuse provenance.
 
 ---
 

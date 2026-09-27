@@ -512,9 +512,15 @@ If no acceptable itinerary can satisfy the user's budget and quality constraints
    - Lower travel style
    - Change transport expectations
    - Reduce activities
-5. Let the user choose.
-
 If the user changes the budget, the system should reuse valid work and re-plan only affected components.
+
+### 6.13 Human Decision Re-planning Flow
+
+When an itinerary requires traveler input (`NEEDS_USER_DECISION` or `INFEASIBLE`):
+1. The API exposes `POST /api/v1/plan/replan` (and alias `POST /api/v1/plan/decision`).
+2. The user submits their chosen trade-off action (`INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`, `REDUCE_DURATION`, `ADJUST_TRAVEL_STYLE`, `ADJUST_PACE`, `REMOVE_DESTINATION`) with optional parameter values.
+3. Unaffected components are preserved without redundant provider queries (e.g. visa, logistics, and attractions remain intact during pure budget updates).
+4. The system produces an updated `FinalItinerary` with status `REPLANNED` and detailed re-planning provenance metadata.
 
 ---
 
