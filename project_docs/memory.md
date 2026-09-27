@@ -4,18 +4,23 @@
 
 ## Current Status
 
-**Phase 15 — Flexible Dates complete.** `src/models/trip.py` (`DateCandidate`, `DateOptimizationResult`), `src/nodes/date_node.py` (`date_node`, `process_date_optimization`), `src/graph/workflow.py`, `src/graph/state.py`, `src/nodes/synthesizer_node.py`, and `src/api/models.py` implemented and verified. Implements flexible date evaluation across all 3 modes (`EXACT`, `FLEXIBLE`, `FIND_BEST`):
-1. `DateCandidate` & `DateOptimizationResult`: Pydantic domain models encapsulating candidate date windows, estimated cost differentials, weather scores, convenience scores, composite quality score (0–100), and structured trade-offs.
-2. `date_node`: Deterministic LangGraph node evaluating candidate windows using seasonal transport multipliers, lodging estimates, weather comfort heuristics, and calendar weekend departure weighting (+10 pts).
-3. LangGraph Topology: Wired as `START -> intake -> date_optimizer -> (conditional route_scope) -> [visa, logistics, experience]`, synchronizing chosen dates into `trip_context.dates.start_date` and `end_date` so downstream nodes plan against concrete dates.
-4. Synthesizer Integration: Passes `date_options` into `FinalItinerary` and includes date strategy summary in travelogue narrative.
-5. Dual-verified with 19 dedicated unit tests (545 total passing across project) and 100% clean formatting and linting.
+**Phase 17 — API Streaming complete.** `src/graph/streaming.py` (LangGraph SSE streaming engine & `PlanningEvent`), `src/api/models.py` (`PlanningEvent` export), `src/api/routes.py` (`POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), and `tests/unit/test_api_streaming.py` implemented and verified. Implements real-time milestone streaming for travel planning and re-planning workflows:
+1. Milestone Lifecycle Streaming:
+   - Emits structured SSE events: `planning_started`, `intake_completed`, `date_optimization_started`, `date_optimization_completed`, `visa_started`, `visa_completed`, `logistics_started`, `logistics_completed`, `experience_started`, `experience_completed`, `budget_calculated`, `optimization_started`, `optimization_completed`, `planning_completed`, `warning`, `error`.
+   - Streaming payloads deliver clean, high-level summaries for UI consumption without internal LangGraph/LangChain execution metadata or stack traces.
+2. Browser & Client Friendly Endpoints:
+   - `POST /api/v1/plan/stream`: Full planning stream taking JSON `PlanRequest`.
+   - `GET /api/v1/plan/stream`: Browser-native `EventSource` compatible endpoint taking URL query parameters.
+   - `POST /api/v1/plan/replan/stream` (and alias `POST /api/v1/plan/decision/stream`): Streams re-planning workflows with maximum artifact reuse.
+3. Hermetic Verification:
+   - 12 comprehensive unit tests in `tests/unit/test_api_streaming.py`.
+   - Entire test suite passes (572 passing unit tests across repository), 100% clean formatting and linting.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 15 — Flexible Dates (Completed)
+Phase 17 — API Streaming (Completed)
 
 ## Completed functionality
 
@@ -216,6 +221,22 @@ Phase 15 — Flexible Dates (Completed)
 - **`src/api/models.py`**: Extended `PlanRequest` with `date_mode`, `flexibility_days`, `window_start`, `window_end`, and cross-field mode validation.
 - **`tests/unit/test_date_optimizer.py`**: 19 unit tests covering all operational modes, candidate generation, multi-factor scoring, weekend bonus, downstream synchronization, and LangGraph workflow.
 
+### Phase 16 (Budget Conflict and Human Decision Flow — 100% complete)
+- **`src/nodes/optimizer_node.py`** (extended):
+  - Enhanced `create_replanning_proposal` with `ACCEPT_REALISTIC_BUDGET`, `ACCEPT_RECOMMENDED_BUDGET`, and `ADJUST_PACE`.
+  - Date realignment: When `REDUCE_DURATION` is invoked on `DateMode.EXACT` trips, dynamically synchronizes `end_date` with the shortened duration via `timedelta`.
+- **`src/graph/edges.py`** (extended):
+  - Updated `determine_affected_components` to support `ACCEPT_REALISTIC_BUDGET` (reuses visa, logistics, experience) and `ADJUST_PACE` (reuses visa and logistics; reruns experience, budget, optimizer).
+- **`src/graph/workflow.py`** (extended):
+  - Updated `replan_workflow` to preserve `date_options`, pass `plan_status` to synthesizer, and assemble re-planning provenance metadata.
+- **`src/nodes/synthesizer_node.py`** (extended):
+  - Allowed explicit terminal `plan_status` overrides (e.g. `REPLANNED`).
+- **`src/api/models.py`** (extended):
+  - Added `ReplanRequest` (proposal_type, target_value, itinerary, trip_context) and `ReplanResponse` (status, itinerary, replan_summary, warnings).
+- **`src/api/routes.py`** (extended):
+  - Implemented `POST /api/v1/plan/replan` (and alias `POST /api/v1/plan/decision`) reconstructing graph state from previous `FinalItinerary` or `TripContext`, executing `replan_workflow`, and handling validation errors (400).
+- **`tests/unit/test_human_decision_flow.py`**: 15 unit tests covering all 4 budget conflict tiers, human trade-off decisions, unaffected work reuse, component isolation, date realignment, and API endpoints.
+
 ## Important files/modules
 
 | Path | Role |
@@ -256,6 +277,7 @@ Phase 15 — Flexible Dates (Completed)
 | `src/tools/places.py` | Multi-tier points of interest and dining tool |
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
 | `tests/unit/test_vertical_slice.py` | 9 Phase 13 complete vertical slice unit tests |
+| `tests/unit/test_human_decision_flow.py` | 15 Phase 16 human decision flow and re-planning unit tests |
 | `tests/unit/test_date_optimizer.py` | 19 Phase 15 date optimizer unit tests |
 | `tests/unit/test_graph.py` | 19 Phase 12 LangGraph orchestration unit tests |
 | `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
@@ -273,9 +295,9 @@ Phase 15 — Flexible Dates (Completed)
 ## Tests completed and their status
 
 - **Hermetic Offline Test Harness**:
-  - `uv run pytest`: **545 passed**, 5 warnings in ~3s (100% offline, zero network reliance in test suite).
+  - `uv run pytest`: **560 passed**, 5 warnings in ~3s (100% offline, zero network reliance in test suite).
   - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-  - `uv run ruff format --check src/ tests/ scripts/`: **78 files clean**.
+  - `uv run ruff format --check src/ tests/ scripts/`: **79 files clean**.
 - **Live Network Integration Verification**:
   - `uv run python scripts/verify_live_nodes.py`: **ALL 7 LIVE PLANNING STAGES COMPLETED SUCCESSFULLY**
     - **Visa Node (Phase 7)**: Live Tavily web search + Gemini structured reconciliation verified Thailand 60-day visa-free status in 6.64s.
@@ -452,9 +474,78 @@ Phase 15 — Flexible Dates is **100% complete, verified via 19 unit tests (545 
 - `README.md`
 - `project_docs/memory.md`
 
+## Phase 16 Completion Status
+
+Phase 16 — Budget Conflict and Human Decision Flow is **100% complete, verified via 15 unit tests (560 passing in suite), and synchronized across all project documentation**.
+
+### Completed Work:
+- Validated all 4 discrete budget conflict tiers:
+  - Budget sufficient: `OptimizationAction.NONE`, plan status `COMPLETED`.
+  - ≤5% over: Automated minor optimization (`CHEAPER_HOTEL`, `LOWER_FOOD_BUDGET`, `MULTIPLE_MINOR`), deterministic recalculation brings total within budget, plan status `COMPLETED`.
+  - 5%–15% over: Halts automated changes, plan status `NEEDS_USER_DECISION`, explicit trade-offs and alternatives presented.
+  - >15% over: Halts automated changes, plan status `INFEASIBLE`, isolates top cost drivers with percentages, calculates realistic budget, provides alternative paths.
+- Re-planning proposal generation and execution (`replan_workflow`):
+  - Supported proposal types: `INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`, `REDUCE_DURATION` (with EXACT calendar date realignment), `ADJUST_TRAVEL_STYLE`, `ADJUST_PACE`, and `REMOVE_DESTINATION`.
+  - Component isolation and maximum reuse of unaffected work verified: budget changes reuse visa, logistics, and experience artifacts without rerun; travel style changes reuse visa; destination removals rerun downstream.
+- API endpoints `POST /api/v1/plan/replan` and alias `POST /api/v1/plan/decision`:
+  - Accepts `ReplanRequest` with previous `itinerary` or `trip_context`, extracts state, runs selective re-planning, and returns `ReplanResponse` with `replan_summary` provenance.
+  - Validates proposal types, target values, and input completeness with structured HTTP 400 errors.
+- Created `tests/unit/test_human_decision_flow.py` with 15 hermetic offline unit tests (all passing). Full suite: 560 passing tests repository-wide, 100% clean formatting and linting.
+
+### Files Changed:
+- `src/nodes/optimizer_node.py`
+- `src/graph/edges.py`
+- `src/graph/workflow.py`
+- `src/nodes/synthesizer_node.py`
+- `src/api/models.py`
+- `src/api/routes.py`
+- `src/api/__init__.py`
+- `tests/unit/test_human_decision_flow.py`
+- `project_docs/phases.md`
+- `project_docs/architecture.md`
+- `project_docs/prd.md`
+- `project_docs/rules.md`
+- `README.md`
+- `project_docs/memory.md`
+
+## Phase 17 Completion Status
+
+Phase 17 — API Streaming is **100% complete, verified via 12 dedicated unit tests (572 passing in full suite), and synchronized across all project documentation**.
+
+### Completed Work:
+- Created real-time streaming engine in `src/graph/streaming.py`:
+  - `PlanningEvent` model with standard SSE serialization (`to_sse()`).
+  - `stream_planning_graph(initial_input)` generating milestone events from LangGraph `astream_events(..., version="v2")`.
+  - Sequential milestone emission: `planning_started`, `intake_completed`, `date_optimization_started`, `date_optimization_completed`, `visa_started`, `visa_completed`, `logistics_started`, `logistics_completed`, `experience_started`, `experience_completed`, `budget_calculated`, `optimization_started`, `optimization_completed`, `planning_completed`, `warning`, `error`.
+  - Client information hygiene: Sanitizes internal engine IDs and traces; produces user-facing milestone summaries (dates, transport, hotels, daily activities, budget subtotals, optimization trade-offs).
+  - Selective re-planning streaming (`stream_replan_workflow`) emitting only affected recomputed components with maximum artifact reuse.
+- Updated API models & routes:
+  - `src/api/models.py`: Exported `PlanningEvent`.
+  - `src/api/routes.py`: Implemented `POST /api/v1/plan/stream`, browser `EventSource` compatible `GET /api/v1/plan/stream`, and `POST /api/v1/plan/replan/stream` (with alias `POST /api/v1/plan/decision/stream`).
+  - `src/api/__init__.py`: Public package exports updated.
+- Created `tests/unit/test_api_streaming.py`:
+  - 12 hermetic offline unit tests covering domestic lifecycle, international visa events, flexible date summaries, failure handling, re-planning stream reuse, SSE formatting, FastAPI streaming endpoints, and error handling.
+  - All 572 tests passing across repository in 137.7s.
+  - 100% clean formatting and linting (`ruff check` and `ruff format`).
+
+### Files Changed:
+- `src/graph/streaming.py`
+- `src/api/models.py`
+- `src/api/routes.py`
+- `src/api/__init__.py`
+- `tests/unit/test_api_streaming.py`
+- `project_docs/phases.md`
+- `project_docs/architecture.md`
+- `project_docs/prd.md`
+- `project_docs/rules.md`
+- `README.md`
+- `project_docs/memory.md`
+
 ## Next recommended phase
 
-**Phase 16 — Budget Conflict and Human Decision Flow**:
-Implement support for handling over-budget plans that require traveler confirmation (`SIGNIFICANT_OVER`), human-in-the-loop decision routing, structured trade-off presentation, and iterative re-planning flows based on user selection.
+**Phase 18 — Frontend**:
+Build responsive modern web interface with Vite, React, TypeScript, and modern styling, featuring interactive trip intake forms, live SSE milestone streaming indicators, rich day-by-day itinerary views, budget breakdown visualizers, and interactive budget conflict resolution cards.
+
+
 
 

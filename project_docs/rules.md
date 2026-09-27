@@ -1161,4 +1161,67 @@ When planning itineraries with date flexibility (`FLEXIBLE` or `FIND_BEST` modes
 - Downstream nodes (`logistics_node`, `experience_node`, `budget_node`) plan against the concrete chosen dates (`trip_context.dates.start_date` and `end_date`), ensuring continuous dates across flights, hotel stays, and daily itineraries.
 - The `DateOptimizationResult` is stored in state (`state["date_options"]`) and passed into `FinalItinerary.date_options`.
 
+---
+
+# 48. Human-in-the-Loop Re-planning & Artifact Reuse
+
+When handling budget conflicts or traveler decision workflows:
+
+## 48.1 Tiered Conflict Handling
+- The system must respect 4 discrete budget outcome tiers:
+  1. `UNDER_BUDGET` / `EXACT`: Normal plan generated with status `COMPLETED`.
+  2. `MINOR_OVER` ($\le 5\%$): Applies automatic minor optimizations without violating quality guardrails; deterministic recalculation brings variance within budget.
+  3. `SIGNIFICANT_OVER` ($5\%-15\%$): Halts automated plan mutation, sets plan status to `NEEDS_USER_DECISION`, and formulates structured trade-offs and alternatives.
+  4. `INFEASIBLE` ($> 15\%$): Halts automated mutation, sets plan status to `INFEASIBLE`, isolates top cost drivers with percentage shares, computes realistic minimum budget, and presents alternative paths.
+
+## 48.2 Component Isolation & Maximum Reuse
+- Re-planning workflows (`replan_workflow`) must selectively rerun only affected planning nodes.
+- Pure budget changes (`INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`) must reuse existing visa, logistics, and experience artifacts without making redundant external calls.
+- Travel style changes (`ADJUST_TRAVEL_STYLE`) must reuse visa and base route while re-planning lodging and dining.
+- Trip shortening (`REDUCE_DURATION`) must reuse visa while re-allocating nights and activity days.
+
+## 48.3 Date Synchronization on Duration Changes
+- When trip duration is shortened under `DateMode.EXACT`, the re-planning proposal must synchronize `end_date` with the updated duration to maintain valid date intervals.
+
+## 48.4 Re-planning API Contract
+- The system exposes `POST /api/v1/plan/replan` (and alias `POST /api/v1/plan/decision`).
+- Clients submit `ReplanRequest` containing previous `itinerary` (or `trip_context`), `proposal_type`, and `target_value`.
+- The endpoint returns `ReplanResponse` containing updated `FinalItinerary` and `replan_summary` detailing component reuse provenance.
+
+---
+
+# 49. Real-time API Streaming & Progress Events
+
+When streaming planning execution progress to API consumers:
+
+## 49.1 Event Contract and Naming Standard
+- Stream events must use standard Server-Sent Events (SSE) formatting:
+  ```text
+  event: <event_name>
+  data: {"event": "<event_name>", "stage": "<stage>", "message": "<human_message>", "data": {...}, "timestamp": "<iso8601>"}
+  ```
+- Standardized milestone event names:
+  1. `planning_started`: Emitted immediately upon workflow initiation.
+  2. `intake_completed`: Emitted after constraint validation.
+  3. `date_optimization_started` & `date_optimization_completed`: Emitted during date evaluation.
+  4. `visa_started` & `visa_completed`: Emitted for international passport visa resolution.
+  5. `logistics_started` & `logistics_completed`: Emitted for flight/transit and hotel selection.
+  6. `experience_started` & `experience_completed`: Emitted for daily itinerary and dining curation.
+  7. `budget_calculated`: Emitted after deterministic mathematical aggregation.
+  8. `optimization_started` & `optimization_completed`: Emitted after constraint evaluation.
+  9. `planning_completed`: Emitted when `FinalItinerary` is synthesized and ready.
+  10. `warning`: Emitted when non-fatal advisories are produced.
+  11. `error`: Emitted if any unrecoverable failure occurs; stream terminates with `plan_status: FAILED`.
+
+## 49.2 Information Hygiene & Client Protection
+- Never expose internal LangChain/LangGraph run IDs, internal node parameters, or raw Python stack traces in client-facing stream payloads.
+- All messages must be user-friendly, descriptive, and actionable.
+
+## 49.3 Dual Endpoint Support
+- The API must provide:
+  - `POST /api/v1/plan/stream`: For full JSON `PlanRequest` submissions.
+  - `GET /api/v1/plan/stream`: For native browser `EventSource` queries.
+  - `POST /api/v1/plan/replan/stream`: For streaming iterative re-planning updates.
+
+
 

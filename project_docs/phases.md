@@ -1109,7 +1109,7 @@ Return:
 
 ---
 
-# 20. Phase 16 — Budget Conflict and Human Decision Flow
+# 20. Phase 16 — Budget Conflict and Human Decision Flow (Completed)
 
 Add the complete human-in-the-loop behavior.
 
@@ -1147,9 +1147,24 @@ User decision
 
 Also test changing the budget and ensuring unaffected work is reused.
 
+## Exit Criteria (Met)
+- Handled all 4 budget tiers deterministically:
+  - Budget sufficient: `OptimizationAction.NONE`, `COMPLETED` plan status.
+  - ≤5% over: Automated minor optimization (`CHEAPER_HOTEL`, `LOWER_FOOD_BUDGET`, `MULTIPLE_MINOR`), deterministic recalculation brings total within budget, `COMPLETED`.
+  - 5%–15% over: Halts automated mutation, `NEEDS_USER_DECISION`, explicit trade-offs and alternatives presented.
+  - >15% over: Halts automated mutation, `INFEASIBLE`, isolates top cost drivers with percentage shares, calculates realistic budget, provides alternative paths.
+- Re-planning proposal generation and execution (`replan_workflow`):
+  - Supported proposal types: `INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`, `REDUCE_DURATION` (with EXACT calendar date realignment), `ADJUST_TRAVEL_STYLE`, `ADJUST_PACE`, and `REMOVE_DESTINATION`.
+  - Component isolation and maximum reuse of unaffected work verified: budget changes reuse visa, logistics, and experience artifacts without rerun; travel style changes reuse visa; destination removals rerun downstream.
+- API endpoints `POST /api/v1/plan/replan` and alias `POST /api/v1/plan/decision`:
+  - Accepts `ReplanRequest` with previous `itinerary` or `trip_context`, extracts state, runs selective re-planning, and returns `ReplanResponse` with `replan_summary` provenance.
+  - Validates proposal types, target values, and input completeness with structured HTTP 400 errors.
+- 100% offline unit tests verified in `tests/unit/test_human_decision_flow.py` (15 passing tests, 560 passing tests repository-wide).
+
+
 ---
 
-# 21. Phase 17 — API Streaming
+# 21. Phase 17 — API Streaming (Completed)
 
 Once the workflow is reliable, expose useful progress through the API.
 
@@ -1158,6 +1173,8 @@ Potential events:
 ```text
 planning_started
 intake_completed
+date_optimization_started
+date_optimization_completed
 visa_started
 visa_completed
 logistics_started
@@ -1175,6 +1192,28 @@ error
 Do not expose internal implementation details unnecessarily.
 
 The client should receive meaningful planning progress.
+
+## Scope & Implementation
+- Dedicated workflow streaming engine in `src/graph/streaming.py` converting LangGraph `astream_events` into strongly-typed `PlanningEvent` models.
+- Support both full planning workflows (`stream_planning_graph`) and iterative re-planning flows (`stream_replan_workflow`).
+- Dual endpoint exposure:
+  - `POST /api/v1/plan/stream`: Accepts JSON `PlanRequest` and streams SSE events.
+  - `GET /api/v1/plan/stream`: Accepts query parameters and streams SSE events for browser `EventSource` compatibility.
+  - `POST /api/v1/plan/replan/stream`: Accepts `ReplanRequest` and streams selective re-planning events.
+- Structured SSE wire format:
+  ```text
+  event: <event_name>
+  data: {"event": "...", "stage": "...", "message": "...", "data": {...}, "timestamp": "..."}
+  ```
+- Client Information Hygiene: Leaking internal LangChain run IDs, state internals, or raw Python stack traces is strictly avoided; payloads supply human-readable summaries and structured milestone metrics.
+
+## Exit criteria (Met)
+- Real-time SSE streaming implemented and operational across domestic, international, and flexible-date trips.
+- All milestone events (`planning_started` through `planning_completed`, plus `warning` and `error`) emitted reliably.
+- Final `planning_completed` event contains the full synthesized `FinalItinerary`.
+- 100% offline fixture-based unit and integration tests passing in `tests/unit/test_api_streaming.py` (12 passing tests, 572 passing repo-wide).
+
+
 
 ---
 

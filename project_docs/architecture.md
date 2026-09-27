@@ -665,28 +665,21 @@ User intervention is appropriate when:
 
 The system should not silently make a major compromise.
 
-If the user changes a constraint, the graph should reuse unaffected work where possible.
+If the user changes a constraint, the re-planning engine (`replan_workflow`) reuses unaffected work where possible (Phase 16).
 
-Example:
+### Component Isolation Matrix
 
-```text
-Existing plan
-     │
-User changes budget
-     │
-     ▼
-Determine affected components
-     │
-     ├── Route unchanged
-     ├── Visa unchanged
-     ├── Attractions unchanged
-     │
-     └── Recalculate:
-           Hotels
-           Transport
-           Budget
-           Optimization
-```
+| Proposal Type | Reused Components | Rerun Components |
+|---|---|---|
+| `INCREASE_BUDGET` / `ACCEPT_REALISTIC_BUDGET` | Route, Visa, Logistics, Experience | Budget Engine, Optimizer |
+| `ADJUST_TRAVEL_STYLE` | Route, Visa | Logistics (hotels tier), Experience (dining tier), Budget, Optimizer |
+| `REDUCE_DURATION` | Route, Visa | Logistics (nights), Experience (days), Budget, Optimizer (aligns `end_date`) |
+| `ADJUST_PACE` | Route, Visa, Logistics | Experience (slots/day), Budget, Optimizer |
+| `REMOVE_DESTINATION` | None (context modified) | Visa, Logistics, Experience, Budget, Optimizer |
+
+### Re-planning Workflow & API Endpoint
+
+Re-planning is exposed via `POST /api/v1/plan/replan` (and alias `POST /api/v1/plan/decision`). Clients submit `ReplanRequest` containing previous `itinerary` (or `trip_context`), `proposal_type`, and `target_value`. The backend returns `ReplanResponse` containing updated `FinalItinerary` and `replan_summary` detailing component reuse provenance.
 
 ---
 
@@ -979,12 +972,41 @@ Primary files:
 ```text
 src/api/
 ├── app.py
+├── models.py
 └── routes.py
+src/graph/
+└── streaming.py
 ```
 
-The API should not contain planning logic.
+The API should not contain planning logic. It translates between external requests/responses and the planning workflow.
 
-It translates between external requests/responses and the planning workflow.
+### Streaming Endpoints & Contracts (Phase 17)
+
+To provide real-time visibility into multi-agent decision steps:
+
+1. **`POST /api/v1/plan/stream`**:
+   - Request Body: `PlanRequest` (JSON)
+   - Response: `text/event-stream` (Server-Sent Events)
+   - Lifecycle: Streams progress events as nodes execute, terminating with `planning_completed` (containing the final `itinerary`) or `error`.
+
+2. **`GET /api/v1/plan/stream`**:
+   - Query Parameters: `origin`, `destination`, `start_date`, `end_date`, `duration_days`, `budget_inr`, `travel_style`, `pace`, `num_travelers`, `date_mode`.
+   - Response: `text/event-stream` for native browser `EventSource` consumption.
+
+3. **`POST /api/v1/plan/replan/stream`**:
+   - Request Body: `ReplanRequest` (JSON)
+   - Response: `text/event-stream` streaming selective re-planning events for only affected components.
+
+### SSE Message Specification
+
+Every message adheres to the SSE standard:
+```text
+event: <event_name>
+data: {"event": "<event_name>", "stage": "<stage>", "message": "<human_message>", "data": {...}, "timestamp": "<iso8601>"}
+```
+
+- **Information Hygiene:** Internal LangChain run IDs, execution metadata, and raw Python tracebacks are strictly excluded from client payloads. Only human-facing messages and structured stage summaries are broadcast.
+
 
 ---
 
@@ -1367,10 +1389,11 @@ Goal: Connect all planning nodes into a resilient, cyclical LangGraph execution 
 
 ## Stage 7 — API Streaming, Frontend & Hardening (Phases 17–20)
 
-- Phase 17: API Streaming (Real-time LangGraph event emission via SSE)
+- Phase 17: API Streaming (Completed — Real-time LangGraph event emission via SSE with dual POST/GET endpoints)
 - Phase 18: Frontend (Interactive web UI in Vite / React / TypeScript / pnpm)
 - Phase 19: End-to-End Test Matrix (Full regression and integration test matrix)
 - Phase 20: Production Hardening (Security, rate limiting, observability, packaging)
+
 
 Goal: Deliver a production-grade, warm Indian-inspired travel planner.
 

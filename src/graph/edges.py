@@ -140,11 +140,20 @@ def determine_affected_components(proposal_type: str) -> dict[str, bool]:
     """
     pt = proposal_type.upper().strip()
 
-    if pt == "INCREASE_BUDGET":
+    if pt in ("INCREASE_BUDGET", "ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET"):
         return {
             "visa": False,
             "logistics": False,
             "experience": False,
+            "budget": True,
+            "optimizer": True,
+        }
+
+    if pt == "ADJUST_PACE":
+        return {
+            "visa": False,
+            "logistics": False,
+            "experience": True,
             "budget": True,
             "optimizer": True,
         }

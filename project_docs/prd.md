@@ -512,11 +512,38 @@ If no acceptable itinerary can satisfy the user's budget and quality constraints
    - Lower travel style
    - Change transport expectations
    - Reduce activities
-5. Let the user choose.
-
 If the user changes the budget, the system should reuse valid work and re-plan only affected components.
 
+### 6.13 Human Decision Re-planning Flow
+
+When an itinerary requires traveler input (`NEEDS_USER_DECISION` or `INFEASIBLE`):
+1. The API exposes `POST /api/v1/plan/replan` (and alias `POST /api/v1/plan/decision`).
+2. The user submits their chosen trade-off action (`INCREASE_BUDGET`, `ACCEPT_REALISTIC_BUDGET`, `REDUCE_DURATION`, `ADJUST_TRAVEL_STYLE`, `ADJUST_PACE`, `REMOVE_DESTINATION`) with optional parameter values.
+3. Unaffected components are preserved without redundant provider queries (e.g. visa, logistics, and attractions remain intact during pure budget updates).
+4. The system produces an updated `FinalItinerary` with status `REPLANNED` and detailed re-planning provenance metadata.
+
 ---
+
+### 6.14 Real-time Planning Progress Streaming (SSE)
+
+Planning complex domestic or international journeys across multiple agents and providers can take 5–15 seconds. To provide a responsive, reassuring traveler experience:
+
+1. The API provides real-time Server-Sent Events (SSE) via `POST /api/v1/plan/stream` and `GET /api/v1/plan/stream`.
+2. The stream delivers step-by-step progress events:
+   - `planning_started`: Workflow initialization with travel parameters.
+   - `intake_completed`: Input validation and travel scope determination.
+   - `date_optimization_started` & `date_optimization_completed`: Multi-factor candidate window evaluation.
+   - `visa_started` & `visa_completed`: Indian passport visa analysis and entry requirements.
+   - `logistics_started` & `logistics_completed`: Multi-tier transport routes and lodging options.
+   - `experience_started` & `experience_completed`: Daily itineraries and curated culinary options.
+   - `budget_calculated`: Itemized financial breakdown and variance status.
+   - `optimization_started` & `optimization_completed`: Feasibility assessment and trade-offs.
+   - `planning_completed`: Final synthesized `FinalItinerary` delivered to the client.
+   - `warning` & `error`: Non-fatal warnings and graceful failure notifications.
+3. Information Hygiene: The stream communicates human-readable milestone messages and structured summaries without exposing raw internal prompts, LangChain IDs, or technical stack traces.
+
+---
+
 
 ## 7. Data and Tool Architecture Requirements
 

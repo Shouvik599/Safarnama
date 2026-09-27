@@ -189,6 +189,7 @@ def process_synthesizer(
     date_options: DateOptimizationResult | None = None,
     warnings: list[str] | None = None,
     errors: list[str] | None = None,
+    plan_status: str | None = None,
     trip_context: TripContext | None = None,
 ) -> FinalItinerary:
     """Synthesize upstream domain artifacts into a validated FinalItinerary.
@@ -275,14 +276,16 @@ def process_synthesizer(
     )
 
     # 5. Terminal Plan Status
-    if errors:
-        plan_status = "FAILED"
+    if plan_status and plan_status not in ("INITIALIZED", "PENDING", "IN_PROGRESS"):
+        resolved_status = plan_status
+    elif errors:
+        resolved_status = "FAILED"
     elif opt_result.action == OptimizationAction.USER_DECISION_REQUIRED:
-        plan_status = "NEEDS_USER_DECISION"
+        resolved_status = "NEEDS_USER_DECISION"
     elif opt_result.action == OptimizationAction.INFEASIBLE:
-        plan_status = "INFEASIBLE"
+        resolved_status = "INFEASIBLE"
     else:
-        plan_status = "COMPLETED"
+        resolved_status = "COMPLETED"
 
     return FinalItinerary(
         trip_id=trip_id,
@@ -295,7 +298,7 @@ def process_synthesizer(
         visa_verdict=visa_verdict,
         date_options=date_options,
         optimization_result=opt_result,
-        plan_status=plan_status,
+        plan_status=resolved_status,
         warnings=combined_warnings,
         is_estimated=has_estimated,
         created_at=datetime.now(UTC).isoformat(),
@@ -326,6 +329,7 @@ def synthesizer_node(state: dict[str, Any] | InitialPlanningState) -> dict[str, 
         date_options = None
         warnings = []
         errors = []
+        plan_status = None
     elif isinstance(state, dict):
         context = state.get("trip_context") or state.get("context")
         logistics_plan = state.get("logistics_plan")
@@ -336,6 +340,7 @@ def synthesizer_node(state: dict[str, Any] | InitialPlanningState) -> dict[str, 
         date_options = state.get("date_options")
         warnings = state.get("warnings", [])
         errors = state.get("errors", [])
+        plan_status = state.get("plan_status")
     else:
         raise SynthesizerValidationError(
             f"Invalid state object for synthesizer_node: {type(state)}"
@@ -351,6 +356,7 @@ def synthesizer_node(state: dict[str, Any] | InitialPlanningState) -> dict[str, 
         date_options=date_options,
         warnings=warnings,
         errors=errors,
+        plan_status=plan_status,
     )
 
     return {

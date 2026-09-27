@@ -14,10 +14,14 @@ from src.api.models import (
     PlanPreviewResponse,
     PlanRequest,
     PlanResponse,
+    ReplanRequest,
+    ReplanResponse,
     ToolStatusItem,
     ToolStatusResponse,
 )
-from src.graph.workflow import run_planning_graph
+from src.graph.streaming import stream_planning_graph, stream_replan_workflow
+from src.graph.workflow import replan_workflow, run_planning_graph
+from src.nodes.optimizer_node import OptimizerError
 from src.tools.calculator import (
     calculate_budget_breakdown,
     calculate_budget_variance,
@@ -338,6 +342,226 @@ def create_trip_plan(request: PlanRequest) -> PlanResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal trip planning error: {str(exc)}",
         ) from exc
+
+
+@router.post("/plan/replan", response_model=ReplanResponse)
+@router.post("/plan/decision", response_model=ReplanResponse, include_in_schema=False)
+def replan_trip(request: ReplanRequest) -> ReplanResponse:
+    """Submit a traveler trade-off decision and re-plan affected components.
+
+    Reuses unaffected work wherever valid.
+    """
+    try:
+        # 1. Resolve starting state
+        if request.itinerary:
+            itin = request.itinerary
+            target_val = request.target_value
+            if (
+                request.proposal_type.upper().strip()
+                in ("ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET")
+                and target_val is None
+            ):
+                target_val = itin.budget_breakdown.total_with_contingency_inr
+
+            current_state = {
+                "trip_context": itin.trip_context,
+                "logistics_plan": itin.logistics_plan,
+                "experience_plan": itin.experience_plan,
+                "budget_breakdown": itin.budget_breakdown,
+                "visa_verdict": itin.visa_verdict,
+                "date_options": itin.date_options,
+                "optimization_result": itin.optimization_result,
+                "warnings": itin.warnings,
+                "errors": [],
+            }
+        elif request.trip_context:
+            target_val = request.target_value
+            base_state = run_planning_graph(request.trip_context)
+            if (
+                request.proposal_type.upper().strip()
+                in ("ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET")
+                and target_val is None
+                and base_state.get("budget_breakdown")
+            ):
+                target_val = base_state["budget_breakdown"].total_with_contingency_inr
+            current_state = base_state
+        else:
+            raise ValueError("Either 'itinerary' or 'trip_context' must be provided to re-plan.")
+
+        # 2. Execute selective re-planning
+        replanned_state = replan_workflow(
+            current_state=current_state,  # type: ignore
+            proposal_type=request.proposal_type,
+            target_value=target_val,
+        )
+
+        final_itinerary = replanned_state.get("final_itinerary")
+        if not final_itinerary:
+            errors = replanned_state.get("errors") or [
+                "Re-planning workflow failed to synthesize an updated itinerary."
+            ]
+            raise ValueError("; ".join(errors))
+
+        return ReplanResponse(
+            status=replanned_state.get("plan_status", "REPLANNED"),
+            itinerary=final_itinerary,
+            replan_summary=replanned_state.get("replan_proposal") or {},
+            warnings=replanned_state.get("warnings", []),
+        )
+    except (ValueError, OptimizerError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal trip re-planning error: {str(exc)}",
+        ) from exc
+
+
+@router.post("/plan/stream")
+async def stream_plan_post(request: PlanRequest) -> StreamingResponse:
+    """Stream real-time multi-agent planning workflow progress events (SSE) from JSON request."""
+    try:
+        context = request.to_trip_context()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid plan request: {str(exc)}",
+        ) from exc
+
+    async def event_generator() -> AsyncGenerator[str, None]:
+        async for event in stream_planning_graph(context):
+            yield event.to_sse()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@router.get("/plan/stream")
+async def stream_plan_get(
+    origin: str,
+    destination: str,
+    start_date: str,
+    end_date: str | None = None,
+    duration_days: int | None = None,
+    budget_inr: float = 50000.0,
+    travel_style: str = "comfortable",
+    pace: str = "balanced",
+    num_travelers: int = 1,
+    date_mode: str = "exact",
+) -> StreamingResponse:
+    """Stream real-time planning progress events (SSE) via GET query parameters for EventSource."""
+    try:
+        plan_req = PlanRequest(
+            origin=origin,
+            destinations=[destination],
+            start_date=start_date,
+            end_date=end_date,
+            duration_days=duration_days,
+            budget_inr=budget_inr,
+            travel_style=travel_style,
+            pace=pace,
+            num_travelers=num_travelers,
+            date_mode=date_mode,
+        )
+        context = plan_req.to_trip_context()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid plan parameters: {str(exc)}",
+        ) from exc
+
+    async def event_generator() -> AsyncGenerator[str, None]:
+        async for event in stream_planning_graph(context):
+            yield event.to_sse()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@router.post("/plan/replan/stream")
+@router.post("/plan/decision/stream", include_in_schema=False)
+async def stream_replan_post(request: ReplanRequest) -> StreamingResponse:
+    """Stream selective re-planning progress events (SSE) following a trade-off decision."""
+    try:
+        if request.itinerary:
+            itin = request.itinerary
+            target_val = request.target_value
+            if (
+                request.proposal_type.upper().strip()
+                in ("ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET")
+                and target_val is None
+            ):
+                target_val = itin.budget_breakdown.total_with_contingency_inr
+
+            current_state = {
+                "trip_context": itin.trip_context,
+                "logistics_plan": itin.logistics_plan,
+                "experience_plan": itin.experience_plan,
+                "budget_breakdown": itin.budget_breakdown,
+                "visa_verdict": itin.visa_verdict,
+                "date_options": itin.date_options,
+                "optimization_result": itin.optimization_result,
+                "warnings": itin.warnings,
+                "errors": [],
+            }
+        elif request.trip_context:
+            target_val = request.target_value
+            base_state = run_planning_graph(request.trip_context)
+            if (
+                request.proposal_type.upper().strip()
+                in ("ACCEPT_REALISTIC_BUDGET", "ACCEPT_RECOMMENDED_BUDGET")
+                and target_val is None
+                and base_state.get("budget_breakdown")
+            ):
+                target_val = base_state["budget_breakdown"].total_with_contingency_inr
+            current_state = base_state
+        else:
+            raise ValueError("Either 'itinerary' or 'trip_context' must be provided to re-plan.")
+    except (ValueError, OptimizerError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Re-planning initialization failed: {str(exc)}",
+        ) from exc
+
+    async def event_generator() -> AsyncGenerator[str, None]:
+        async for event in stream_replan_workflow(
+            current_state=current_state,  # type: ignore
+            proposal_type=request.proposal_type,
+            target_value=target_val,
+        ):
+            yield event.to_sse()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/stream/events")

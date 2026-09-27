@@ -295,6 +295,7 @@ def replan_workflow(
     new_state["experience_plan"] = opt_output.experience_plan or updated_experience
     new_state["budget_breakdown"] = opt_output.budget_breakdown or updated_budget
     new_state["optimization_result"] = opt_output.optimization_result
+    new_state["date_options"] = current_state.get("date_options")
     new_state["replan_requested"] = True
     new_state["replan_proposal"] = {
         "proposal_type": proposal_type,
@@ -319,8 +320,10 @@ def replan_workflow(
         experience_plan=opt_output.experience_plan or updated_experience,
         budget_breakdown=opt_output.budget_breakdown or updated_budget,
         visa_verdict=updated_visa,
+        date_options=current_state.get("date_options"),
         optimization_result=opt_output.optimization_result,
         warnings=new_state.get("warnings") or [],
+        plan_status=new_state["plan_status"],
     )
     new_state["final_itinerary"] = final_itinerary
 
