@@ -12,9 +12,12 @@ from src.api.models import (
     HealthResponse,
     PlanPreviewRequest,
     PlanPreviewResponse,
+    PlanRequest,
+    PlanResponse,
     ToolStatusItem,
     ToolStatusResponse,
 )
+from src.graph.workflow import run_planning_graph
 from src.tools.calculator import (
     calculate_budget_breakdown,
     calculate_budget_variance,
@@ -305,6 +308,36 @@ def preview_trip_plan(request: PlanPreviewRequest) -> PlanPreviewResponse:
             "status": "Forecast available upon date selection",
         },
     )
+
+
+@router.post("/plan", response_model=PlanResponse)
+def create_trip_plan(request: PlanRequest) -> PlanResponse:
+    """Execute end-to-end multi-agent trip planning workflow and synthesize final itinerary."""
+    try:
+        context = request.to_trip_context()
+        graph_state = run_planning_graph(context)
+        final_itinerary = graph_state.get("final_itinerary")
+        if not final_itinerary:
+            errors = graph_state.get("errors") or [
+                "Planning workflow failed to synthesize an itinerary."
+            ]
+            raise ValueError("; ".join(errors))
+
+        return PlanResponse(
+            status=graph_state.get("plan_status", "COMPLETED"),
+            itinerary=final_itinerary,
+            warnings=graph_state.get("warnings", []),
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal trip planning error: {str(exc)}",
+        ) from exc
 
 
 @router.get("/stream/events")

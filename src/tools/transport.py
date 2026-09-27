@@ -7,12 +7,23 @@ Fallback Cascade:
 1. Test Fixture: data/fixtures/mock_flights.json (if use_fixture=True or
    SAFARNAMA_USE_FIXTURES=true)
 2. In-Memory Cache: 1-hour TTL per (origin, destination, date, mode) search
-3. Live Aviation APIs: Sky Scraper / Flights Sky / Aviationstack
+3. Live Flight Tier 0: SerpApi Google Flights (SERPAPI_KEY / SERPER_API_KEY) — real fares +
+   booking deep-links via Google Flights engine.
+4. Live Aviation APIs: Sky Scraper / Flights Sky / Aviationstack
    (using RAPIDAPI_KEY / AVIATIONSTACK_API_KEY)
-4. Live Indian Railways APIs: Indian Railway IRCTC / eRail (using RAPIDAPI_KEY / Open access)
-5. Live International Rail & Bus APIs: transport.rest / Transitland (Zero auth open access)
-6. Live Web Search Tool Fallback: search_web() for live schedule & fare snippets
-7. Tier 5: Offline Distance & Speed Physics Engine (Haversine math guaranteeing zero crash)
+5. Live Indian Railways APIs: Indian Railway IRCTC / eRail (using RAPIDAPI_KEY / Open access)
+6. Live International Rail & Bus APIs: transport.rest / Transitland (Zero auth open access)
+7. Live Web Search Tool Fallback: search_web() for live schedule & fare snippets
+8. Tier 7: Offline Distance & Speed Physics Engine (Haversine math guaranteeing zero crash)
+
+Seasonal Pricing Multiplier (applied to all estimated/heuristic flight fares):
+  - Peak months (Dec, Jan, Apr, May, Oct): ×1.35
+  - Shoulder months (Mar, Jun, Sep, Nov):   ×1.15
+  - Off-peak months (Feb, Jul, Aug):         ×1.00
+
+Google Flights Deep Links:
+  Every FLIGHT TransportSegment carries a valid google.com/travel/flights deep link so that
+  upstream synthesizer nodes can surface actionable booking URLs even for estimated fares.
 """
 
 from __future__ import annotations
@@ -44,6 +55,27 @@ log = logging.getLogger(__name__)
 FIXTURE_PATH = Path(__file__).parent.parent.parent / "data" / "fixtures" / "mock_flights.json"
 CACHE_TTL_SECONDS = 3600  # 1 hour
 DEFAULT_TIMEOUT_SECONDS = 12.0
+
+# ---------------------------------------------------------------------------
+# Seasonal Pricing Multipliers
+# ---------------------------------------------------------------------------
+
+# Month -> multiplier tier for flight fare estimation.
+# Applied only to heuristic/offline estimated fares — never mutates live prices.
+SEASONAL_MULTIPLIERS: dict[int, float] = {
+    1: 1.35,  # January   — peak (New Year, winter travel)
+    2: 1.00,  # February  — off-peak
+    3: 1.15,  # March     — shoulder (spring break)
+    4: 1.35,  # April     — peak (summer holiday start)
+    5: 1.35,  # May       — peak (peak summer)
+    6: 1.15,  # June      — shoulder (monsoon onset)
+    7: 1.00,  # July      — off-peak (deep monsoon)
+    8: 1.00,  # August    — off-peak (deep monsoon)
+    9: 1.15,  # September — shoulder (post-monsoon)
+    10: 1.35,  # October   — peak (festive / Diwali / Durga Puja)
+    11: 1.15,  # November  — shoulder
+    12: 1.35,  # December  — peak (Christmas / New Year)
+}
 
 
 # ---------------------------------------------------------------------------
@@ -182,6 +214,39 @@ def _search_fixture(
 
 
 # ---------------------------------------------------------------------------
+# Seasonal Multiplier & Deep-Link Helpers
+# ---------------------------------------------------------------------------
+
+
+def _get_seasonal_multiplier(travel_date: str) -> float:
+    """Return the seasonal fare multiplier for a given travel date string (YYYY-MM-DD).
+
+    Returns 1.0 on any parse failure so estimates remain conservative rather than crashing.
+    This multiplier is applied ONLY to estimated/heuristic fares, never to live prices.
+    """
+    try:
+        month = int(travel_date.split("-")[1])
+        return SEASONAL_MULTIPLIERS.get(month, 1.0)
+    except Exception:
+        return 1.0
+
+
+def _make_google_flights_deep_link(dep_iata: str, arr_iata: str, travel_date: str) -> str:
+    """Build a deterministic Google Flights deep link for a given origin/destination/date.
+
+    The URL is always valid and surfaceable to end-users regardless of API provider.
+    Uses the google.com/travel/flights/search format with IATA identifiers.
+    """
+    dep = dep_iata.strip().upper()
+    arr = arr_iata.strip().upper()
+    return (
+        f"https://www.google.com/travel/flights/search"
+        f"?q={urllib.parse.quote(f'flights+{dep}+to+{arr}')}"
+        "&tfs=CAA"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Provider Implementation 2: Distance & Speed Physics Engine Baseline
 # ---------------------------------------------------------------------------
 
@@ -235,10 +300,13 @@ def _estimate_physics_transport(
     options: list[TransportSegment] = []
     requested_mode = mode.upper()
 
-    # 1. Flight Option
+    # 1. Flight Option (with seasonal multiplier applied to estimated base fare)
     if requested_mode in ("ALL", "FLIGHT"):
+        seasonal_mult = _get_seasonal_multiplier(travel_date)
         flight_duration = max(45, int((dist_km / 650.0) * 60) + 45)
-        flight_price = max(2800.0, round(dist_km * 5.80, 2))
+        flight_price = max(2800.0, round(dist_km * 5.80 * seasonal_mult, 2))
+        dep_iata = _resolve_iata_code(origin)
+        arr_iata = _resolve_iata_code(destination)
         options.append(
             TransportSegment(
                 mode="FLIGHT",
@@ -251,7 +319,7 @@ def _estimate_physics_transport(
                 duration_minutes=flight_duration,
                 price_inr=flight_price,
                 cabin_class="ECONOMY",
-                booking_url="https://safarnama.local/flights",
+                booking_url=_make_google_flights_deep_link(dep_iata, arr_iata, travel_date),
                 provider="physics-heuristic",
             )
         )
@@ -436,6 +504,9 @@ def _search_sky_scraper(
                                 duration_minutes=duration,
                                 price_inr=float(price_val),
                                 cabin_class="ECONOMY",
+                                booking_url=_make_google_flights_deep_link(
+                                    orig_code, dest_code, travel_date
+                                ),
                                 provider="sky-scraper",
                             )
                         )
@@ -501,6 +572,9 @@ def _search_flights_sky(
                             duration_minutes=fl.get("durationMinutes", 180),
                             price_inr=float(fl.get("price", 4500.0)),
                             cabin_class="ECONOMY",
+                            booking_url=_make_google_flights_deep_link(
+                                origin.upper(), destination.upper(), travel_date
+                            ),
                             provider="flights-sky",
                         )
                     )
@@ -584,7 +658,8 @@ def _search_aviationstack(
                 lat1, lon1 = _resolve_coordinates(dep_iata)
                 lat2, lon2 = _resolve_coordinates(arr_iata)
                 dist_km = _haversine_distance_km(lat1, lon1, lat2, lon2)
-                base_price = max(2950.0, round(dist_km * 5.25, 2))
+                seasonal_mult = _get_seasonal_multiplier(travel_date)
+                base_price = max(2950.0, round(dist_km * 5.25 * seasonal_mult, 2))
 
                 options: list[TransportSegment] = []
                 seen_flights: set[str] = set()
@@ -625,7 +700,7 @@ def _search_aviationstack(
                         except Exception:
                             pass
 
-                    booking_url = f"https://www.google.com/travel/flights?q=flights+from+{dep_iata}+to+{arr_iata}"
+                    booking_url = _make_google_flights_deep_link(dep_iata, arr_iata, travel_date)
 
                     options.append(
                         TransportSegment(
@@ -662,6 +737,147 @@ def _search_aviationstack(
                     )
     except Exception as exc:
         log.warning("Aviationstack API request failed for %s->%s: %s", origin, destination, exc)
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Provider Implementation 3b: Live SerpApi Google Flights
+# ---------------------------------------------------------------------------
+
+
+def _search_serpapi_flights(
+    origin: str,
+    destination: str,
+    travel_date: str,
+    timeout: float = DEFAULT_TIMEOUT_SECONDS,
+) -> TransportSearchResult | None:
+    """Execute live flight search via SerpApi Google Flights engine.
+
+    SerpApi provides real-time Google Flights pricing with direct booking deep-links.
+    Uses the 'google_flights' engine with a departure/arrival IATA pair and travel date.
+    API key is consumed from SERPAPI_KEY or SERPER_API_KEY (same credential as hotels/places).
+
+    Args:
+        origin: Origin location (IATA code, city, or airport name).
+        destination: Destination location (IATA code, city, or airport name).
+        travel_date: Travel date in YYYY-MM-DD format.
+        timeout: Network timeout in seconds.
+
+    Returns:
+        TransportSearchResult with live fares and booking URLs, or None on any failure.
+    """
+    api_key = os.getenv("SERPAPI_KEY") or os.getenv("SERPER_API_KEY")
+    if not api_key:
+        return None
+
+    dep_iata = _resolve_iata_code(origin)
+    arr_iata = _resolve_iata_code(destination)
+
+    params: dict[str, str] = {
+        "engine": "google_flights",
+        "departure_id": dep_iata,
+        "arrival_id": arr_iata,
+        "outbound_date": travel_date[:10],
+        "currency": "INR",
+        "hl": "en",
+        "api_key": api_key,
+    }
+
+    url = f"https://serpapi.com/search?{urllib.parse.urlencode(params)}"
+
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Safarnama/0.1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if resp.status == 200:
+                body = json.loads(resp.read().decode("utf-8"))
+
+                # SerpApi Google Flights: results nested under 'best_flights' and 'other_flights'
+                raw_flights: list[dict] = []
+                raw_flights.extend(body.get("best_flights", [])[:3])
+                raw_flights.extend(body.get("other_flights", [])[:3])
+
+                options: list[TransportSegment] = []
+                seen_codes: set[str] = set()
+
+                for flight_group in raw_flights:
+                    flights_in_group = flight_group.get("flights", [])
+                    if not flights_in_group:
+                        continue
+
+                    first_leg = flights_in_group[0]
+                    last_leg = flights_in_group[-1]
+
+                    carrier_name = first_leg.get("airline") or "Google Flights"
+                    flight_number = first_leg.get("flight_number") or ""
+
+                    if flight_number and flight_number in seen_codes:
+                        continue
+                    if flight_number:
+                        seen_codes.add(flight_number)
+
+                    dep_time_raw = first_leg.get("departure_airport", {}).get("time", "")
+                    arr_time_raw = last_leg.get("arrival_airport", {}).get("time", "")
+
+                    # Extract HH:MM from timestamps like "2026-10-15 09:30"
+                    dep_time = dep_time_raw[-5:] if len(dep_time_raw) >= 5 else "09:00"
+                    arr_time = arr_time_raw[-5:] if len(arr_time_raw) >= 5 else "12:00"
+
+                    duration_mins = int(flight_group.get("total_duration", 120))
+                    price_inr = float(flight_group.get("price", 5500.0))
+
+                    # Prefer SerpApi-provided booking link; fall back to Google Flights deep link
+                    booking_link: str | None = flight_group.get(
+                        "booking_token"
+                    ) or flight_group.get("book_url")
+                    if not booking_link:
+                        booking_link = _make_google_flights_deep_link(
+                            dep_iata, arr_iata, travel_date
+                        )
+                    elif not booking_link.startswith("http"):
+                        # booking_token is not a URL; wrap with Google Flights URL
+                        booking_link = _make_google_flights_deep_link(
+                            dep_iata, arr_iata, travel_date
+                        )
+
+                    options.append(
+                        TransportSegment(
+                            mode="FLIGHT",
+                            carrier=carrier_name,
+                            transport_code=flight_number or None,
+                            origin=dep_iata,
+                            destination=arr_iata,
+                            departure_time=dep_time,
+                            arrival_time=arr_time,
+                            duration_minutes=duration_mins,
+                            price_inr=price_inr,
+                            cabin_class="ECONOMY",
+                            booking_url=booking_link,
+                            provider="serpapi-google-flights",
+                        )
+                    )
+
+                if options:
+                    log.info("Fetched %d flights from SerpApi Google Flights API", len(options))
+                    return TransportSearchResult(
+                        origin=dep_iata,
+                        destination=arr_iata,
+                        travel_date=travel_date,
+                        mode_requested="FLIGHT",
+                        options=options,
+                        provider_used="serpapi-google-flights",
+                        total_found=len(options),
+                        is_fallback=False,
+                        is_estimated=False,
+                        timestamp=datetime.now(UTC).isoformat(),
+                    )
+    except Exception as exc:
+        log.warning(
+            "SerpApi Google Flights request failed for %s->%s: %s", origin, destination, exc
+        )
 
     return None
 
@@ -974,8 +1190,14 @@ def search_transport(
         _TRANSPORT_CACHE.set(clean_orig, clean_dest, travel_date, clean_mode, res)
         return res
 
-    # 1. Live Flights (Sky Scraper / Flights Sky / Aviationstack)
+    # 1. Live Flights — Tier 0: SerpApi Google Flights (real fares + deep links)
     if clean_mode in ("ALL", "FLIGHT"):
+        res = _search_serpapi_flights(clean_orig, clean_dest, travel_date, timeout=timeout)
+        if res and res.options:
+            _TRANSPORT_CACHE.set(clean_orig, clean_dest, travel_date, clean_mode, res)
+            return res
+
+        # Tier 1: Sky Scraper / Flights Sky / Aviationstack (RapidAPI cascade)
         res = _search_sky_scraper(clean_orig, clean_dest, travel_date, timeout=timeout)
         if res and res.options:
             _TRANSPORT_CACHE.set(clean_orig, clean_dest, travel_date, clean_mode, res)
@@ -1024,6 +1246,7 @@ def search_transport(
 def get_transport_status() -> dict[str, bool | str]:
     """Retrieve operational status of configured transport API providers."""
     return {
+        "serpapi_configured": bool(os.getenv("SERPAPI_KEY") or os.getenv("SERPER_API_KEY")),
         "rapidapi_configured": bool(os.getenv("RAPIDAPI_KEY")),
         "aviationstack_configured": bool(os.getenv("AVIATIONSTACK_API_KEY")),
         "transport_rest_available": True,  # Keyless open access

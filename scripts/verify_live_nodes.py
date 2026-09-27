@@ -15,6 +15,7 @@ import sys
 import time
 
 from dotenv import load_dotenv
+from src.graph import replan_workflow, run_planning_graph
 from src.models.trip import (
     BudgetMode,
     DateMode,
@@ -298,10 +299,181 @@ def test_live_optimizer_node(state, budget, logistics, experience) -> None:
     assert output.budget_breakdown is not None
 
 
+def test_live_langgraph_orchestration() -> None:
+    print_banner("6. LIVE TEST: LangGraph Orchestration (Phase 12)")
+    print("Executing full autonomous StateGraph workflow with live APIs...")
+
+    trip_request = {
+        "origin": "DEL",
+        "destinations": ["GOI"],
+        "scope": "DOMESTIC",
+        "dates": {
+            "mode": "EXACT",
+            "start_date": "2026-10-15",
+            "end_date": "2026-10-18",
+            "duration_days": 3,
+        },
+        "party": {"adults": 2, "children": 0},
+        "budget": {"amount_inr": 60000.0, "mode": "TOTAL"},
+        "travel_style": "COMFORTABLE",
+        "pace": "BALANCED",
+        "activity_preferences": ["BEACH", "HISTORICAL"],
+    }
+
+    t0 = time.perf_counter()
+    graph_output = run_planning_graph(trip_request)
+    elapsed = time.perf_counter() - t0
+
+    print(f"\n[OK] Full LangGraph StateGraph executed in {elapsed:.4f}s:")
+    print(f"  - Terminal Plan Status:   {graph_output.get('plan_status')}")
+    print(f"  - Scope Routed:           {graph_output.get('travel_scope')}")
+    print(f"  - Logistics Plan Legs:    {len(graph_output['logistics_plan'].transport_legs)}")
+    print(f"  - Logistics Hotel:        {graph_output['logistics_plan'].hotel_stays[0].hotel_name}")
+    print(f"  - Experience Days:        {len(graph_output['experience_plan'].days)}")
+    total_inr = graph_output["budget_breakdown"].total_with_contingency_inr
+    print(f"  - Budget Projected Total: INR {total_inr:,.2f}")
+    print(f"  - Optimization Action:    {graph_output['optimization_result'].action.value}")
+    print(f"  - Total Warnings Caught:  {len(graph_output.get('warnings', []))}")
+
+    assert graph_output.get("trip_context") is not None
+    assert graph_output.get("logistics_plan") is not None
+    assert graph_output.get("experience_plan") is not None
+    assert graph_output.get("budget_breakdown") is not None
+    assert graph_output.get("optimization_result") is not None
+
+    print("\nTesting Selective Re-planning with Reuse of Unaffected Work...")
+    t_replan = time.perf_counter()
+    replanned = replan_workflow(
+        current_state=graph_output,
+        proposal_type="INCREASE_BUDGET",
+        target_value=90000.0,
+    )
+    elapsed_replan = time.perf_counter() - t_replan
+
+    print(f"[OK] Re-planning completed in {elapsed_replan:.4f}s:")
+    print(f"  - Re-planning Proposal:   {replanned['replan_proposal']['proposal_type']}")
+    print(f"  - Reused Components:      {replanned['replan_proposal']['reused_components']}")
+    print(f"  - Rerun Components:       {replanned['replan_proposal']['rerun_components']}")
+    print(f"  - New Status:             {replanned.get('plan_status')}")
+
+    assert replanned["replan_requested"] is True
+    assert "logistics" in replanned["replan_proposal"]["reused_components"]
+    assert "experience" in replanned["replan_proposal"]["reused_components"]
+    assert replanned["trip_context"].budget.amount_inr == 90000.0
+
+
+def test_live_vertical_slice() -> None:
+    print_banner("7. LIVE TEST: End-to-End Vertical Slice (API & Synthesizer - Phase 13)")
+    print("Controlled Scenario: Delhi -> Goa, 2 adults, 4 days, Comfortable, ₹100,000 budget")
+    print("Executing POST /api/v1/plan via FastAPI service...")
+
+    from fastapi.testclient import TestClient
+    from src.api.app import app
+
+    client = TestClient(app)
+    payload = {
+        "origin": "Delhi",
+        "destinations": ["Goa"],
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-04",
+        "adults": 2,
+        "children": 0,
+        "budget_inr": 100000.0,
+        "travel_style": "COMFORTABLE",
+        "pace": "BALANCED",
+        "activity_preferences": ["beaches", "relaxation"],
+        "must_visits": ["Baga Beach"],
+    }
+
+    t0 = time.perf_counter()
+    resp = client.post("/api/v1/plan", json=payload)
+    elapsed = time.perf_counter() - t0
+
+    assert resp.status_code == 200, f"Expected 200 OK, got {resp.status_code}: {resp.text}"
+    data = resp.json()
+    itinerary = data["itinerary"]
+
+    print(f"\n[OK] Vertical Slice API response received in {elapsed:.4f}s:")
+    print(f"  - Status:            {data['status']}")
+    print(f"  - Title:             {itinerary['title']}")
+    print(f"  - Trip ID:           {itinerary['trip_id']}")
+    print(f"  - Transport Legs:    {len(itinerary['logistics_plan']['transport_legs'])}")
+    print(f"  - Hotel Stays:       {len(itinerary['logistics_plan']['hotel_stays'])}")
+    print(f"  - Experience Days:   {len(itinerary['experience_plan']['days'])}")
+    total_proj = itinerary["budget_breakdown"]["total_with_contingency_inr"]
+    print(f"  - Projected Total:   INR {total_proj:,.2f}")
+    print(f"  - Estimated Flag:    {itinerary['is_estimated']}")
+    print(f"  - Summary:           {itinerary['summary'][:150]}...")
+
+    assert itinerary["title"]
+    assert itinerary["summary"]
+    assert total_proj > 0
+
+
+def test_live_international_vertical_slice() -> None:
+    print_banner("8. LIVE TEST: International Vertical Slice (API & Live Visa - Phase 14)")
+    print(
+        "Controlled Scenario: Delhi -> Bangkok, Thailand, 2 adults, 4 days, "
+        "Comfortable, ₹150,000 budget"
+    )
+    print("Executing POST /api/v1/plan via FastAPI service...")
+
+    from fastapi.testclient import TestClient
+    from src.api.app import app
+
+    client = TestClient(app)
+    payload = {
+        "origin": "Delhi",
+        "destinations": ["Bangkok, Thailand"],
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-05",
+        "adults": 2,
+        "children": 0,
+        "budget_inr": 150000.0,
+        "travel_style": "COMFORTABLE",
+        "pace": "BALANCED",
+        "scope": "INTERNATIONAL",
+        "activity_preferences": ["temples", "street food", "culture"],
+    }
+
+    t0 = time.perf_counter()
+    resp = client.post("/api/v1/plan", json=payload)
+    elapsed = time.perf_counter() - t0
+
+    assert resp.status_code == 200, f"Expected 200 OK, got {resp.status_code}: {resp.text}"
+    data = resp.json()
+    itinerary = data["itinerary"]
+
+    print(f"\n[OK] International Vertical Slice API response received in {elapsed:.4f}s:")
+    print(f"  - Status:            {data['status']}")
+    print(f"  - Title:             {itinerary['title']}")
+    print(f"  - Trip ID:           {itinerary['trip_id']}")
+    print(f"  - Scope:             {itinerary['trip_context']['scope']}")
+    visa = itinerary["visa_verdict"]
+    print(f"  - Visa Bypass:       {visa['is_domestic_bypass']}")
+    print(f"  - Visa Countries:    {[c['country_name'] for c in visa['countries']]}")
+    print(f"  - Total Visa Cost:   INR {visa['total_visa_cost_inr']:,.2f}")
+    print(f"  - Transport Legs:    {len(itinerary['logistics_plan']['transport_legs'])}")
+    print(f"  - Hotel Stays:       {len(itinerary['logistics_plan']['hotel_stays'])}")
+    print(f"  - Experience Days:   {len(itinerary['experience_plan']['days'])}")
+    total_proj = itinerary["budget_breakdown"]["total_with_contingency_inr"]
+    print(f"  - Projected Total:   INR {total_proj:,.2f}")
+    print(f"  - Summary:           {itinerary['summary'][:160]}...")
+
+    assert itinerary["title"]
+    assert itinerary["summary"]
+    assert visa["is_domestic_bypass"] is False
+    assert len(visa["countries"]) >= 1
+    assert total_proj > 0
+
+
 def main() -> None:
     print("\n" + "#" * 70)
     print("  SAFARNAMA LIVE EXTERNAL INTEGRATION TEST SUITE")
-    print("  Validates all 5 planning stages (Visa, Logistics, Experience, Budget, Optimizer)")
+    print(
+        "  Validates all 8 stages "
+        "(Visa, Logistics, Experience, Budget, Optimizer, Graph, Slice, Intl Slice)"
+    )
     print("#" * 70)
 
     try:
@@ -310,9 +482,12 @@ def main() -> None:
         state, experience = test_live_experience_node(logistics)
         budget = test_live_budget_node(state, logistics, experience)
         test_live_optimizer_node(state, budget, logistics, experience)
+        test_live_langgraph_orchestration()
+        test_live_vertical_slice()
+        test_live_international_vertical_slice()
 
         print("\n" + "=" * 70)
-        print("  ALL 5 LIVE PLANNING NODE INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("  ALL 8 LIVE PLANNING INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
         print("=" * 70 + "\n")
     except Exception as exc:
         print(f"\n[FAIL] Live test failed with error: {exc}", file=sys.stderr)
