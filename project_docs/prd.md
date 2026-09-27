@@ -157,24 +157,22 @@ V1 supports:
 
 The architecture should remain extensible to individual traveler profiles later.
 
-### 5.5 Travel dates
+### 5.5 Travel dates (Implemented — Phase 15)
 
 The user can choose any of:
 
-1. **Exact dates**
-2. **Flexible date window**
-3. **Find suitable dates within a window**
+1. **Exact dates (`DateMode.EXACT`)**: User specifies concrete departure and return dates. Planner confirms dates and assigns an overall quality score.
+2. **Flexible date window (`DateMode.FLEXIBLE`)**: User provides a base start date with an allowed shift window (e.g. ±3 days). Planner evaluates shifted candidate windows.
+3. **Find suitable dates within a window (`DateMode.FIND_BEST`)**: User provides a broader calendar window (e.g., month of November) and desired duration. Planner evaluates candidate windows across the span.
 
-For date optimization, the planner balances:
+For date optimization, the planner evaluates:
 
-- Cost
-- Weather
-- Attraction suitability
-- Route feasibility
-- Availability
-- Overall trip quality
+- **Logistics Pricing**: Transport (flights with seasonal multiplier: peak ×1.35, shoulder ×1.15, off-peak ×1.00) + lodging
+- **Weather Suitability**: Rain probability and temperature comfort from historical monthly climate profiles
+- **Calendar Convenience**: Weekend travel efficiency (+10 pt bonus for windows spanning Saturday and Sunday)
+- **Composite Quality Score (0–100)**: Weighted score balancing 45% price, 45% weather, and weekend bonus.
 
-It should present the recommended date range plus 2–3 alternatives and their main trade-offs.
+The final itinerary includes the recommended date range plus 2–3 ranked alternatives, composite quality scores, and structured trade-offs (logistics costs, weather conditions, crowd/leave implications).
 
 ### 5.6 Trip duration
 

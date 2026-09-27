@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 14 — International Vertical Slice (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete)
-Test Suite: 524 unit tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 15 — Flexible Dates (Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates & Multi-Factor Candidate Window Optimization Complete)
+Test Suite: 545 unit tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff linting and formatting
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, the first complete domestic vertical slice (`POST /api/v1/plan`), and the international vertical slice with verified Indian passport visa synthesis and Schengen optimization. It also includes an enhanced transport layer featuring Tier-0 SerpApi Google Flights with real fares, deterministic seasonal demand multipliers, and universal live Google Flights deep linking. **It is not yet production-ready**, nor is the full frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, the complete domestic and international vertical slices (`POST /api/v1/plan`) with verified Indian passport visa synthesis and Schengen optimization, and flexible date optimization with multi-factor quality scoring. **It is not yet production-ready**, nor is the full frontend interface implemented.
 
 | Phase        | Description                                                                                             | Status       |
 | --------------| ---------------------------------------------------------------------------------------------------------| --------------|
@@ -33,7 +33,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 12** | LangGraph Orchestration (StateGraph, parallel nodes, state reduction)                                   | **Complete** |
 | **Phase 13** | First Complete Vertical Slice (End-to-end domestic itinerary generation)                                | **Complete** |
 | **Phase 14** | International Vertical Slice (End-to-end international with visa integration)                           | **Complete** |
-| **Phase 15** | Flexible Dates (Candidate date window optimization)                                                     | Planned      |
+| **Phase 15** | Flexible Dates (Candidate date window optimization, multi-factor scoring)                                | **Complete** |
 | **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution)                                | Planned      |
 | **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph)                                             | Planned      |
 | **Phase 18** | Frontend (Interactive web user interface)                                                               | Planned      |
@@ -142,8 +142,14 @@ Generic conversational AI chatbots fail at this task because they:
   - Multi-hop international transport legs and sequential hotel stays across foreign destinations.
   - Deterministic visa cost summation and integration into `BudgetBreakdown`, contingency buffer, and `FinalItinerary`.
   - Executive summary and traveler advisories dynamically enriched with Indian passport visa requirements, processing times, and advance notice rules.
+- **Date Optimization & Flexible Planning Engine (`src/nodes/date_node.py`, `src/models/trip.py`)**:
+  - 3 date operational modes: `DateMode.EXACT` (confirms dates with quality score), `DateMode.FLEXIBLE` (±N days shift optimization), and `DateMode.FIND_BEST` (sliding window sampling across calendar window).
+  - Multi-factor evaluation balancing logistics pricing (transport + accommodation with seasonal demand multipliers), weather friendliness (rain probability and temperature comfort), and calendar convenience (+10 pt weekend weighting bonus).
+  - Composite quality score on a 0–100 scale (`0.45 * price_score + 0.45 * weather_score + weekend_bonus`).
+  - Transparent trade-offs: Surfaces estimated logistics costs, weather summaries, and leave/crowd observations across top recommendation and 2–3 ranked alternatives.
+  - Downstream graph integration: Updates `trip_context` dates so downstream nodes plan on concrete optimal dates while preserving alternatives in `FinalItinerary.date_options`.
 - **Dual Verification Testing Architecture**:
-  - **Hermetic Offline Test Harness**: 524 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
+  - **Hermetic Offline Test Harness**: 545 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
   - **Live Network Integration Verification**: Automated 8-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes, domestic vertical slice, and international vertical slice.
 
 ### Planned Capabilities (Future Phases)

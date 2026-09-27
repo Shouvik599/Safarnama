@@ -26,6 +26,7 @@ from src.graph.edges import (
 from src.graph.state import PlanGraphState, create_initial_state
 from src.models.trip import TripContext
 from src.nodes.budget_node import budget_node, process_budget
+from src.nodes.date_node import date_node
 from src.nodes.experience_node import experience_node, process_experience
 from src.nodes.intake_node import intake_node
 from src.nodes.logistics_node import logistics_node, process_logistics
@@ -95,6 +96,7 @@ def build_planning_graph() -> CompiledStateGraph:
 
     # 1. Register specialized planning nodes
     builder.add_node("intake", _wrap_safe_node(intake_node, "intake"))
+    builder.add_node("date_optimizer", _wrap_safe_node(date_node, "date_optimizer"))
     builder.add_node("visa", _wrap_safe_node(visa_node, "visa"))
     builder.add_node("logistics", _wrap_safe_node(logistics_node, "logistics"))
     builder.add_node("experience", _wrap_safe_node(experience_node, "experience"))
@@ -104,12 +106,13 @@ def build_planning_graph() -> CompiledStateGraph:
 
     # 2. Add edges and conditional routing
     builder.add_edge(START, "intake")
+    builder.add_edge("intake", "date_optimizer")
 
-    # Scope routing from Intake:
+    # Scope routing from Date Optimizer:
     # International -> Visa
     # Domestic -> Parallel fan-out to ['logistics', 'experience']
     builder.add_conditional_edges(
-        "intake",
+        "date_optimizer",
         route_scope,
         ["visa", "logistics", "experience", END],
     )

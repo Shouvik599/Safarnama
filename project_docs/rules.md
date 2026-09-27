@@ -1137,3 +1137,28 @@ Whenever any environment variable is added, modified, renamed, or removed in `.e
 - Any architecture or tooling specifications in `project_docs/architecture.md`, `project_docs/rules.md`, and `project_docs/memory.md` that discuss provider integration or environment configuration must be updated in lockstep.
 - An implementation task or phase is **not complete** if environment variables were introduced or altered without updating `.env.example`, `README.md`, and the project docs.
 
+---
+
+# 47. Flexible Date Optimization
+
+When planning itineraries with date flexibility (`FLEXIBLE` or `FIND_BEST` modes):
+
+## 47.1 Deterministic Multi-Factor Scoring
+- Candidate window evaluation must be 100% deterministic (zero LLM math).
+- Multi-factor evaluation combines:
+  1. Pricing variance (outbound/return transport + accommodation with seasonal multipliers).
+  2. Weather suitability index (temperature and precipitation favorability).
+  3. Calendar convenience (weekend weighting bonus for Friday/Saturday departure convenience).
+- Composite quality score must be normalized to a standard [0, 100] range.
+
+## 47.2 Operational Modes
+- `EXACT`: Skips candidate evaluation, evaluates the exact dates, and sets `date_options=None`.
+- `FLEXIBLE`: Explores candidate windows shifted by up to $\pm \text{flexibility\_days}$ (clamped between 3 and 7 days).
+- `FIND_BEST`: Steps through the complete search window `[window_start, window_end]` with a sliding window matching `duration_days`.
+
+## 47.3 Downstream Date Synchronization
+- The Date Optimizer Node runs immediately after the Intake Node (`START -> intake -> date_optimizer`).
+- Downstream nodes (`logistics_node`, `experience_node`, `budget_node`) plan against the concrete chosen dates (`trip_context.dates.start_date` and `end_date`), ensuring continuous dates across flights, hotel stays, and daily itineraries.
+- The `DateOptimizationResult` is stored in state (`state["date_options"]`) and passed into `FinalItinerary.date_options`.
+
+

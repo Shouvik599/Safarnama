@@ -208,6 +208,87 @@ class TripDates(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Date Optimization Models (Phase 15)
+# ---------------------------------------------------------------------------
+
+
+class DateCandidate(BaseModel):
+    """A candidate travel date window evaluated during date optimization."""
+
+    model_config = ConfigDict(frozen=True)
+
+    start_date: str = Field(description="Trip start date (YYYY-MM-DD).")
+    end_date: str = Field(description="Trip end date (YYYY-MM-DD).")
+    duration_days: int = Field(ge=1, description="Duration in days.")
+
+    # Financial evaluation
+    estimated_transport_cost_inr: float = Field(
+        default=0.0, ge=0.0, description="Estimated total transport cost in INR."
+    )
+    estimated_hotel_cost_inr: float = Field(
+        default=0.0, ge=0.0, description="Estimated total accommodation cost in INR."
+    )
+    total_logistics_cost_inr: float = Field(
+        default=0.0, ge=0.0, description="Sum of transport and hotel costs in INR."
+    )
+
+    # Weather evaluation
+    weather_summary: str = Field(
+        default="Mild conditions",
+        description="Summary of weather forecast for this date window.",
+    )
+    avg_temperature_c: float | None = Field(
+        default=None, description="Average forecasted temperature in Celsius."
+    )
+    rain_probability_pct: float | None = Field(
+        default=None, ge=0.0, le=100.0, description="Average rain probability percentage (0-100)."
+    )
+    is_weather_favorable: bool = Field(
+        default=True, description="Whether weather is conducive to outdoor activities."
+    )
+
+    # Scoring & Trade-offs
+    price_score: float = Field(
+        default=80.0, ge=0.0, le=100.0, description="Score based on price competitiveness (0-100)."
+    )
+    weather_score: float = Field(
+        default=80.0, ge=0.0, le=100.0, description="Score based on weather friendliness (0-100)."
+    )
+    composite_score: float = Field(
+        default=80.0, ge=0.0, le=100.0, description="Weighted overall quality score (0-100)."
+    )
+
+    trade_offs: list[str] = Field(
+        default_factory=list,
+        description="Key pros, cons, and trade-off observations for this candidate date window.",
+    )
+    is_weekend_heavy: bool = Field(
+        default=False, description="Whether the date window maximizes weekend days."
+    )
+
+
+class DateOptimizationResult(BaseModel):
+    """Result of flexible date evaluation and selection."""
+
+    model_config = ConfigDict(frozen=True)
+
+    mode: DateMode = Field(description="The date mode evaluated (EXACT, FLEXIBLE, or FIND_BEST).")
+    recommended: DateCandidate = Field(
+        description="The primary recommended travel date window selected for planning."
+    )
+    alternatives: list[DateCandidate] = Field(
+        default_factory=list,
+        description="2-3 alternative candidate date ranges with explicit trade-offs.",
+    )
+    total_candidates_evaluated: int = Field(
+        ge=1, description="Number of candidate date windows evaluated."
+    )
+    evaluation_summary: str = Field(
+        description="Summary narrative explaining the date selection and trade-offs."
+    )
+
+
+# ---------------------------------------------------------------------------
 # Budget
 # ---------------------------------------------------------------------------
 

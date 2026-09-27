@@ -16,7 +16,7 @@ from typing import Annotated, Any, TypedDict
 from src.models.budget import BudgetBreakdown, OptimizationResult
 from src.models.itinerary import ExperiencePlan, FinalItinerary
 from src.models.logistics import LogisticsPlan
-from src.models.trip import TravelScope, TripContext
+from src.models.trip import DateOptimizationResult, TravelScope, TripContext
 from src.models.visa import VisaVerdict
 
 log = logging.getLogger(__name__)
@@ -79,6 +79,7 @@ class PlanGraphState(TypedDict, total=False):
     effective_duration_days: int | None
     total_budget_inr: float | None
     daily_budget_per_person_inr: float | None
+    date_options: DateOptimizationResult | None
 
     # Intermediate / Parallel Planning Artifacts
     visa_verdict: VisaVerdict | None
@@ -129,6 +130,7 @@ def create_initial_state(
             trip_context.budget.amount_inr if trip_context and trip_context.budget else None
         ),
         "daily_budget_per_person_inr": None,
+        "date_options": None,
         "visa_verdict": None,
         "logistics_plan": None,
         "experience_plan": None,

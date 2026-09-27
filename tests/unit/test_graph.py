@@ -420,6 +420,7 @@ def test_wrap_safe_node_catches_exception() -> None:
 
 
 @patch("src.graph.workflow.intake_node")
+@patch("src.graph.workflow.date_node")
 @patch("src.graph.workflow.visa_node")
 @patch("src.graph.workflow.logistics_node")
 @patch("src.graph.workflow.experience_node")
@@ -431,6 +432,7 @@ def test_domestic_workflow_execution(
     mock_exp: MagicMock,
     mock_log: MagicMock,
     mock_vis: MagicMock,
+    mock_date: MagicMock,
     mock_int: MagicMock,
 ) -> None:
     """Verify complete end-to-end execution of a domestic trip through the graph."""
@@ -444,6 +446,10 @@ def test_domestic_workflow_execution(
         "trip_context": ctx,
         "travel_scope": TravelScope.DOMESTIC,
         "warnings": ["Intake warning"],
+    }
+    mock_date.return_value = {
+        "trip_context": ctx,
+        "date_options": None,
     }
     mock_log.return_value = {"logistics_plan": logistics, "warnings": ["Logistics warning"]}
     mock_exp.return_value = {"experience_plan": experience, "warnings": ["Experience warning"]}
@@ -462,6 +468,7 @@ def test_domestic_workflow_execution(
 
     # 1. Verify node invocations
     assert mock_int.called
+    assert mock_date.called
     assert not mock_vis.called, "Domestic trip must bypass the Visa node!"
     assert mock_log.called
     assert mock_exp.called
@@ -482,6 +489,7 @@ def test_domestic_workflow_execution(
 
 
 @patch("src.graph.workflow.intake_node")
+@patch("src.graph.workflow.date_node")
 @patch("src.graph.workflow.visa_node")
 @patch("src.graph.workflow.logistics_node")
 @patch("src.graph.workflow.experience_node")
@@ -493,6 +501,7 @@ def test_international_workflow_execution(
     mock_exp: MagicMock,
     mock_log: MagicMock,
     mock_vis: MagicMock,
+    mock_date: MagicMock,
     mock_int: MagicMock,
 ) -> None:
     """Verify complete end-to-end execution of an international trip routes through Visa node."""
@@ -507,6 +516,10 @@ def test_international_workflow_execution(
         "trip_context": ctx,
         "travel_scope": TravelScope.INTERNATIONAL,
         "warnings": [],
+    }
+    mock_date.return_value = {
+        "trip_context": ctx,
+        "date_options": None,
     }
     mock_vis.return_value = {"visa_verdict": visa, "warnings": ["Visa advance app required"]}
     mock_log.return_value = {"logistics_plan": logistics}
@@ -524,6 +537,7 @@ def test_international_workflow_execution(
     output = app.invoke(initial_state)
 
     # 1. Visa node MUST be invoked for international trips
+    assert mock_date.called
     assert mock_vis.called
     assert output["visa_verdict"] == visa
     assert "Visa advance app required" in output["warnings"]

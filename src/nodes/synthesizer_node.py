@@ -24,7 +24,12 @@ from src.models.budget import (
 )
 from src.models.itinerary import ExperiencePlan, FinalItinerary
 from src.models.logistics import LogisticsPlan
-from src.models.trip import InitialPlanningState, TravelStyle, TripContext
+from src.models.trip import (
+    DateOptimizationResult,
+    InitialPlanningState,
+    TravelStyle,
+    TripContext,
+)
 from src.models.visa import VisaVerdict
 
 log = logging.getLogger(__name__)
@@ -79,6 +84,7 @@ def generate_itinerary_summary(
     experience: ExperiencePlan,
     budget: BudgetBreakdown,
     visa: VisaVerdict | None = None,
+    date_options: DateOptimizationResult | None = None,
 ) -> str:
     """Synthesize an executive narrative summary covering all trip pillars.
 
@@ -88,6 +94,7 @@ def generate_itinerary_summary(
         experience: Generated ExperiencePlan.
         budget: Deterministic BudgetBreakdown.
         visa: Optional VisaVerdict with visa requirements for Indian travelers.
+        date_options: Optional DateOptimizationResult with flexible date alternatives.
 
     Returns:
         Paragraph summarizing transport, stays, daily sights, dining, visa rules, and budget health.
@@ -124,6 +131,16 @@ def generate_itinerary_summary(
         schengen_note = " [Uniform Schengen Visa]" if visa.schengen_single_visa_applicable else ""
         visa_desc = f" Indian passport visa: {'; '.join(visa_notes)}{adv_note}{schengen_note}."
 
+    # Date optimization summary
+    date_desc = ""
+    if date_options and date_options.alternatives:
+        rec = date_options.recommended
+        date_desc = (
+            f" Dates were optimized ({date_options.mode.value}): recommended "
+            f"{rec.start_date} to {rec.end_date} (Score: {rec.composite_score:.1f}/100) "
+            f"evaluated across {date_options.total_candidates_evaluated} candidate windows."
+        )
+
     # Budget summary
     user_budget = budget.variance.user_budget_inr
     proj_total = budget.total_with_contingency_inr
@@ -152,7 +169,7 @@ def generate_itinerary_summary(
         f"for {party_desc} traveling from {context.origin}. The itinerary features {legs_cnt} "
         f"transport segments and quality lodging at {hotel_str}. Daily scheduling is tuned to a "
         f"{context.pace.value.lower()} pace {sight_str}, paired with authentic regional culinary "
-        f"spots.{visa_desc} Financials: {budget_note}."
+        f"spots.{visa_desc}{date_desc} Financials: {budget_note}."
     )
     return summary
 
@@ -169,6 +186,7 @@ def process_synthesizer(
     budget_breakdown: BudgetBreakdown | None = None,
     optimization_result: OptimizationResult | None = None,
     visa_verdict: VisaVerdict | None = None,
+    date_options: DateOptimizationResult | None = None,
     warnings: list[str] | None = None,
     errors: list[str] | None = None,
     trip_context: TripContext | None = None,
@@ -182,6 +200,7 @@ def process_synthesizer(
         budget_breakdown: Deterministic BudgetBreakdown.
         optimization_result: Optional OptimizationResult from Optimizer Node.
         visa_verdict: Optional VisaVerdict for international travel.
+        date_options: Optional DateOptimizationResult with flexible date alternatives.
         warnings: Optional list of graph warnings.
         errors: Optional list of graph errors.
         trip_context: Keyword alias for state_or_context.
@@ -222,7 +241,7 @@ def process_synthesizer(
     # 2. Titles and Summaries
     title = generate_itinerary_title(context)
     summary = generate_itinerary_summary(
-        context, logistics_plan, experience_plan, budget_breakdown, visa_verdict
+        context, logistics_plan, experience_plan, budget_breakdown, visa_verdict, date_options
     )
 
     # 3. Consolidated Warnings
@@ -274,6 +293,7 @@ def process_synthesizer(
         experience_plan=experience_plan,
         budget_breakdown=budget_breakdown,
         visa_verdict=visa_verdict,
+        date_options=date_options,
         optimization_result=opt_result,
         plan_status=plan_status,
         warnings=combined_warnings,
@@ -303,6 +323,7 @@ def synthesizer_node(state: dict[str, Any] | InitialPlanningState) -> dict[str, 
         budget_breakdown = None
         opt_result = None
         visa_verdict = None
+        date_options = None
         warnings = []
         errors = []
     elif isinstance(state, dict):
@@ -312,6 +333,7 @@ def synthesizer_node(state: dict[str, Any] | InitialPlanningState) -> dict[str, 
         budget_breakdown = state.get("budget_breakdown")
         opt_result = state.get("optimization_result")
         visa_verdict = state.get("visa_verdict")
+        date_options = state.get("date_options")
         warnings = state.get("warnings", [])
         errors = state.get("errors", [])
     else:
@@ -326,6 +348,7 @@ def synthesizer_node(state: dict[str, Any] | InitialPlanningState) -> dict[str, 
         budget_breakdown=budget_breakdown,
         optimization_result=opt_result,
         visa_verdict=visa_verdict,
+        date_options=date_options,
         warnings=warnings,
         errors=errors,
     )
