@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 17 — API Streaming (Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete), Phase 17 (API Streaming — Real-time LangGraph SSE Event Emission & Endpoints Complete)
-Test Suite: 572 unit tests passing (100% offline, zero network reliance in tests)
-Code Quality: 100% compliant with Ruff linting and formatting
+Current Phase: Phase 18 — Frontend (Batch 1 Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete), Phase 17 (API Streaming — Real-time LangGraph SSE Event Emission & Endpoints Complete), Phase 18 (Frontend Batch 1: Welcome, Trip Details, Destinations with Interactive Controls, Static Destination Auto-Population & Dynamic Route Seeding Complete)
+Test Suite: 572 Python unit tests + 10 Frontend unit/flow tests passing (100% offline, zero network reliance in tests)
+Code Quality: 100% compliant with Ruff and Oxlint
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, complete domestic and international vertical slices (`POST /api/v1/plan`), flexible date optimization (`DateMode.FLEXIBLE`, `FIND_BEST`), human-in-the-loop budget conflict resolution with selective re-planning (`replan_workflow` and `POST /api/v1/plan/replan`), and real-time planning progress streaming via Server-Sent Events (`src/graph/streaming.py` and `POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`). **It is not yet production-ready**, nor is the full frontend interface implemented.
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, complete domestic and international vertical slices (`POST /api/v1/plan`), flexible date optimization (`DateMode.FLEXIBLE`, `FIND_BEST`), human-in-the-loop budget conflict resolution with selective re-planning (`replan_workflow` and `POST /api/v1/plan/replan`), real-time planning progress streaming via Server-Sent Events (`src/graph/streaming.py` and `POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), and **Frontend Batch 1** (`frontend/`: Welcome, Trip Details, and Destinations with full interactive controls, static destination auto-population across all 250 countries and 36 Indian states/UTs, and dynamic route seeding).
 
 | Phase        | Description                                                                                             | Status       |
 | --------------| ---------------------------------------------------------------------------------------------------------| --------------|
@@ -36,7 +36,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 15** | Flexible Dates (Candidate date window optimization, multi-factor scoring)                                | **Complete** |
 | **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution, re-planning API)               | **Complete** |
 | **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph & dual POST/GET endpoints)                   | **Complete** |
-| **Phase 18** | Frontend (Interactive web user interface in Vite / React / TypeScript / pnpm)                            | Planned      |
+| **Phase 18** | Frontend (Batch 1: Welcome, Trip Details, Destinations with Interactive Controls)                        | **Batch 1 Complete** |
 | **Phase 19** | End-to-End Test Matrix (Full regression and test scenarios)                                             | Planned      |
 | **Phase 20** | Production Hardening (Observability, rate limits, deployment)                                           | Planned      |
 
@@ -855,7 +855,58 @@ Financial calculations follow strict rules defined in `src/tools/calculator.py`:
 
 ---
 
-## 19. Contributing & Engineering Rules
+## 19. Frontend Web Application (Batch 1 Complete)
+
+The Safarnama web client lives in `frontend/`, constructed as an editorial travel planning interface faithfully aligned with the approved Stitch project **`Safarnama`** (`projects/12901504223215830628`).
+
+### Architecture & Tech Stack:
+- **Core Framework**: Vite 8 + React 19 + TypeScript + Tailwind CSS
+- **Package Manager**: `pnpm` exclusively
+- **Typography & Icons**: Google Fonts (`Plus Jakarta Sans` for geometric structural headings, `Inter` for utilitarian micro-legibility), Google Material Symbols Outlined
+- **Color Identity**: Light-mode editorial canvas (`#FFFDF8`), elevated card surfaces (`#FFFFFF`), Safarnama Saffron (`#E87524`), and Deep Maroon accents (`#7A2E2E`)
+- **State Management**: Centralized `TripPlanningContext` with full bidirectional state retention across navigation steps
+
+### Batch 1 Implemented Screens:
+1. **Screen 1: Welcome / Landing Screen**
+   - Brand header with official logo and primary CTAs.
+   - Editorial hero section with travel journal flat-lay visual and floating journey badge indicators.
+   - 6-card bento architecture showcasing smart itineraries, transport routing, stays, weather hazards, visa rules, and budget reconciliation.
+   - Curated preview circuits (Ladakh Pass, Kyoto Autumn Trail, Amalfi Coast) launching directly into the planning workflow.
+2. **Screen 2: Trip Details**
+   - 5-step progress stepper with active glow indicator.
+   - **Origin Autocomplete**: Search and select from 14 major Indian origin airports with full IATA airport codes.
+   - **Destination Search**: Autocomplete across preconfigured circuits and global regions with quick inspiration chips.
+   - **Interactive Date Picker**: Editorial date typography (`Sat, Oct 18` / `Tue, Oct 28`) triggering native accessible calendar dialogs (`showPicker()`) without digit clipping.
+   - **Synchronized Leg Preferences**: Morning, Afternoon, and Evening leg time cycling that automatically synchronizes the year label with the selected calendar dates (e.g. selecting January 2027 immediately updates the leg button to `2027 • Evening leg`).
+   - **Static Data Destination Auto-Population**: Real-time autocomplete powered by static datasets covering all 250 sovereign countries and all 36 Indian States and Union Territories with instant visa verdicts and seasonal climate summaries.
+   - **Real-Time Badges**: Dynamic Seasonal Weather Quality Badge (`getSeasonDescription`) and Visa Guidance Badge (`getVisaVerdict`) adapting live as destinations and dates change.
+   - **Party Dynamics**: Solo, Couple, Family, and Friends Group buttons paired with traveler counter steppers.
+3. **Screen 3: Destinations & Route Sequence**
+   - **Dynamic Route Seeding**: Automatically seeds stops matching any chosen domestic state/UT or international country (e.g. Norway seeds Oslo, Flåm, Bergen, Tromsø; Rajasthan seeds Jaipur, Jodhpur, Udaipur, Jaisalmer).
+   - **Stop Night Steppers**: `[ - ] X nights [ + ]` counters allowing per-stop allocation.
+   - **Duration Reconciliation Engine**: Real-time comparison banner alerting to differences between allocated stop nights and overall trip duration, featuring one-click synchronization.
+   - **Route Sequence Timeline**: Drag-free reorder controls (up/down), stop removal, and custom destination insertion with automatic transit connector recalculation.
+   - **Curated Suggestions**: Destination-filtered attractions with "+ Add Stop" and "Add as Day Trip" actions.
+
+### Running Frontend Locally:
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+The application will be live at `http://localhost:5173/`.
+
+### Running Tests & Linting:
+```bash
+cd frontend
+pnpm test -- --run   # 10 unit/flow tests in Vitest
+pnpm build           # TypeScript typecheck & production bundle
+pnpm lint            # Oxlint static analysis
+```
+
+---
+
+## 20. Contributing & Engineering Rules
 
 When contributing code or modifying this repository:
 
@@ -864,7 +915,7 @@ When contributing code or modifying this repository:
    - Use `uv add --dev <package>` for development dependencies.
    - **Never use `pip`**.
 2. **Frontend Management**:
-   - When the frontend is created in Phase 10, use `pnpm` exclusively (never `npm` or `yarn`).
+   - Use `pnpm` exclusively for frontend operations (never `npm` or `yarn`).
 3. **Incremental Progress**:
    - Implement one capability or tool at a time.
    - Write comprehensive unit tests with offline mock fixtures.
@@ -877,7 +928,7 @@ When contributing code or modifying this repository:
 
 ---
 
-## 20. Instructions for AI Coding Agents
+## 21. Instructions for AI Coding Agents
 
 If you are an AI assistant (Claude Code, Cursor, Copilot, Codex, Antigravity) picking up this project:
 
@@ -909,7 +960,7 @@ If you are an AI assistant (Claude Code, Cursor, Copilot, Codex, Antigravity) pi
 
 ---
 
-## 21. Visual & Design Identity
+## 22. Visual & Design Identity
 
 The visual foundation for Safarnama is detailed in `project_docs/design.md`:
 
@@ -920,7 +971,7 @@ The visual foundation for Safarnama is detailed in `project_docs/design.md`:
 
 ---
 
-## 22. License
+## 23. License
 
 ```text
 License: Not yet specified.

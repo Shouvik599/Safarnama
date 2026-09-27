@@ -1,0 +1,1392 @@
+import type { RouteStop, DestinationSuggestion } from '../types/trip';
+import { PRECONFIGURED_CIRCUITS } from './locations';
+import generatedCountries from './generated_countries.json';
+import indianStatesUts from './indian_states_uts.json';
+
+export interface DestinationItem {
+  id: string;
+  name: string;
+  alias: string;
+  scope: 'DOMESTIC' | 'INTERNATIONAL';
+  type: 'STATE' | 'UT' | 'COUNTRY' | 'CIRCUIT';
+  visaStatus: string;
+  defaultDurationDays: number;
+  seasonSummary: string;
+  defaultStops: RouteStop[];
+  suggestions: DestinationSuggestion[];
+}
+
+// -------------------------------------------------------------
+// 1. CURATED DOMESTIC CIRCUITS, STATES & UNION TERRITORIES
+// -------------------------------------------------------------
+export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
+  {
+    id: 'rajasthan',
+    name: 'Rajasthan (Jaipur, Jodhpur, Udaipur & Jaisalmer)',
+    alias: 'Rajasthan Royals',
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 10,
+    seasonSummary: 'Optimal Season: Mild Winter Sunshine & Desert Festivals',
+    defaultStops: [
+      {
+        id: 'jaipur',
+        name: 'Jaipur',
+        country: 'India',
+        nights: 3,
+        role: 'Pink City Forts',
+        imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Amber Fort in Jaipur Rajasthan overlooking Maota Lake',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~4 hrs transit',
+          title: 'Express Intercity Train to Jodhpur',
+        },
+      },
+      {
+        id: 'jodhpur',
+        name: 'Jodhpur',
+        country: 'India',
+        nights: 2,
+        role: 'Blue City & Mehrangarh',
+        imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Mehrangarh Fort towering above blue houses of Jodhpur',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~4 hrs 30 mins',
+          title: 'Private Chauffeur via Ranakpur Jain Temples',
+        },
+      },
+      {
+        id: 'udaipur',
+        name: 'Udaipur',
+        country: 'India',
+        nights: 3,
+        role: 'City of Lakes & Palaces',
+        imageUrl: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Lake Pichola in Udaipur with historic City Palace reflection',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~5 hrs transit',
+          title: 'Desert Express Train to Jaisalmer',
+        },
+      },
+      {
+        id: 'jaisalmer',
+        name: 'Jaisalmer',
+        country: 'India',
+        nights: 2,
+        role: 'Golden Fort & Thar Desert',
+        imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e42f9b20?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Golden sandstone ramparts of Jaisalmer fort in Thar desert',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'ranthambore',
+        name: 'Ranthambore National Park',
+        region: 'Sawai Madhopur, Rajasthan',
+        tag: 'Bengal Tiger Safari',
+        description: 'Historic jungle reserve renowned for royal Bengal tiger encounters around ancient ruins.',
+        imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+      {
+        id: 'pushkar',
+        name: 'Pushkar & Brahma Lake',
+        region: 'Ajmer, Rajasthan',
+        tag: 'Sacred Lake & Desert Ghats',
+        description: 'Vibrant pilgrim town with sacred ghats, rose gardens, and desert sand dunes.',
+        imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'himachal',
+    name: 'Himachal Pradesh (Shimla, Manali & Dharamshala)',
+    alias: 'Himachal Hills',
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 8,
+    seasonSummary: 'Optimal Season: Snow-Capped Peaks & Fresh Mountain Pines',
+    defaultStops: [
+      {
+        id: 'shimla',
+        name: 'Shimla',
+        country: 'India',
+        nights: 3,
+        role: 'Colonial Hill Capital',
+        imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Shimla Mall Road ridge framed by cedar pines and Himalayan peaks',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~6 hrs transit',
+          title: 'Scenic Mountain Highway via Kullu Valley',
+        },
+      },
+      {
+        id: 'manali',
+        name: 'Manali & Solang Valley',
+        country: 'India',
+        nights: 3,
+        role: 'Alpine Passes & Snow Valley',
+        imageUrl: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Snow covered Himalayan mountains around Solang Valley Manali',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~6 hrs transit',
+          title: 'Mountain Pass Drive to Kangra Valley',
+        },
+      },
+      {
+        id: 'dharamshala',
+        name: 'Dharamshala & McLeod Ganj',
+        country: 'India',
+        nights: 2,
+        role: 'Little Lhasa & Monasteries',
+        imageUrl: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Prayer flags overlooking Dhauladhar mountain range in McLeod Ganj',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'kasol',
+        name: 'Kasol & Parvati Valley',
+        region: 'Kullu, Himachal Pradesh',
+        tag: 'Pine Trails & Riverbanks',
+        description: 'Tranquil riverside sanctuary known for pine forests and alpine hikes to Tosh and Kheerganga.',
+        imageUrl: 'https://images.unsplash.com/photo-1596761611016-186165ed2e00?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+      {
+        id: 'bir',
+        name: 'Bir Billing',
+        region: 'Kangra, Himachal Pradesh',
+        tag: 'Paragliding Capital',
+        description: 'World-renowned takeoff site for paragliding over tea estates and Tibetan monasteries.',
+        imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'goa',
+    name: 'Goa (North Beaches, Panaji Heritage & South Serenity)',
+    alias: 'Goa Stays',
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 6,
+    seasonSummary: 'Optimal Season: Sunny Coastal Breezes & Vibrant Beach Life',
+    defaultStops: [
+      {
+        id: 'north-goa',
+        name: 'North Goa (Anjuna & Vagator)',
+        country: 'India',
+        nights: 3,
+        role: 'Coastlines & Sunsets',
+        imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Palm fringed beach cove in North Goa at sunset',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~1 hr 15 mins',
+          title: 'Coastal Drive via Panaji Latin Quarter',
+        },
+      },
+      {
+        id: 'south-goa',
+        name: 'South Goa (Palolem & Benaulim)',
+        country: 'India',
+        nights: 3,
+        role: 'White Sands & Serenity',
+        imageUrl: 'https://images.unsplash.com/photo-1587922546307-776227941871?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Quiet crescent bay of Palolem Beach in South Goa',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'dudhsagar',
+        name: 'Dudhsagar Waterfalls',
+        region: 'Mollem National Park, Goa',
+        tag: 'Four-Tiered Jungle Cascade',
+        description: 'Spectacular jungle cataract cascading 310 meters down the Western Ghats.',
+        imageUrl: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+      {
+        id: 'old-goa',
+        name: 'Old Goa & Fontainhas',
+        region: 'Panaji, Goa',
+        tag: 'Portuguese Heritage',
+        description: 'UNESCO basilica and colorful 18th-century Portuguese villas with terracotta roofs.',
+        imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'kashmir',
+    name: 'Jammu & Kashmir (Srinagar, Gulmarg & Pahalgam)',
+    alias: 'Kashmir Valley',
+    scope: 'DOMESTIC',
+    type: 'UT',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 8,
+    seasonSummary: 'Optimal Season: Emerald Valleys, Shikara Cruises & Snow Meadows',
+    defaultStops: [
+      {
+        id: 'srinagar',
+        name: 'Srinagar',
+        country: 'India',
+        nights: 3,
+        role: 'Dal Lake & Mughal Gardens',
+        imageUrl: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Traditional wooden Shikara boat drifting on serene Dal Lake Srinagar',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~2 hrs transit',
+          title: 'Scenic Meadow Drive to Gulmarg',
+        },
+      },
+      {
+        id: 'gulmarg',
+        name: 'Gulmarg',
+        country: 'India',
+        nights: 2,
+        role: 'High Meadows & Gondola',
+        imageUrl: 'https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Gulmarg meadow surrounded by snow-capped Pir Panjal peaks',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~3 hrs 30 mins',
+          title: 'River Road Transfer to Pahalgam',
+        },
+      },
+      {
+        id: 'pahalgam',
+        name: 'Pahalgam',
+        country: 'India',
+        nights: 3,
+        role: 'Lidder River & Betaab Valley',
+        imageUrl: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Pristine Lidder river flowing through pine valley of Pahalgam',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'sonamarg',
+        name: 'Sonamarg & Thajiwas Glacier',
+        region: 'Ganderbal, Kashmir',
+        tag: 'Meadow of Gold',
+        description: 'Gateway to Ladakh featuring turquoise glacier melt streams and high mountain meadows.',
+        imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  },
+  {
+    id: 'uttarakhand',
+    name: 'Uttarakhand (Rishikesh, Mussoorie & Nainital)',
+    alias: 'Devbhoomi Hills',
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 8,
+    seasonSummary: 'Optimal Season: Crisp Alpine Air, Ganga Ghats & Lake Vistas',
+    defaultStops: [
+      {
+        id: 'rishikesh',
+        name: 'Rishikesh',
+        country: 'India',
+        nights: 3,
+        role: 'Ganga Valley & Yoga Capital',
+        imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e42f9b20?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Laxman Jhula suspension bridge over holy Ganges in Rishikesh',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~2 hrs 30 mins',
+          title: 'Hill Highway to Mussoorie',
+        },
+      },
+      {
+        id: 'mussoorie',
+        name: 'Mussoorie',
+        country: 'India',
+        nights: 2,
+        role: 'Queen of Hills & Doon Valley',
+        imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Mussoorie ridge overlooking misty Doon valley at sunset',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~6 hrs transit',
+          title: 'Kumaon Foothills Highway to Nainital',
+        },
+      },
+      {
+        id: 'nainital',
+        name: 'Nainital',
+        country: 'India',
+        nights: 3,
+        role: 'Lake District & Kumaon',
+        imageUrl: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Emerald waters of Naini Lake surrounded by forested hills',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'corbett',
+        name: 'Jim Corbett National Park',
+        region: 'Nainital District, Uttarakhand',
+        tag: 'Oldest Tiger Reserve',
+        description: 'Dense sal forest sanctuaries famed for wild elephants, leopards, and Bengal tigers.',
+        imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  },
+  {
+    id: 'andaman',
+    name: 'Andaman & Nicobar (Port Blair, Havelock & Neil Island)',
+    alias: 'Andaman Islands',
+    scope: 'DOMESTIC',
+    type: 'UT',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 8,
+    seasonSummary: 'Optimal Season: Turquoise Tropical Waters & Coral Snorkeling',
+    defaultStops: [
+      {
+        id: 'port-blair',
+        name: 'Port Blair',
+        country: 'India',
+        nights: 2,
+        role: 'Island Gateway & History',
+        imageUrl: 'https://images.unsplash.com/photo-1587922546307-776227941871?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Historic cellular jail and turquoise coastline of Port Blair',
+        transitToNext: {
+          mode: 'ferry',
+          icon: 'directions_boat',
+          duration: '~1 hr 30 mins',
+          title: 'Makruzz High-Speed Island Catamaran',
+        },
+      },
+      {
+        id: 'havelock',
+        name: 'Havelock Island (Swaraj Dweep)',
+        country: 'India',
+        nights: 4,
+        role: 'Radhanagar White Sands',
+        imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Radhanagar Beach on Havelock Island with azure waters and white sand',
+        transitToNext: {
+          mode: 'ferry',
+          icon: 'directions_boat',
+          duration: '~1 hr transit',
+          title: 'Inter-Island Catamaran to Neil',
+        },
+      },
+      {
+        id: 'neil',
+        name: 'Neil Island (Shaheed Dweep)',
+        country: 'India',
+        nights: 2,
+        role: 'Natural Rock Bridge & Corals',
+        imageUrl: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Natural limestone bridge formed by sea waves on Neil Island',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'elephant-beach',
+        name: 'Elephant Beach Reef',
+        region: 'Havelock Island, Andaman',
+        tag: 'Sea Walking & Sea Turtles',
+        description: 'Vibrant coral reef accessible by forest trail or speedboat with crystal visibility.',
+        imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'sikkim',
+    name: 'Sikkim & Darjeeling (Gangtok, Pelling & Darjeeling)',
+    alias: 'Sikkim Peaks',
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (ILP/PAP Required for border areas)',
+    defaultDurationDays: 8,
+    seasonSummary: 'Optimal Season: Kanchenjunga Panoramas & Buddhist Monasteries',
+    defaultStops: [
+      {
+        id: 'gangtok',
+        name: 'Gangtok',
+        country: 'India',
+        nights: 3,
+        role: 'Himalayan Ridge Capital',
+        imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Gangtok city overlooking misty Himalayan ridges and Rumtek Monastery',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~4 hrs 30 mins',
+          title: 'Scenic Mountain Drive to Pelling',
+        },
+      },
+      {
+        id: 'pelling',
+        name: 'Pelling',
+        country: 'India',
+        nights: 2,
+        role: 'Kanchenjunga Sanctuary',
+        imageUrl: 'https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Golden morning sunrise hitting Kanchenjunga peak from Pelling',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~3 hrs 30 mins',
+          title: 'Tea Estate Mountain Road to Darjeeling',
+        },
+      },
+      {
+        id: 'darjeeling',
+        name: 'Darjeeling',
+        country: 'India',
+        nights: 3,
+        role: 'Queen of the Hills & Tea Gardens',
+        imageUrl: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Verdant rolling tea plantations in Darjeeling under blue skies',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'tsomgo',
+        name: 'Tsomgo Lake & Nathula Pass',
+        region: 'East Sikkim',
+        tag: 'Glacial Alpine Lake (12,400ft)',
+        description: 'Sacred high-altitude lake surrounded by rugged mountains on the historic Silk Route.',
+        imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'karnataka',
+    name: 'Karnataka (Bengaluru, Mysuru, Coorg & Hampi)',
+    alias: 'Karnataka Heritage',
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: 9,
+    seasonSummary: 'Optimal Season: Pleasant Deccan Weather & Coffee Harvest',
+    defaultStops: [
+      {
+        id: 'bengaluru',
+        name: 'Bengaluru',
+        country: 'India',
+        nights: 2,
+        role: 'Silicon Garden City',
+        imageUrl: 'https://images.unsplash.com/photo-1596761611016-186165ed2e00?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Bengaluru cityscape and Vidhana Soudha illuminated at twilight',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~2 hrs transit',
+          title: 'Vande Bharat Express to Mysuru',
+        },
+      },
+      {
+        id: 'mysuru',
+        name: 'Mysuru',
+        country: 'India',
+        nights: 2,
+        role: 'Royal Palace City',
+        imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e42f9b20?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Illuminated golden domes of Mysore Palace in Karnataka',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~3 hrs transit',
+          title: 'Western Ghats Road to Coorg',
+        },
+      },
+      {
+        id: 'coorg',
+        name: 'Coorg (Madikeri)',
+        country: 'India',
+        nights: 3,
+        role: 'Coffee Estates & Waterfalls',
+        imageUrl: 'https://images.unsplash.com/photo-1587922546307-776227941871?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Mist rising over lush green coffee plantation hills in Coorg',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~6 hrs transit',
+          title: 'Express Train to Hospet / Hampi',
+        },
+      },
+      {
+        id: 'hampi',
+        name: 'Hampi',
+        country: 'India',
+        nights: 2,
+        role: 'UNESCO Boulder Ruins',
+        imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Stone chariot of Vijayanagara Empire standing in Hampi ruins',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'gokarna',
+        name: 'Gokarna & Om Beach',
+        region: 'Uttara Kannada, Karnataka',
+        tag: 'Pristine Coastal Cliffs',
+        description: 'Laid-back pilgrimage and beach haven with dramatic cliffs meeting the Arabian Sea.',
+        imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  },
+];
+
+// -------------------------------------------------------------
+// 2. CURATED TOP INTERNATIONAL DESTINATIONS (NORWAY, SWITZERLAND, ETC.)
+// -------------------------------------------------------------
+export const CURATED_INTERNATIONAL_DESTINATIONS: DestinationItem[] = [
+  {
+    id: 'norway',
+    name: 'Norway (Oslo, Flåm, Bergen & Tromsø)',
+    alias: 'Norway Fjords',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'Schengen Visa Required • ~15-30 Days Processing',
+    defaultDurationDays: 10,
+    seasonSummary: 'Optimal Season: Midnight Sun & Fjords (Jun-Aug) / Northern Lights (Sep-Mar)',
+    defaultStops: [
+      {
+        id: 'oslo',
+        name: 'Oslo',
+        country: 'Norway',
+        nights: 2,
+        role: 'Capital & Fjord Gateway',
+        imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Oslo Opera House resting on Oslofjord harbor waters',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~4 hrs 30 mins',
+          title: 'Bergen Line Scenic High-Mountain Railway to Myrdal',
+        },
+      },
+      {
+        id: 'flam',
+        name: 'Flåm & Sognefjord',
+        country: 'Norway',
+        nights: 2,
+        role: 'Dramatic Fjord Rails & Glaciers',
+        imageUrl: 'https://images.unsplash.com/photo-1507272931001-fc06c17e4f43?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Flåm Railway winding down steep green cliffs into Aurlandsfjord',
+        transitToNext: {
+          mode: 'ferry',
+          icon: 'directions_boat',
+          duration: '~5 hrs transit',
+          title: 'Sognefjord Express Catamaran to Bergen',
+        },
+      },
+      {
+        id: 'bergen',
+        name: 'Bergen',
+        country: 'Norway',
+        nights: 3,
+        role: 'Bryggen Wharf & Fjord Gateway',
+        imageUrl: 'https://images.unsplash.com/photo-1520769669658-f07657f5a307?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Iconic colorful wooden merchant houses along Bryggen wharf Bergen',
+        transitToNext: {
+          mode: 'flight',
+          icon: 'flight',
+          duration: '~2 hrs transit',
+          title: 'Direct Arctic Flight to Tromsø',
+        },
+      },
+      {
+        id: 'tromso',
+        name: 'Tromsø',
+        country: 'Norway',
+        nights: 3,
+        role: 'Arctic Capital & Northern Lights',
+        imageUrl: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Vibrant green Aurora Borealis dancing across snowy Arctic mountains in Tromsø',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'geiranger',
+        name: 'Geirangerfjord',
+        region: 'Møre og Romsdal, Norway',
+        tag: 'UNESCO Fjord Wonder',
+        description: 'Sheer granite cliffs and the famous Seven Sisters waterfalls rising out of sapphire waters.',
+        imageUrl: 'https://images.unsplash.com/photo-1507272931001-fc06c17e4f43?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+      {
+        id: 'lofoten',
+        name: 'Lofoten Islands',
+        region: 'Nordland, Norway',
+        tag: 'Arctic Archipelago',
+        description: 'Dramatic jagged mountain peaks rising directly from the Norwegian Sea with red fishing cabins.',
+        imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+      {
+        id: 'preikestolen',
+        name: 'Preikestolen (Pulpit Rock)',
+        region: 'Stavanger, Norway',
+        tag: 'Epic Fjord Clifftop',
+        description: 'Flat-topped 604-meter rock plateau towering directly over Lysefjord.',
+        imageUrl: 'https://images.unsplash.com/photo-1520769669658-f07657f5a307?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'switzerland',
+    name: 'Switzerland (Zurich, Lucerne, Interlaken & Zermatt)',
+    alias: 'Swiss Alpine Trail',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'Schengen Visa Required • ~15-30 Days Processing',
+    defaultDurationDays: 10,
+    seasonSummary: 'Optimal Season: Alpine Wildflowers (May-Sep) / World-Class Skiing (Dec-Apr)',
+    defaultStops: [
+      {
+        id: 'zurich',
+        name: 'Zurich',
+        country: 'Switzerland',
+        nights: 2,
+        role: 'Lake City & Arrival Hub',
+        imageUrl: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Limmat River and historic twin spires of Grossmünster in Zurich',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~50 mins transit',
+          title: 'SBB InterCity Rail to Lucerne',
+        },
+      },
+      {
+        id: 'lucerne',
+        name: 'Lucerne & Mt. Pilatus',
+        country: 'Switzerland',
+        nights: 3,
+        role: 'Chapel Bridge & Mountain Lake',
+        imageUrl: 'https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Historic wooden Chapel Bridge in Lucerne with Lake Lucerne reflection',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~1 hr 50 mins',
+          title: 'Luzern-Interlaken Express Panoramic Train',
+        },
+      },
+      {
+        id: 'interlaken',
+        name: 'Interlaken & Jungfrau',
+        country: 'Switzerland',
+        nights: 3,
+        role: 'Top of Europe & Lauterbrunnen',
+        imageUrl: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Lauterbrunnen valley with Staubbach waterfall framed by Swiss Alps',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~2 hrs 15 mins',
+          title: 'Matterhorn Gotthard Bahn to Zermatt',
+        },
+      },
+      {
+        id: 'zermatt',
+        name: 'Zermatt & Matterhorn',
+        country: 'Switzerland',
+        nights: 2,
+        role: 'Car-Free Alpine Peak Sanctuary',
+        imageUrl: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Iconic pyramidal peak of the Matterhorn bathed in golden sunrise',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'geneva',
+        name: 'Geneva & Lake Geneva',
+        region: 'Lake Geneva Region',
+        tag: 'Jet d\'Eau & Old Town',
+        description: 'Cosmopolitan diplomatic enclave on the shores of Western Europe\'s largest alpine lake.',
+        imageUrl: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  },
+  {
+    id: 'france',
+    name: 'France (Paris, Lyon & French Riviera)',
+    alias: 'France Elegance',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'Schengen Visa Required • ~15-30 Days Processing',
+    defaultDurationDays: 10,
+    seasonSummary: 'Optimal Season: Spring Blooms (Apr-Jun) / Autumn Culture & Wine (Sep-Nov)',
+    defaultStops: [
+      {
+        id: 'paris',
+        name: 'Paris',
+        country: 'France',
+        nights: 4,
+        role: 'City of Light & Art',
+        imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Eiffel Tower rising above Haussmann architecture and Seine River Paris',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~1 hr 57 mins',
+          title: 'TGV InOui High-Speed Rail to Lyon',
+        },
+      },
+      {
+        id: 'lyon',
+        name: 'Lyon',
+        country: 'France',
+        nights: 2,
+        role: 'Gastronomy Capital & Renaissance',
+        imageUrl: 'https://images.unsplash.com/photo-1524397031866-1c6f4949a2a7?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Colorful Renaissance facades along Saone river in Vieux Lyon',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~4 hrs 30 mins',
+          title: 'TGV Mediterranean Rail to Nice',
+        },
+      },
+      {
+        id: 'nice',
+        name: 'Nice & Côte d\'Azur',
+        country: 'France',
+        nights: 4,
+        role: 'Mediterranean Coast & Promenade',
+        imageUrl: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Promenade des Anglais curving along turquoise waters of Nice France',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'monaco',
+        name: 'Monaco & Monte Carlo',
+        region: 'French Riviera',
+        tag: 'Royal Principality',
+        description: 'Glamorous harbor enclave with luxury yachts, casino palaces, and cliffside botanical gardens.',
+        imageUrl: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'thailand',
+    name: 'Thailand (Bangkok, Chiang Mai & Phuket)',
+    alias: 'Thailand Trails',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'Visa Exemption / 60-Day Free Entry for Indian Passports',
+    defaultDurationDays: 10,
+    seasonSummary: 'Optimal Season: Dry & Sunny Coastal Weather (Nov-Apr)',
+    defaultStops: [
+      {
+        id: 'bangkok',
+        name: 'Bangkok',
+        country: 'Thailand',
+        nights: 3,
+        role: 'Golden Temples & Street Food',
+        imageUrl: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Wat Arun Temple of Dawn glistening across Chao Phraya River Bangkok',
+        transitToNext: {
+          mode: 'flight',
+          icon: 'flight',
+          duration: '~1 hr 15 mins',
+          title: 'Domestic Flight to Chiang Mai',
+        },
+      },
+      {
+        id: 'chiang-mai',
+        name: 'Chiang Mai',
+        country: 'Thailand',
+        nights: 3,
+        role: 'Old City & Mountain Sanctuaries',
+        imageUrl: 'https://images.unsplash.com/photo-1513415564515-763d91423bdd?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Wat Phra That Doi Suthep mountain temple overlooking Chiang Mai valley',
+        transitToNext: {
+          mode: 'flight',
+          icon: 'flight',
+          duration: '~2 hrs transit',
+          title: 'Direct Island Flight to Phuket',
+        },
+      },
+      {
+        id: 'phuket',
+        name: 'Phuket & Andaman Coast',
+        country: 'Thailand',
+        nights: 4,
+        role: 'Island Beaches & Limestone Bays',
+        imageUrl: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Traditional wooden longtail boat moored in crystal turquoise bay Phuket',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'phi-phi',
+        name: 'Phi Phi Islands',
+        region: 'Krabi / Phuket',
+        tag: 'Limestone Lagoon Paradise',
+        description: 'Iconic Maya Bay limestone lagoons with coral reefs and towering sea karsts.',
+        imageUrl: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'vietnam',
+    name: 'Vietnam (Hanoi, Ha Long Bay & Da Nang/Hoi An)',
+    alias: 'Vietnam Wonders',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'eVisa Active • 30-90 Days Instant for Indian Passports',
+    defaultDurationDays: 9,
+    seasonSummary: 'Optimal Season: Favorable Mild Temperatures & Clear Skies (Oct-Apr)',
+    defaultStops: [
+      {
+        id: 'hanoi',
+        name: 'Hanoi',
+        country: 'Vietnam',
+        nights: 3,
+        role: 'Old Quarter & French Colonial',
+        imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Hanoi Old Quarter narrow streets bustling with coffee houses and lanterns',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~2 hrs 30 mins',
+          title: 'Luxury Highway Transfer to Ha Long Marina',
+        },
+      },
+      {
+        id: 'halong-bay',
+        name: 'Ha Long Bay',
+        country: 'Vietnam',
+        nights: 2,
+        role: 'Emerald Sea & Limestone Karsts',
+        imageUrl: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Hundreds of limestone karst islands rising from emerald waters of Ha Long Bay',
+        transitToNext: {
+          mode: 'flight',
+          icon: 'flight',
+          duration: '~1 hr 20 mins',
+          title: 'Coastal Flight to Da Nang',
+        },
+      },
+      {
+        id: 'hoi-an',
+        name: 'Da Nang & Hoi An',
+        country: 'Vietnam',
+        nights: 4,
+        role: 'Lantern Town & Marble Mountains',
+        imageUrl: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Hoi An ancient river town illuminated by colorful silk lanterns at night',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'ba-na-hills',
+        name: 'Ba Na Hills & Golden Bridge',
+        region: 'Da Nang, Vietnam',
+        tag: 'Giant Hands Bridge',
+        description: 'Spectacular pedestrian bridge supported by two enormous stone hands over misty cliffs.',
+        imageUrl: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'bali',
+    name: 'Bali, Indonesia (Ubud, Seminyak & Nusa Penida)',
+    alias: 'Bali Islands',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'Visa on Arrival (e-VOA) • 30 Days Instant for Indian Passports',
+    defaultDurationDays: 8,
+    seasonSummary: 'Optimal Season: Warm Tropical Sun & Gentle Ocean Swells (Apr-Oct)',
+    defaultStops: [
+      {
+        id: 'ubud',
+        name: 'Ubud',
+        country: 'Indonesia',
+        nights: 3,
+        role: 'Rice Terraces & Jungle Sanctuaries',
+        imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Emerald green Tegalalang rice terraces stepping down jungle valley in Ubud Bali',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~1 hr 30 mins',
+          title: 'Private Chauffeur to Coastal Seminyak',
+        },
+      },
+      {
+        id: 'seminyak',
+        name: 'Seminyak & Canggu',
+        country: 'Indonesia',
+        nights: 3,
+        role: 'Sunset Coast & Beach Clubs',
+        imageUrl: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Golden sunset across Seminyak beach with rolling Indian Ocean surf',
+        transitToNext: {
+          mode: 'ferry',
+          icon: 'directions_boat',
+          duration: '~45 mins transit',
+          title: 'Sanur Fast Boat to Nusa Penida Island',
+        },
+      },
+      {
+        id: 'nusa-penida',
+        name: 'Nusa Penida',
+        country: 'Indonesia',
+        nights: 2,
+        role: 'Kelingking Cliff & Coastal Wonders',
+        imageUrl: 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Dramatic T-Rex shaped coastal promontory of Kelingking Beach Nusa Penida',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'uluwatu',
+        name: 'Uluwatu Temple & Sunset Kecak Dance',
+        region: 'Bukit Peninsula, Bali',
+        tag: 'Clifftop Sea Temple',
+        description: '70-meter sea cliff temple with spectacular sunset Kecak fire dance overlooking the ocean.',
+        imageUrl: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'uae',
+    name: 'Dubai & UAE (Dubai Downtown, Marina & Abu Dhabi)',
+    alias: 'Dubai Splendor',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: '30-Day Tourist Visa / eVisa Active for Indian Passports',
+    defaultDurationDays: 7,
+    seasonSummary: 'Optimal Season: Perfect Mild Winter & Beach Weather (Nov-Mar)',
+    defaultStops: [
+      {
+        id: 'dubai',
+        name: 'Dubai',
+        country: 'United Arab Emirates',
+        nights: 4,
+        role: 'Futuristic Skyscrapers & Souks',
+        imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Burj Khalifa rising above the Dubai Fountain and downtown skyline',
+        transitToNext: {
+          mode: 'car',
+          icon: 'directions_car',
+          duration: '~1 hr 15 mins',
+          title: 'Luxury Highway Transfer to Abu Dhabi',
+        },
+      },
+      {
+        id: 'abu-dhabi',
+        name: 'Abu Dhabi',
+        country: 'United Arab Emirates',
+        nights: 3,
+        role: 'Grand Mosque & Cultural Louvre',
+        imageUrl: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'White marble domes and minarets of Sheikh Zayed Grand Mosque Abu Dhabi',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'desert-safari',
+        name: 'Red Dune Desert Safari & Bedouin Camp',
+        region: 'Dubai, UAE',
+        tag: 'Dune Bashing & Stargazing',
+        description: 'Thrilling 4x4 dune bashing across crimson desert sands followed by traditional barbecue and stargazing.',
+        imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80',
+        actionLabel: 'Add as Day Trip',
+        isDayTrip: true,
+      },
+    ],
+  },
+  {
+    id: 'uk',
+    name: 'United Kingdom (London, Edinburgh & Scottish Highlands)',
+    alias: 'British Heritage',
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: 'UK Standard Visitor Visa Required • ~3 Weeks Processing',
+    defaultDurationDays: 9,
+    seasonSummary: 'Optimal Season: Long Summer Daylight & Castle Festivals (May-Sep)',
+    defaultStops: [
+      {
+        id: 'london',
+        name: 'London',
+        country: 'United Kingdom',
+        nights: 4,
+        role: 'Royal Monuments & Thames',
+        imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Big Ben clock tower and Westminster Bridge over Thames River London',
+        transitToNext: {
+          mode: 'train',
+          icon: 'train',
+          duration: '~4 hrs 20 mins',
+          title: 'LNER High-Speed Rail along East Coast to Edinburgh',
+        },
+      },
+      {
+        id: 'edinburgh',
+        name: 'Edinburgh & Scottish Highlands',
+        country: 'United Kingdom',
+        nights: 5,
+        role: 'Castle Clifftops & Lochs',
+        imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&auto=format&fit=crop&q=80',
+        imageAlt: 'Historic Edinburgh Castle sitting on volcanic Castle Rock Scotland',
+      },
+    ],
+    suggestions: [
+      {
+        id: 'loch-ness',
+        name: 'Loch Ness & Isle of Skye',
+        region: 'Highlands, Scotland',
+        tag: 'Mythic Lochs & Glens',
+        description: 'Dramatic mountain glens and ancient ruins of Urquhart Castle over deep waters.',
+        imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  },
+];
+
+// Combine all curated items with existing Japan, Ladakh, Italy, Kerala
+export const PRECONFIGURED_DESTINATIONS: DestinationItem[] = PRECONFIGURED_CIRCUITS.map((c) => ({
+  id: c.id,
+  name: c.name,
+  alias: c.alias,
+  scope: c.scope,
+  type: (c.scope === 'DOMESTIC' ? 'STATE' : 'COUNTRY') as 'STATE' | 'COUNTRY',
+  visaStatus: c.visaStatus,
+  defaultDurationDays: c.defaultDurationDays,
+  seasonSummary: c.seasonInsights['autumn'] || 'Optimal Season: Pleasant Weather & Mild Sunshine',
+  defaultStops: c.defaultStops,
+  suggestions: c.suggestions,
+}));
+
+export const ALL_CURATED_DESTINATIONS: DestinationItem[] = [
+  ...PRECONFIGURED_DESTINATIONS,
+  ...CURATED_INTERNATIONAL_DESTINATIONS,
+  ...DOMESTIC_DESTINATIONS,
+];
+
+// Helper to generate dynamic fallback stops for any of the 36 Indian states & UTs
+export function generateDomesticFallback(stateOrUtName: string): DestinationItem | null {
+  const query = stateOrUtName.toLowerCase().trim();
+  const found = (indianStatesUts as Array<{
+    id: string;
+    name: string;
+    type: 'STATE' | 'UT';
+    capital: string;
+    top_cities: string[];
+    alias: string;
+    season: string;
+  }>).find(
+    (s) =>
+      s.name.toLowerCase() === query ||
+      s.name.toLowerCase().includes(query) ||
+      query.includes(s.name.toLowerCase()) ||
+      s.id.toLowerCase() === query ||
+      s.alias.toLowerCase().includes(query)
+  );
+
+  if (!found) return null;
+
+  const cities = found.top_cities.length > 0 ? found.top_cities : [found.capital || found.name];
+  const stops: RouteStop[] = cities.map((city, idx) => ({
+    id: `${found.id}-stop-${idx + 1}`,
+    name: city,
+    country: 'India',
+    region: found.name,
+    nights: idx === 0 ? 3 : 2,
+    role: idx === 0 ? 'State Capital & Arrival Hub' : 'Scenic Gateway & Heritage Quarter',
+    imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80',
+    imageAlt: `${city} in ${found.name}`,
+    transitToNext:
+      idx < cities.length - 1
+        ? {
+            mode: 'transit',
+            icon: 'directions_transit',
+            duration: '~2 hrs transit',
+            title: `Scenic Regional Express to ${cities[idx + 1]}`,
+          }
+        : undefined,
+  }));
+
+  const totalNights = stops.reduce((acc, s) => acc + s.nights, 0);
+
+  return {
+    id: found.id,
+    name: `${found.name} (${cities.join(', ')})`,
+    alias: found.alias,
+    scope: 'DOMESTIC',
+    type: found.type,
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: Math.max(7, totalNights),
+    seasonSummary: `Optimal Season: ${found.season}`,
+    defaultStops: stops,
+    suggestions: [
+      {
+        id: `${found.id}-suggest-1`,
+        name: `${found.capital} Cultural & Heritage Sanctuaries`,
+        region: found.name,
+        tag: 'Heritage & Culture',
+        description: `Explore the vibrant local markets, ancient architecture, and cultural traditions of ${found.name}.`,
+        imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  };
+}
+
+// Helper to generate dynamic fallback stops for any of the 250 sovereign countries
+export function generateCountryFallback(countryName: string): DestinationItem | null {
+  const cLower = countryName.toLowerCase().trim();
+  const cData = (generatedCountries as Array<{
+    code: string;
+    name: string;
+    capital: string;
+    region: string;
+    subregion: string;
+    is_schengen: boolean;
+    top_cities: string[];
+  }>).find(
+    (c) =>
+      c.name.toLowerCase() === cLower ||
+      c.name.toLowerCase().includes(cLower) ||
+      cLower.includes(c.name.toLowerCase())
+  );
+
+  if (!cData) return null;
+
+  const visa = cData.is_schengen
+    ? 'Schengen Visa Required • ~15-30 Days Processing'
+    : cData.region === 'Asia'
+    ? 'eVisa or Visa on Arrival Available for Indian Passports'
+    : 'International Destination • Tourist Visa Required';
+
+  const cities = cData.top_cities.length > 0 ? cData.top_cities : [cData.capital || cData.name];
+  const stops: RouteStop[] = cities.map((city, idx) => ({
+    id: `${cData.code.toLowerCase()}-stop-${idx + 1}`,
+    name: city,
+    country: cData.name,
+    nights: idx === 0 ? 3 : 2,
+    role: idx === 0 ? 'Capital & Arrival Hub' : 'Regional Gateway & Cultural Heart',
+    imageUrl: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80',
+    imageAlt: `${city} in ${cData.name}`,
+    transitToNext:
+      idx < cities.length - 1
+        ? {
+            mode: 'transit',
+            icon: 'directions_transit',
+            duration: '~2 hrs transit',
+            title: `Scenic Regional Connection to ${cities[idx + 1]}`,
+          }
+        : undefined,
+  }));
+
+  const totalNights = stops.reduce((acc, s) => acc + s.nights, 0);
+
+  return {
+    id: cData.name.toLowerCase().replace(/\s+/g, '-'),
+    name: `${cData.name} (${cities.join(', ')})`,
+    alias: `${cData.name} Circuit`,
+    scope: 'INTERNATIONAL',
+    type: 'COUNTRY',
+    visaStatus: visa,
+    defaultDurationDays: Math.max(7, totalNights),
+    seasonSummary: 'Optimal Season: Favorable Mild Temperatures & Pleasant Sightseeing Conditions',
+    defaultStops: stops,
+    suggestions: [
+      {
+        id: `${cData.code.toLowerCase()}-suggest-1`,
+        name: `${cData.name} Highlights & Historic Quarter`,
+        region: cData.name,
+        tag: 'Cultural Heritage',
+        description: `Explore the vibrant architectural landmarks, historic museums, and local cuisine of ${cData.name}.`,
+        imageUrl: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  };
+}
+
+// Master resolution function: given any destination text or circuitId, resolves accurate stops
+export function resolveDestinationData(destinationInput: string): DestinationItem {
+  if (!destinationInput || !destinationInput.trim()) {
+    return ALL_CURATED_DESTINATIONS[0];
+  }
+  const query = destinationInput.toLowerCase().trim();
+
+  // Special direct matching for Norway to ensure instant exact hit
+  if (query.includes('norway') || query.includes('oslo') || query.includes('bergen')) {
+    const norway = ALL_CURATED_DESTINATIONS.find((d) => d.id === 'norway');
+    if (norway) return norway;
+  }
+
+  // 1. Direct match in curated destinations
+  const curatedMatch = ALL_CURATED_DESTINATIONS.find((d) => {
+    const id = d.id.toLowerCase();
+    const alias = d.alias.toLowerCase();
+    const name = d.name.toLowerCase();
+    return (
+      query === id ||
+      query === alias ||
+      query.includes(id) ||
+      (id.length > 3 && id.includes(query)) ||
+      query.includes(alias) ||
+      name.includes(query) ||
+      (query.length > 3 && query.includes(name))
+    );
+  });
+
+  if (curatedMatch) {
+    return curatedMatch;
+  }
+
+  // 2. Fallback dynamically generated domestic Indian state or UT
+  const domesticFallback = generateDomesticFallback(destinationInput);
+  if (domesticFallback) {
+    return domesticFallback;
+  }
+
+  // 3. Fallback dynamically generated country from static dataset
+  const countryFallback = generateCountryFallback(destinationInput);
+  if (countryFallback) {
+    return countryFallback;
+  }
+
+  // 4. Default to first curated destination (Japan)
+  return ALL_CURATED_DESTINATIONS[0];
+}
+
+// Autocomplete search across all 250 countries + all 36 Indian states & UTs + curated circuits
+export function searchAllDestinations(query: string): Array<{
+  id: string;
+  title: string;
+  subtitle: string;
+  scope: 'DOMESTIC' | 'INTERNATIONAL';
+  visaStatus: string;
+}> {
+  const q = query.toLowerCase().trim();
+  const results: Array<{
+    id: string;
+    title: string;
+    subtitle: string;
+    scope: 'DOMESTIC' | 'INTERNATIONAL';
+    visaStatus: string;
+  }> = [];
+
+  const addedIds = new Set<string>();
+
+  // 1. Match in curated destinations first
+  for (const d of ALL_CURATED_DESTINATIONS) {
+    if (
+      !q ||
+      d.name.toLowerCase().includes(q) ||
+      d.alias.toLowerCase().includes(q) ||
+      d.id.toLowerCase().includes(q) ||
+      d.defaultStops.some((s) => s.name.toLowerCase().includes(q))
+    ) {
+      if (!addedIds.has(d.id)) {
+        addedIds.add(d.id);
+        results.push({
+          id: d.id,
+          title: d.alias,
+          subtitle: d.name,
+          scope: d.scope,
+          visaStatus: d.visaStatus,
+        });
+      }
+    }
+  }
+
+  // 2. Match in all 36 Indian States & UTs
+  for (const s of indianStatesUts) {
+    if (
+      !q ||
+      s.name.toLowerCase().includes(q) ||
+      s.alias.toLowerCase().includes(q) ||
+      s.top_cities.some((c: string) => c.toLowerCase().includes(q))
+    ) {
+      if (!addedIds.has(s.id)) {
+        addedIds.add(s.id);
+        results.push({
+          id: s.id,
+          title: s.name,
+          subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
+          scope: 'DOMESTIC',
+          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+        });
+      }
+    }
+  }
+
+  // 3. Match in all 250 sovereign countries from static dataset
+  for (const c of generatedCountries) {
+    if (
+      q &&
+      (c.name.toLowerCase().includes(q) ||
+        (c.capital && c.capital.toLowerCase().includes(q)) ||
+        c.top_cities.some((city: string) => city.toLowerCase().includes(q)))
+    ) {
+      const cId = c.name.toLowerCase().replace(/\s+/g, '-');
+      if (!addedIds.has(cId)) {
+        addedIds.add(cId);
+        results.push({
+          id: cId,
+          title: c.name,
+          subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
+          scope: 'INTERNATIONAL',
+          visaStatus: c.is_schengen
+            ? 'Schengen Visa Required • ~15-30 Days Processing'
+            : 'International • Tourist Visa / eVisa Active',
+        });
+      }
+    }
+  }
+
+  return results.slice(0, 10);
+}

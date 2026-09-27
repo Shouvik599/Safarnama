@@ -1248,6 +1248,26 @@ pnpm
 
 not npm.
 
+## 22.1 Batch 1: Core Journey Onboarding & Route Sequencing (Completed)
+
+Implemented the first 3 screens aligned with the approved Stitch project `Safarnama`:
+- **Screen 1 (Welcome / Landing Screen)**: Editorial hero, flat-lay aesthetics, 6-card bento architecture, popular preview routes, and primary navigation.
+- **Screen 2 (Trip Details)**:
+  - Location Search & Autocomplete for 14 major Indian origin airports with IATA designations.
+  - **Static Data Destination Auto-Population**: Real-time autocomplete search (`searchAllDestinations`) across all 250 sovereign countries (`generated_countries.json`), all 36 Indian States and Union Territories (`indian_states_uts.json`), and curated circuits.
+  - Interactive Date Picker with editorial typography (`Sat, Oct 18` / `Tue, Oct 28`), native accessible calendar picker (`showPicker()`), zero browser indicator digit clipping, and automatic duration calculation (`durationDays = return - departure`).
+  - Departure and return leg cycling selectors (Morning, Afternoon, Evening) with immediate year synchronization to the chosen calendar dates (e.g. choosing 2027 immediately reflects `2027 • Evening leg`).
+  - Real-time Seasonal Weather Badge adapting to destination and chosen month (`getSeasonDescription`).
+  - Real-time Visa Verdict Badge adapting to destination (`getVisaVerdict`, e.g. Schengen Visa required for Norway, ₹0 domestic visa for Rajasthan/Ladakh).
+  - Traveler group counters and party dynamic selectors.
+- **Screen 3 (Destinations & Route Sequence)**:
+  - **Dynamic Route Seeding & Resolver**: `resolveDestinationData()` dynamically generates/resolves route stops matching any entered domestic state/UT or international country. Entering "Norway" on Screen 2 seeds real Norway cities (Oslo, Flåm & Sognefjord, Bergen & Bryggen, Tromsø & Arctic Fjords) with scenic rail/fjord catamaran transit connectors instead of falling back to Japan cities.
+  - Stop Night Counters with interactive `[ - ] X nights [ + ]` steppers.
+  - Duration Reconciliation Engine comparing total allocated stop nights against target trip duration, alerting to gaps/surpluses, with one-click date synchronization.
+  - Stop reordering, deletion, and custom destination insertion with automatic transit connector recalculation.
+  - Curated suggestions dynamically filtered by active destination.
+- **Verification**: 10 automated flow and regression tests passing in Vitest (`flow.test.tsx`), production bundle verified with Vite/tsc (`pnpm build`), and zero linter warnings/errors (`oxlint`).
+
 ---
 
 # 23. Phase 19 — End-to-End Test Matrix

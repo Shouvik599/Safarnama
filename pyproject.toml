@@ -10,6 +10,7 @@ dependencies = [
     "langgraph>=1.2.12",
     "pydantic>=2.13.5",
     "python-dotenv>=1.2.3",
+    "uvicorn>=0.54.0",
 ]
 
 [build-system]

@@ -1,0 +1,479 @@
+[
+  {
+    "id": "andhra-pradesh",
+    "name": "Andhra Pradesh",
+    "type": "STATE",
+    "capital": "Amaravati",
+    "top_cities": [
+      "Visakhapatnam",
+      "Tirupati",
+      "Araku Valley"
+    ],
+    "alias": "Coastal Andhra & Hills",
+    "season": "Pleasant Coastal Breezes & Temple Sanctuaries (Oct-Mar)"
+  },
+  {
+    "id": "arunachal-pradesh",
+    "name": "Arunachal Pradesh",
+    "type": "STATE",
+    "capital": "Itanagar",
+    "top_cities": [
+      "Tawang",
+      "Ziro Valley",
+      "Dirang"
+    ],
+    "alias": "Eastern Himalayas",
+    "season": "Lush Mountain Valleys & Monastic Highlands (Oct-Apr)"
+  },
+  {
+    "id": "assam",
+    "name": "Assam",
+    "type": "STATE",
+    "capital": "Dispur",
+    "top_cities": [
+      "Guwahati",
+      "Kaziranga National Park",
+      "Majuli Island"
+    ],
+    "alias": "Brahmaputra Valley",
+    "season": "Wildlife Safari Season & Verdant Tea Trails (Nov-Apr)"
+  },
+  {
+    "id": "bihar",
+    "name": "Bihar",
+    "type": "STATE",
+    "capital": "Patna",
+    "top_cities": [
+      "Bodh Gaya",
+      "Nalanda",
+      "Rajgir"
+    ],
+    "alias": "Heritage & Enlightenment Trail",
+    "season": "Pleasant Winter Sun & Buddhist Pilgrimage (Oct-Mar)"
+  },
+  {
+    "id": "chhattisgarh",
+    "name": "Chhattisgarh",
+    "type": "STATE",
+    "capital": "Raipur",
+    "top_cities": [
+      "Bastar & Chitrakote Falls",
+      "Jagdalpur",
+      "Barnawapara"
+    ],
+    "alias": "Tribal Heart & Waterfalls",
+    "season": "Cascading Waterfalls & Mild Green Landscapes (Oct-Feb)"
+  },
+  {
+    "id": "goa",
+    "name": "Goa",
+    "type": "STATE",
+    "capital": "Panaji",
+    "top_cities": [
+      "North Goa",
+      "South Goa",
+      "Panaji Old Quarter"
+    ],
+    "alias": "Goa Coastal Sun & Heritage",
+    "season": "Tropical Sun, Beach Shacks & Portuguese Heritage (Nov-Mar)"
+  },
+  {
+    "id": "gujarat",
+    "name": "Gujarat",
+    "type": "STATE",
+    "capital": "Gandhinagar",
+    "top_cities": [
+      "Ahmedabad",
+      "Rann of Kutch",
+      "Gir National Park",
+      "Dwarka"
+    ],
+    "alias": "Colors of Gujarat",
+    "season": "White Desert Rann Utsav & Lion Safari (Nov-Feb)"
+  },
+  {
+    "id": "haryana",
+    "name": "Haryana",
+    "type": "STATE",
+    "capital": "Chandigarh",
+    "top_cities": [
+      "Kurukshetra",
+      "Gurugram",
+      "Pinjore Gardens"
+    ],
+    "alias": "Heritage & Vedic Landscapes",
+    "season": "Cool Winter Sunshine & Cultural Heritage (Oct-Mar)"
+  },
+  {
+    "id": "himachal-pradesh",
+    "name": "Himachal Pradesh",
+    "type": "STATE",
+    "capital": "Shimla",
+    "top_cities": [
+      "Shimla",
+      "Manali",
+      "Dharamshala & McLeodGanj"
+    ],
+    "alias": "Himachal Pine Valleys",
+    "season": "Snow-Capped Peaks & Fresh Mountain Pines (Year-round)"
+  },
+  {
+    "id": "jharkhand",
+    "name": "Jharkhand",
+    "type": "STATE",
+    "capital": "Ranchi",
+    "top_cities": [
+      "Ranchi Waterfalls",
+      "Betla National Park",
+      "Netarhat"
+    ],
+    "alias": "Land of Forests & Falls",
+    "season": "Crisp Winter Sun & Plunging Waterfalls (Oct-Mar)"
+  },
+  {
+    "id": "karnataka",
+    "name": "Karnataka",
+    "type": "STATE",
+    "capital": "Bengaluru",
+    "top_cities": [
+      "Bengaluru",
+      "Mysore",
+      "Coorg Coffee Estates",
+      "Hampi Ruins"
+    ],
+    "alias": "Karnataka Heritage & Coffee Hills",
+    "season": "Pleasant Plateau Breezes & Spice Trails (Oct-Mar)"
+  },
+  {
+    "id": "kerala",
+    "name": "Kerala",
+    "type": "STATE",
+    "capital": "Thiruvananthapuram",
+    "top_cities": [
+      "Kochi",
+      "Munnar Tea Hills",
+      "Alleppey Backwaters"
+    ],
+    "alias": "Gods Own Country",
+    "season": "Serene Backwaters, Houseboats & Ayurvedic Retreats (Sep-Mar)"
+  },
+  {
+    "id": "madhya-pradesh",
+    "name": "Madhya Pradesh",
+    "type": "STATE",
+    "capital": "Bhopal",
+    "top_cities": [
+      "Khajuraho Temples",
+      "Bandhavgarh National Park",
+      "Orchha",
+      "Gwalior"
+    ],
+    "alias": "Heart of India & Tiger Reserves",
+    "season": "Mild Winter Sunshine & Wilderness Safaris (Oct-Mar)"
+  },
+  {
+    "id": "maharashtra",
+    "name": "Maharashtra",
+    "type": "STATE",
+    "capital": "Mumbai",
+    "top_cities": [
+      "Mumbai",
+      "Lonavala & Khandala",
+      "Ajanta & Ellora Caves",
+      "Mahabaleshwar"
+    ],
+    "alias": "Western Ghats & Coastal Metro",
+    "season": "Pleasant Coastal Breezes & Mist-Clad Ghats (Oct-Mar)"
+  },
+  {
+    "id": "manipur",
+    "name": "Manipur",
+    "type": "STATE",
+    "capital": "Imphal",
+    "top_cities": [
+      "Imphal",
+      "Loktak Floating Lake",
+      "Ukhrul"
+    ],
+    "alias": "Jeweled Land & Floating Lake",
+    "season": "Lush Highlands & Floating Phumdis (Oct-Apr)"
+  },
+  {
+    "id": "meghalaya",
+    "name": "Meghalaya",
+    "type": "STATE",
+    "capital": "Shillong",
+    "top_cities": [
+      "Shillong",
+      "Cherrapunji & Living Root Bridges",
+      "Dawki Umngot River"
+    ],
+    "alias": "Abode of the Clouds",
+    "season": "Crystal Clear Rivers & Dramatic Waterfalls (Oct-May)"
+  },
+  {
+    "id": "mizoram",
+    "name": "Mizoram",
+    "type": "STATE",
+    "capital": "Aizawl",
+    "top_cities": [
+      "Aizawl",
+      "Reiek Mountain",
+      "Champhai"
+    ],
+    "alias": "Rolling Bamboo Hills",
+    "season": "Cool Mountain Mists & Rolling Ridges (Oct-Apr)"
+  },
+  {
+    "id": "nagaland",
+    "name": "Nagaland",
+    "type": "STATE",
+    "capital": "Kohima",
+    "top_cities": [
+      "Kohima",
+      "Dzukou Valley",
+      "Mokokchung"
+    ],
+    "alias": "Falcon Capital & Hornbill Hills",
+    "season": "Hornbill Cultural Festival & Valley Treks (Nov-Apr)"
+  },
+  {
+    "id": "odisha",
+    "name": "Odisha",
+    "type": "STATE",
+    "capital": "Bhubaneswar",
+    "top_cities": [
+      "Bhubaneswar",
+      "Puri Beach",
+      "Konark Sun Temple",
+      "Chilika Lake"
+    ],
+    "alias": "Temple Coast & Golden Sands",
+    "season": "Pleasant Coastal Sun & Migratory Flamingoes (Oct-Mar)"
+  },
+  {
+    "id": "punjab",
+    "name": "Punjab",
+    "type": "STATE",
+    "capital": "Chandigarh",
+    "top_cities": [
+      "Amritsar Golden Temple",
+      "Wagah Border",
+      "Patiala"
+    ],
+    "alias": "Land of Five Rivers",
+    "season": "Golden Mustard Fields & Crispy Winter Morning Langar (Oct-Mar)"
+  },
+  {
+    "id": "rajasthan",
+    "name": "Rajasthan",
+    "type": "STATE",
+    "capital": "Jaipur",
+    "top_cities": [
+      "Jaipur",
+      "Jodhpur",
+      "Udaipur",
+      "Jaisalmer"
+    ],
+    "alias": "Rajasthan Royals",
+    "season": "Mild Winter Sunshine & Desert Festivals (Oct-Mar)"
+  },
+  {
+    "id": "sikkim",
+    "name": "Sikkim",
+    "type": "STATE",
+    "capital": "Gangtok",
+    "top_cities": [
+      "Gangtok",
+      "Pelling & Kanchenjunga",
+      "Lachung & Yumthang Valley"
+    ],
+    "alias": "Himalayan Shangri-La",
+    "season": "Clear Kanchenjunga Views & Alpine Blooms (Mar-May, Oct-Dec)"
+  },
+  {
+    "id": "tamil-nadu",
+    "name": "Tamil Nadu",
+    "type": "STATE",
+    "capital": "Chennai",
+    "top_cities": [
+      "Chennai",
+      "Madurai Meenakshi",
+      "Ooty Nilgiri Hills",
+      "Kanyakumari"
+    ],
+    "alias": "Dravidian Temples & Nilgiri Hills",
+    "season": "Cooler Coastal Breezes & Nilgiri Mountain Air (Oct-Mar)"
+  },
+  {
+    "id": "telangana",
+    "name": "Telangana",
+    "type": "STATE",
+    "capital": "Hyderabad",
+    "top_cities": [
+      "Hyderabad",
+      "Warangal Thousand Pillar Temple",
+      "Nagarjuna Sagar"
+    ],
+    "alias": "City of Pearls & Nizam Heritage",
+    "season": "Pleasant Winter Sun & Culinary Biryani Trails (Oct-Mar)"
+  },
+  {
+    "id": "tripura",
+    "name": "Tripura",
+    "type": "STATE",
+    "capital": "Agartala",
+    "top_cities": [
+      "Agartala",
+      "Ujjayanta Palace",
+      "Unakoti Rock Carvings"
+    ],
+    "alias": "Palaces of the East",
+    "season": "Mild Winter Weather & Royal Lake Palaces (Oct-Mar)"
+  },
+  {
+    "id": "uttar-pradesh",
+    "name": "Uttar Pradesh",
+    "type": "STATE",
+    "capital": "Lucknow",
+    "top_cities": [
+      "Varanasi Ghats",
+      "Agra Taj Mahal",
+      "Lucknow Nawabi Quarter",
+      "Ayodhya"
+    ],
+    "alias": "Heritage of the Ganga Plains",
+    "season": "Misty Winter Mornings & Ganga Aarti (Oct-Mar)"
+  },
+  {
+    "id": "uttarakhand",
+    "name": "Uttarakhand",
+    "type": "STATE",
+    "capital": "Dehradun",
+    "top_cities": [
+      "Rishikesh & Haridwar",
+      "Mussoorie Queen of Hills",
+      "Nainital Lake"
+    ],
+    "alias": "Devbhoomi Yoga & Alpine Lakes",
+    "season": "Crisp Alpine Breeze & Sacred Ganga Ghats (Year-round)"
+  },
+  {
+    "id": "west-bengal",
+    "name": "West Bengal",
+    "type": "STATE",
+    "capital": "Kolkata",
+    "top_cities": [
+      "Kolkata Cultural Capital",
+      "Darjeeling Himalayan Rail",
+      "Kalimpong",
+      "Sundarbans"
+    ],
+    "alias": "Culture, Tea Gardens & Mangroves",
+    "season": "Festive Autumn & Cool Himalayan Tea Terraces (Oct-Mar)"
+  },
+  {
+    "id": "andaman-nicobar",
+    "name": "Andaman and Nicobar Islands",
+    "type": "UT",
+    "capital": "Port Blair",
+    "top_cities": [
+      "Port Blair",
+      "Havelock Island (Radhanagar)",
+      "Neil Island"
+    ],
+    "alias": "Emerald Bay & Coral Isles",
+    "season": "Turquoise Waters, Scuba Diving & White Sand Beaches (Oct-May)"
+  },
+  {
+    "id": "chandigarh",
+    "name": "Chandigarh",
+    "type": "UT",
+    "capital": "Chandigarh",
+    "top_cities": [
+      "Chandigarh Capitol Complex",
+      "Rock Garden",
+      "Sukhna Lake"
+    ],
+    "alias": "The City Beautiful",
+    "season": "Pleasant Urban Architecture & Garden Walks (Oct-Mar)"
+  },
+  {
+    "id": "dadra-nagar-haveli-daman-diu",
+    "name": "Dadra & Nagar Haveli and Daman & Diu",
+    "type": "UT",
+    "capital": "Daman",
+    "top_cities": [
+      "Daman Fort Beach",
+      "Diu Portuguese Citadel",
+      "Silvassa"
+    ],
+    "alias": "Portuguese Coastal Fortress",
+    "season": "Breezy Arabian Sea & Historic Citadels (Oct-Mar)"
+  },
+  {
+    "id": "delhi",
+    "name": "Delhi (National Capital Territory)",
+    "type": "UT",
+    "capital": "New Delhi",
+    "top_cities": [
+      "New Delhi Central Vista",
+      "Old Delhi & Red Fort",
+      "Qutub Minar & Mehrauli"
+    ],
+    "alias": "Capital Heartland & Mughal Monuments",
+    "season": "Crisp Winter Sunshine & Heritage Walks (Oct-Mar)"
+  },
+  {
+    "id": "jammu-kashmir",
+    "name": "Jammu and Kashmir",
+    "type": "UT",
+    "capital": "Srinagar",
+    "top_cities": [
+      "Srinagar Dal Lake",
+      "Gulmarg Meadow of Flowers",
+      "Pahalgam Valley"
+    ],
+    "alias": "Paradise on Earth",
+    "season": "Chinar Foliage & Dal Lake Houseboats / Winter Snow (Year-round)"
+  },
+  {
+    "id": "ladakh",
+    "name": "Ladakh",
+    "type": "UT",
+    "capital": "Leh",
+    "top_cities": [
+      "Leh",
+      "Nubra Valley",
+      "Pangong Tso Lake"
+    ],
+    "alias": "Ladakh High Passes",
+    "season": "High Mountain Passes Open & Crystal Skies (May-Sep) / Chadar (Dec-Feb)"
+  },
+  {
+    "id": "lakshadweep",
+    "name": "Lakshadweep",
+    "type": "UT",
+    "capital": "Kavaratti",
+    "top_cities": [
+      "Agatti Coral Island",
+      "Bangaram Lagoon",
+      "Kavaratti"
+    ],
+    "alias": "Pristine Coral Atolls",
+    "season": "Calm Crystal Lagoons & Scuba Adventures (Oct-Apr)"
+  },
+  {
+    "id": "puducherry",
+    "name": "Puducherry",
+    "type": "UT",
+    "capital": "Pondicherry",
+    "top_cities": [
+      "White Town French Quarter",
+      "Auroville & Matrimandir",
+      "Paradise Beach"
+    ],
+    "alias": "French Riviera of the East",
+    "season": "Mild Coastal Breezes & Heritage Boulevard Cafes (Oct-Mar)"
+  }
+]

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Clean Ivory App Icon / Favicon Canvas Tile -->
+  <rect width="400" height="400" rx="88" fill="#FFFDF8"/>
+  <rect x="2" y="2" width="396" height="396" rx="86" fill="none" stroke="#EFE7DA" stroke-width="2"/>
+
+  <!-- Standalone Journey Loop Symbol -->
+  <g transform="translate(105, 96)">
+    <!-- Primary Outer Path (Safarnama Saffron #E87524) -->
+    <path d="M 32 158 C 32 94, 62 26, 105 26 C 148 26, 178 94, 178 158" 
+          fill="none" stroke="#E87524" stroke-width="21" stroke-linecap="round"/>
+    
+    <!-- Dynamic Inner Journey Route (Deep Maroon #7A2E2E) -->
+    <path d="M 178 158 C 178 198, 146 218, 105 218 C 64 218, 48 186, 48 150 C 48 104, 80 82, 105 82 C 128 82, 146 100, 146 124 C 146 144, 128 156, 105 156" 
+          fill="none" stroke="#7A2E2E" stroke-width="16" stroke-linecap="round"/>
+
+    <!-- Destination Pin Anchor Points -->
+    <circle cx="105" cy="124" r="11.5" fill="#E87524"/>
+    <circle cx="105" cy="26" r="8.5" fill="#FFFDF8" stroke="#E87524" stroke-width="6"/>
+  </g>
+</svg>

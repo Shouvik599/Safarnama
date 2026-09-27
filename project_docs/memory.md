@@ -4,23 +4,36 @@
 
 ## Current Status
 
-**Phase 17 — API Streaming complete.** `src/graph/streaming.py` (LangGraph SSE streaming engine & `PlanningEvent`), `src/api/models.py` (`PlanningEvent` export), `src/api/routes.py` (`POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), and `tests/unit/test_api_streaming.py` implemented and verified. Implements real-time milestone streaming for travel planning and re-planning workflows:
-1. Milestone Lifecycle Streaming:
-   - Emits structured SSE events: `planning_started`, `intake_completed`, `date_optimization_started`, `date_optimization_completed`, `visa_started`, `visa_completed`, `logistics_started`, `logistics_completed`, `experience_started`, `experience_completed`, `budget_calculated`, `optimization_started`, `optimization_completed`, `planning_completed`, `warning`, `error`.
-   - Streaming payloads deliver clean, high-level summaries for UI consumption without internal LangGraph/LangChain execution metadata or stack traces.
-2. Browser & Client Friendly Endpoints:
-   - `POST /api/v1/plan/stream`: Full planning stream taking JSON `PlanRequest`.
-   - `GET /api/v1/plan/stream`: Browser-native `EventSource` compatible endpoint taking URL query parameters.
-   - `POST /api/v1/plan/replan/stream` (and alias `POST /api/v1/plan/decision/stream`): Streams re-planning workflows with maximum artifact reuse.
-3. Hermetic Verification:
-   - 12 comprehensive unit tests in `tests/unit/test_api_streaming.py`.
-   - Entire test suite passes (572 passing unit tests across repository), 100% clean formatting and linting.
-
-Do not start subsequent phases until explicitly requested.
+**Safarnama Frontend — Batch 1 & Interactive Features Complete.** Implemented the first 3 screens of the Safarnama frontend faithfully following the approved designs in the Stitch project **`Safarnama`**, complete with interactive planning controls:
+1. Screen 1: **Welcome / Landing Screen**
+   - Header with official logo, navigation links, and primary CTA.
+   - Editorial hero section with travel diary flat-lay composition, floating contextual indicator cards, and dual CTAs.
+   - 6-card bento architecture section detailing smart itineraries, transit, stays, weather, visa guidance, and budget planning.
+   - Popular journey preview routes (Ladakh, Kyoto, Amalfi) with direct planner launch.
+   - Personal Safarnama closing banner and 5-column comprehensive footer.
+2. Screen 2: **Trip Planner — Trip Details**
+   - 5-step progress stepper (Step 1 active with primary container glow).
+   - Origin search autocomplete for 14 major Indian origin airports with IATA labels (Delhi DEL, Mumbai BOM, Bengaluru BLR, Kolkata CCU, Chennai MAA, Hyderabad HYD, Goa GOI, Kochi COK, etc.).
+   - Destination search autocomplete and featured circuit selectors (Japan Autumn Trail, Ladakh Pass, Italy Circuit, Kerala Stays).
+   - Interactive date pickers (`<input type="date">`) with automated journey duration calculation (`durationDays = return - departure`).
+   - Departure and return leg cycling preference buttons (Morning leg → Afternoon leg → Evening leg).
+   - Real-time Seasonal Weather Badge dynamically adapting to the selected month and destination via `getSeasonDescription`.
+   - Real-time Visa Verdict Badge dynamically adapting to destination via `getVisaVerdict`.
+   - Party dynamic buttons (Solo, Couple / Pair, Family, Friends Group) and counter steppers for Adults, Children, and Infants.
+   - Concierge editorial insight callout and autosave status indicator.
+3. Screen 3: **Trip Planner — Destinations & Route Sequence**
+   - 5-step progress stepper (Step 1 completed with checkmark, Step 2 active route).
+   - Dynamic Route Seeding: Selecting a circuit (Japan, Ladakh, Italy, Kerala) automatically populates curated stops with real transit connectors and durations.
+   - Stop Night Counters: Interactive `[ - ] X nights [ + ]` steppers on each stop card.
+   - Duration Reconciliation Engine: Live reconciliation banner comparing total allocated stop nights against target trip duration, alerting to duration gaps or over-allocations, with a one-click "Sync Trip Duration" action.
+   - Route Timeline Sequence: Reorder stops up/down with automatic transit connector recalculation, remove stops, and add custom destinations.
+   - Curated suggestions dynamically filtered by the active circuit and categories, with "+ Add Stop" and "Add as Day Trip" actions.
+   - Connected flow: Welcome ↔ Trip Details ↔ Destinations with bidirectional synchronization and state persistence.
+   - Stops cleanly at Batch 1 boundary when advancing to Step 3 (Preferences).
 
 ## Current implementation phase
 
-Phase 17 — API Streaming (Completed)
+Frontend Batch 1 — Screens 1–3 + Interactive Planning Controls (Completed)
 
 ## Completed functionality
 
@@ -541,10 +554,52 @@ Phase 17 — API Streaming is **100% complete, verified via 12 dedicated unit te
 - `README.md`
 - `project_docs/memory.md`
 
-## Next recommended phase
+## Frontend Batch 1 Completion Status
 
-**Phase 18 — Frontend**:
-Build responsive modern web interface with Vite, React, TypeScript, and modern styling, featuring interactive trip intake forms, live SSE milestone streaming indicators, rich day-by-day itinerary views, budget breakdown visualizers, and interactive budget conflict resolution cards.
+Frontend Batch 1 (Screens 1–3) is **100% complete, verified via 10 Vitest/React Testing Library tests, clean production build, zero-warning Oxlint static analysis, and synchronized documentation**.
+
+### Completed Screens & Capabilities:
+- **Screen 1**: Welcome / Landing Screen (editorial hero, bento feature grid, curated circuits, closing CTA banner, 5-column footer)
+- **Screen 2**: Trip Planner — Trip Details
+  - 5-step stepper, Indian origin airport autocomplete (14 airports with IATA designations).
+  - **Static Data Destination Auto-Population**: Real-time autocomplete search (`searchAllDestinations`) across all 250 sovereign countries (`generated_countries.json`), all 36 Indian States and Union Territories (`indian_states_uts.json`), and curated circuits.
+  - Interactive Date Picker with editorial typography (`Sat, Oct 18` / `Tue, Oct 28`), native accessible calendar picker (`showPicker()`), and zero digit clipping.
+  - Departure and return leg cycling preference selectors (Morning, Afternoon, Evening) with immediate year synchronization to the selected date (e.g. selecting January 2027 immediately updates leg text to `2027 • Evening leg`).
+  - Real-time Seasonal Weather Badge adapting to destination and chosen month (`getSeasonDescription`).
+  - Real-time Visa Verdict Badge adapting to destination (`getVisaVerdict`, e.g. Schengen Visa required for Norway, ₹0 domestic visa for Rajasthan/Ladakh).
+  - Party dynamic buttons and traveler counter steppers.
+- **Screen 3**: Trip Planner — Destinations
+  - **Dynamic Route Seeding & Resolver**: `resolveDestinationData()` dynamically generates/resolves route stops matching any entered domestic state/UT or international country. Entering "Norway" on Screen 2 seeds real Norway cities (Oslo, Flåm & Sognefjord, Bergen & Bryggen, Tromsø & Arctic Fjords) with scenic rail/fjord catamaran transit connectors instead of falling back to Japan cities.
+  - Stop night counter steppers (`[ - ] X nights [ + ]`).
+  - Duration Reconciliation Engine comparing total allocated stop nights against target trip duration, alerting to gaps/surpluses, with one-click date synchronization.
+  - Route sequence timeline with reorder controls, stop removal, and custom destination insertion with automatic transit connector recalculation.
+  - Curated suggestions dynamically filtered by active destination.
+
+### Reusable Components & Design Architecture:
+- Framework: Vite + React 19 + TypeScript + Tailwind CSS
+- Stitch Reference: Directly inspected project `Safarnama` (`projects/12901504223215830628`)
+- Centralized Design Tokens: Tailored palette (Saffron `#E87524`, Deep Maroon `#7A2E2E`, Ivory canvas `#FFFDF8`), typography (`Plus Jakarta Sans` headings, `Inter` body, Google Material Symbols), modular spacing
+- Reusable Components:
+  - Layout: `Header`, `PlannerHeader`, `Footer`, `PlannerFooter`
+  - Planner: `ProgressStepper`, `CounterStepper`, `RouteSequenceItem`, `SuggestionCard`
+- Structured State Management: `TripPlanningContext` and `useTripPlanning` persisting trip details and route sequence seamlessly across forward and back navigation.
+
+### Verification:
+- Tests: 10 unit & integration tests passing in `frontend/src/test/flow.test.tsx` (`vitest`).
+- Build: `tsc -b && vite build` bundled with zero errors or warnings.
+- Lint: `oxlint` passed with 0 errors and 0 warnings across 24 files.
+- Python Suite: 572 tests passing across root repository.
+
+### Next Recommended Batch:
+
+**Batch 2 — Completing the Wizard & Progress**
+Screens 4–8:
+- Screen 4: Trip Planner — Travelers & Style
+- Screen 5: Trip Planner — Budget & Pacing
+- Screen 6: Trip Planner — Review & Confirm
+- Screen 7: Planning Engine Progress & Streaming Visualizer
+- Screen 8: Itinerary Generated / Overview Reveal
+
 
 
 
