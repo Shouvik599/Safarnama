@@ -4,18 +4,18 @@
 
 ## Current Status
 
-**Phase 13 — First Complete Vertical Slice complete.** `src/models/itinerary.py` (`FinalItinerary`), `src/nodes/synthesizer_node.py`, `src/graph/workflow.py`, `src/api/routes.py`, `src/api/models.py`, and `src/api/main.py` implemented and verified. Implements the first complete vertical slice connecting the FastAPI API layer, LangGraph orchestration, and final itinerary structured output:
-1. `FinalItinerary`: Comprehensive domain model synthesizing `trip_id`, `title`, `summary`, `trip_context`, `logistics_plan`, `experience_plan`, `budget_breakdown`, `visa_verdict`, `optimization_result`, `plan_status`, `warnings`, `is_estimated`, and `created_at`.
-2. `synthesizer_node`: LangGraph node assembling `FinalItinerary` with zero LLM math (financial metrics derived directly from `BudgetBreakdown`), auto-generating evocative titles and summaries based on destination, travelers, and travel style.
-3. StateGraph Integration: `optimizer -> synthesizer -> END` wired cleanly into `build_planning_graph()`, with full support for flat and nested trip context requests.
-4. FastAPI API Layer: `POST /api/v1/plan` endpoint executing the full LangGraph planning engine and returning validated `PlanResponse`.
-5. Dual-verified with 9 dedicated unit tests (505 total passing across project) and 7-stage live external API verification (`scripts/verify_live_nodes.py`, Stage 7 end-to-end live vertical slice execution in 4.14s). All lint and format checks pass.
+**Phase 15 — Flexible Dates complete.** `src/models/trip.py` (`DateCandidate`, `DateOptimizationResult`), `src/nodes/date_node.py` (`date_node`, `process_date_optimization`), `src/graph/workflow.py`, `src/graph/state.py`, `src/nodes/synthesizer_node.py`, and `src/api/models.py` implemented and verified. Implements flexible date evaluation across all 3 modes (`EXACT`, `FLEXIBLE`, `FIND_BEST`):
+1. `DateCandidate` & `DateOptimizationResult`: Pydantic domain models encapsulating candidate date windows, estimated cost differentials, weather scores, convenience scores, composite quality score (0–100), and structured trade-offs.
+2. `date_node`: Deterministic LangGraph node evaluating candidate windows using seasonal transport multipliers, lodging estimates, weather comfort heuristics, and calendar weekend departure weighting (+10 pts).
+3. LangGraph Topology: Wired as `START -> intake -> date_optimizer -> (conditional route_scope) -> [visa, logistics, experience]`, synchronizing chosen dates into `trip_context.dates.start_date` and `end_date` so downstream nodes plan against concrete dates.
+4. Synthesizer Integration: Passes `date_options` into `FinalItinerary` and includes date strategy summary in travelogue narrative.
+5. Dual-verified with 19 dedicated unit tests (545 total passing across project) and 100% clean formatting and linting.
 
 Do not start subsequent phases until explicitly requested.
 
 ## Current implementation phase
 
-Phase 13 — First Complete Vertical Slice (Completed)
+Phase 15 — Flexible Dates (Completed)
 
 ## Completed functionality
 
@@ -200,6 +200,22 @@ Phase 13 — First Complete Vertical Slice (Completed)
 - **`src/api/main.py`**: Created FastAPI entrypoint exporting `app` and `create_app`.
 - **`tests/unit/test_vertical_slice.py`**: 9 unit tests covering title/summary synthesis, `FinalItinerary` assembly, StateGraph execution, zero-arithmetic guarantee, and FastAPI `POST /plan` validation and successful response generation.
 
+### Phase 15 (Flexible Dates — 100% complete)
+- **`src/models/trip.py`** (extended):
+  - Added `DateCandidate` model (start/end dates, estimated cost in INR, weather comfort score 0-100, calendar convenience score 0-100, composite quality score 0-100, is_recommended flag, trade-off notes).
+  - Added `DateOptimizationResult` model (mode, recommended_candidate, alternatives list, candidate_count, notes).
+- **`src/models/itinerary.py`** (extended): Added `date_options: DateOptimizationResult | None` to `FinalItinerary`.
+- **`src/graph/state.py`**: Added `date_options: DateOptimizationResult | None` to `PlanGraphState`.
+- **`src/nodes/date_node.py`**: Complete Date Optimizer planning node:
+  - Generates candidate windows for `EXACT` (single window), `FLEXIBLE` (shifts up to $\pm \text{flexibility\_days}$), and `FIND_BEST` (sliding window of `duration_days` across `[window_start, window_end]`).
+  - Evaluates candidates deterministically using seasonal transport multipliers, base room rates, weather heuristics, and weekend departure bonuses (+10 pts).
+  - Computes composite quality score (0–100) weighting price savings, weather, and convenience.
+  - Updates `trip_context.dates.start_date` and `end_date` to synchronize downstream nodes (`logistics_node`, `experience_node`, `budget_node`).
+- **`src/graph/workflow.py`**: Wired `date_optimizer` into StateGraph between `intake` and `route_scope`.
+- **`src/nodes/synthesizer_node.py`**: Passed `date_options` into `FinalItinerary` and appended date optimization summary to itinerary narrative.
+- **`src/api/models.py`**: Extended `PlanRequest` with `date_mode`, `flexibility_days`, `window_start`, `window_end`, and cross-field mode validation.
+- **`tests/unit/test_date_optimizer.py`**: 19 unit tests covering all operational modes, candidate generation, multi-factor scoring, weekend bonus, downstream synchronization, and LangGraph workflow.
+
 ## Important files/modules
 
 | Path | Role |
@@ -225,6 +241,7 @@ Phase 13 — First Complete Vertical Slice (Completed)
 | `src/nodes/experience_node.py` | Phase 9 experience planning node, attractions, dining, weather pacing |
 | `src/nodes/budget_node.py` | Phase 10 deterministic budget engine node, cost aggregation, contingency, variance |
 | `src/nodes/optimizer_node.py` | Phase 11 optimizer planning node, tiered optimization, guardrails, re-planning |
+| `src/nodes/date_node.py` | Phase 15 date optimizer node, candidate window generation, multi-factor scoring |
 | `src/nodes/synthesizer_node.py` | Phase 13 itinerary synthesizer node, final itinerary assembly |
 | `src/nodes/__init__.py` | Node exports |
 | `src/prompts/estimator_prompts.py` | Isolated prompt templates for LLM estimator |
@@ -239,6 +256,7 @@ Phase 13 — First Complete Vertical Slice (Completed)
 | `src/tools/places.py` | Multi-tier points of interest and dining tool |
 | `src/tools/fallback_estimator.py` | Multi-provider LLM fallback estimator tool |
 | `tests/unit/test_vertical_slice.py` | 9 Phase 13 complete vertical slice unit tests |
+| `tests/unit/test_date_optimizer.py` | 19 Phase 15 date optimizer unit tests |
 | `tests/unit/test_graph.py` | 19 Phase 12 LangGraph orchestration unit tests |
 | `tests/unit/test_intake_node.py` | 21 Phase 6 intake node unit tests |
 | `tests/unit/test_visa_node.py` | 20 Phase 7 visa node unit tests |
@@ -255,9 +273,9 @@ Phase 13 — First Complete Vertical Slice (Completed)
 ## Tests completed and their status
 
 - **Hermetic Offline Test Harness**:
-  - `uv run pytest`: **505 passed**, 5 warnings in 8.44s (100% offline, zero network reliance in test suite).
+  - `uv run pytest`: **545 passed**, 5 warnings in ~3s (100% offline, zero network reliance in test suite).
   - `uv run ruff check src/ tests/ scripts/`: **All checks passed!**
-  - `uv run ruff format --check src/ tests/ scripts/`: **75 files already formatted**.
+  - `uv run ruff format --check src/ tests/ scripts/`: **78 files clean**.
 - **Live Network Integration Verification**:
   - `uv run python scripts/verify_live_nodes.py`: **ALL 7 LIVE PLANNING STAGES COMPLETED SUCCESSFULLY**
     - **Visa Node (Phase 7)**: Live Tavily web search + Gemini structured reconciliation verified Thailand 60-day visa-free status in 6.64s.
@@ -402,8 +420,41 @@ Phase 14 — International Vertical Slice is **100% complete, dual-verified (off
 - **Cascade priority**: SerpApi Google Flights → Sky Scraper → Flights Sky → Aviationstack → IRCTC → transport.rest → web_search → physics-heuristic.
 - **Deterministic principle preserved**: Seasonal multiplier is a lookup table + math, zero LLM involvement.
 
+## Phase 15 Completion Status
+
+Phase 15 — Flexible Dates is **100% complete, verified via 19 unit tests (545 passing in suite), and synchronized across all project documentation**.
+
+### Completed Work:
+- Extended domain models with `DateCandidate` and `DateOptimizationResult` in `src/models/trip.py`.
+- Added `date_options` to `FinalItinerary` in `src/models/itinerary.py` and `PlanGraphState` in `src/graph/state.py`.
+- Implemented `src/nodes/date_node.py` supporting `EXACT`, `FLEXIBLE`, and `FIND_BEST` modes with candidate generation, multi-factor evaluation (pricing, weather, weekend weighting), and composite scoring.
+- Synchronized downstream planning: updating `trip_context.dates.start_date` and `end_date` with the recommended window so `logistics_node`, `experience_node`, and `budget_node` operate on concrete dates.
+- Integrated `date_optimizer` node into StateGraph topology (`START -> intake -> date_optimizer -> route_scope`).
+- Extended `PlanRequest` with date mode validation in `src/api/models.py`.
+- Verified with 19 dedicated unit tests in `tests/unit/test_date_optimizer.py` and patched graph tests in `tests/unit/test_graph.py`.
+
+### Files Changed:
+- `src/models/trip.py`
+- `src/models/__init__.py`
+- `src/models/itinerary.py`
+- `src/graph/state.py`
+- `src/nodes/date_node.py`
+- `src/graph/workflow.py`
+- `src/nodes/synthesizer_node.py`
+- `src/nodes/logistics_node.py`
+- `src/api/models.py`
+- `tests/unit/test_date_optimizer.py`
+- `tests/unit/test_graph.py`
+- `project_docs/phases.md`
+- `project_docs/architecture.md`
+- `project_docs/prd.md`
+- `project_docs/rules.md`
+- `README.md`
+- `project_docs/memory.md`
+
 ## Next recommended phase
 
-**Phase 15 — Flexible Dates**:
-Implement support for candidate date window evaluation, pricing and weather comparisons across flexible date options, selection of optimal departure/return dates, and structured trade-off reporting.
+**Phase 16 — Budget Conflict and Human Decision Flow**:
+Implement support for handling over-budget plans that require traveler confirmation (`SIGNIFICANT_OVER`), human-in-the-loop decision routing, structured trade-off presentation, and iterative re-planning flows based on user selection.
+
 

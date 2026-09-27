@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
@@ -139,6 +139,26 @@ class PlanRequest(BaseModel):
         pattern=r"^\d{4}-\d{2}-\d{2}$",
         description="Trip return date (YYYY-MM-DD).",
     )
+    date_mode: str = Field(
+        default="EXACT",
+        description="Date mode: 'EXACT', 'FLEXIBLE', or 'FIND_BEST'.",
+    )
+    flexibility_days: int = Field(
+        default=0,
+        ge=0,
+        le=14,
+        description="For FLEXIBLE mode: allowed shift days (0-14).",
+    )
+    window_start: str | None = Field(
+        default=None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        description="Earliest travel date for FIND_BEST mode (YYYY-MM-DD).",
+    )
+    window_end: str | None = Field(
+        default=None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        description="Latest travel date for FIND_BEST mode (YYYY-MM-DD).",
+    )
     duration_days: int | None = Field(
         default=None,
         ge=1,
@@ -192,10 +212,27 @@ class PlanRequest(BaseModel):
             raise ValueError("'origin' is required when 'trip_context' is not supplied.")
         if not self.destinations:
             raise ValueError("'destinations' is required when 'trip_context' is not supplied.")
-        if not self.start_date:
-            raise ValueError("'start_date' is required when 'trip_context' is not supplied.")
-        if not self.end_date:
-            raise ValueError("'end_date' is required when 'trip_context' is not supplied.")
+
+        d_mode = self.date_mode.upper()
+        if d_mode == "EXACT":
+            if not self.start_date:
+                raise ValueError("'start_date' is required for EXACT date mode.")
+            if not self.end_date:
+                raise ValueError("'end_date' is required for EXACT date mode.")
+        elif d_mode == "FLEXIBLE":
+            if not self.start_date:
+                raise ValueError("'start_date' is required for FLEXIBLE date mode.")
+            if self.duration_days is None and not self.end_date:
+                raise ValueError(
+                    "'duration_days' or 'end_date' is required for FLEXIBLE date mode."
+                )
+        elif d_mode == "FIND_BEST":
+            if not self.window_start:
+                raise ValueError("'window_start' is required for FIND_BEST date mode.")
+            if not self.window_end:
+                raise ValueError("'window_end' is required for FIND_BEST date mode.")
+            if self.duration_days is None:
+                raise ValueError("'duration_days' is required for FIND_BEST date mode.")
         return self
 
     def to_trip_context(self) -> TripContext:
@@ -204,11 +241,35 @@ class PlanRequest(BaseModel):
             return self.trip_context
 
         party = TripParty(adults=self.adults, children=self.children)
+
+        d_mode_enum = DateMode(self.date_mode.upper())
+        dur = self.duration_days
+        if dur is None and self.start_date and self.end_date:
+            try:
+                d1 = datetime.strptime(self.start_date, "%Y-%m-%d").date()
+                d2 = datetime.strptime(self.end_date, "%Y-%m-%d").date()
+                dur = (d2 - d1).days + 1
+            except ValueError:
+                dur = 5
+        elif dur is None:
+            dur = 5
+
+        derived_end_date = self.end_date
+        if d_mode_enum == DateMode.FLEXIBLE and not derived_end_date and self.start_date:
+            try:
+                s_dt = datetime.strptime(self.start_date, "%Y-%m-%d").date()
+                derived_end_date = (s_dt + timedelta(days=dur - 1)).strftime("%Y-%m-%d")
+            except ValueError:
+                pass
+
         dates = TripDates(
-            mode=DateMode.EXACT,
+            mode=d_mode_enum,
             start_date=self.start_date,
-            end_date=self.end_date,
-            duration_days=self.duration_days,
+            end_date=derived_end_date,
+            duration_days=dur,
+            flexibility_days=self.flexibility_days,
+            window_start=self.window_start,
+            window_end=self.window_end,
         )
         b_mode = (
             BudgetMode.PER_PERSON if self.budget_mode.upper() == "PER_PERSON" else BudgetMode.TOTAL

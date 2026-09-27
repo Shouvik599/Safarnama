@@ -638,7 +638,7 @@ def process_logistics(
     # 2. Extract configuration
     party = context.party
     travel_style = _normalize_travel_style(context.travel_style)
-    start_date = context.dates.start_date
+    start_date = context.dates.start_date or context.dates.window_start
 
     plan_warnings: list[str] = []
 

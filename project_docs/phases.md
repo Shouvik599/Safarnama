@@ -1079,29 +1079,33 @@ India → Country A → Country B
 
 ---
 
-# 19. Phase 15 — Flexible Dates
+# 19. Phase 15 — Flexible Dates (Completed)
 
 Add support for:
 
-- Exact dates
-- Flexible date window
-- Best dates within a window
+- Exact dates (`DateMode.EXACT`)
+- Flexible date window (`DateMode.FLEXIBLE`, ±N days)
+- Best dates within a window (`DateMode.FIND_BEST`, duration across broad window)
 
 For optimized date selection, evaluate:
 
-- Live pricing
-- Availability
-- Weather
-- Route feasibility
-- Overall experience quality
+- Multi-factor pricing: Outbound & return transport + lodging with seasonal multiplier
+- Weather assessment: Historical monthly precipitation, temperature, and outdoor activity friendliness
+- Calendar convenience: Weekend weighting bonus (+10 pts) for trip windows spanning Saturday & Sunday
+- Overall quality score: Composite quality score on a 0–100 scale (45% price, 45% weather, 10% weekend bonus)
 
 Return:
 
-- Recommended dates
-- 2–3 alternatives
-- Trade-offs
+- Recommended dates (updates downstream `trip_context` start and end dates)
+- 2–3 ranked alternative windows
+- Structured trade-offs for each candidate window
+- Composite quality scores and human-readable evaluation summary narrative
 
-This phase should be added after the basic itinerary workflow is reliable.
+## Exit Criteria (Met)
+- `DateCandidate` and `DateOptimizationResult` domain models implemented and integrated with `FinalItinerary.date_options`.
+- Planning node `date_node` registered in LangGraph StateGraph topology between `intake` and `route_scope`.
+- `PlanRequest` API model extended with `date_mode`, `flexibility_days`, `window_start`, `window_end` validation and conversion.
+- 100% offline fixture-based unit tests implemented in `tests/unit/test_date_optimizer.py` (19 passing tests, 545 passing repo-wide).
 
 ---
 

@@ -36,7 +36,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.models.budget import BudgetBreakdown, OptimizationResult
 from src.models.logistics import LogisticsPlan
-from src.models.trip import TripContext
+from src.models.trip import DateOptimizationResult, TripContext
 from src.models.visa import VisaVerdict
 
 # ---------------------------------------------------------------------------
@@ -398,6 +398,10 @@ class FinalItinerary(BaseModel):
     visa_verdict: VisaVerdict | None = Field(
         default=None,
         description="Visa evaluation and requirements (None or domestic bypass).",
+    )
+    date_options: DateOptimizationResult | None = Field(
+        default=None,
+        description="Flexible date optimization options and alternatives if applicable.",
     )
     optimization_result: OptimizationResult = Field(
         description="Optimization status, actions taken, and trade-offs."

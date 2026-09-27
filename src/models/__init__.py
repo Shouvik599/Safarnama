@@ -62,7 +62,9 @@ from src.models.transport import TransportSearchResult, TransportSegment
 # Trip context
 from src.models.trip import (
     BudgetMode,
+    DateCandidate,
     DateMode,
+    DateOptimizationResult,
     FoodImportance,
     FoodPreferences,
     InitialPlanningState,
@@ -116,7 +118,9 @@ __all__ = [
     "WebSearchResult",
     # Phase 5 — trip context
     "BudgetMode",
+    "DateCandidate",
     "DateMode",
+    "DateOptimizationResult",
     "FoodImportance",
     "FoodPreferences",
     "InitialPlanningState",

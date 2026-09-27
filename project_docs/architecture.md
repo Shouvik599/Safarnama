@@ -57,6 +57,13 @@ The overall planning flow is:
                  │ scope + origin   │
                  └────────┬─────────┘
                           │
+                          ▼
+                 ┌──────────────────┐
+                 │  Date Optimizer  │
+                 │ Multi-factor date│
+                 │ window selection │
+                 └────────┬─────────┘
+                          │
                  ┌────────┴─────────┐
                  │                  │
           INTERNATIONAL          DOMESTIC
@@ -717,41 +724,68 @@ Long-range or low-confidence forecasts should not cause disproportionate itinera
 
 # 14. Date Optimization Architecture
 
-Three date modes are supported:
+Three date modes are supported via `DateMode` (`src/models/trip.py`):
 
-### Exact dates
+### 1. Exact dates (`DateMode.EXACT`)
 
 ```text
-User dates
+User dates (start_date, end_date)
    ↓
-Plan trip
+Single candidate evaluation
+   ↓
+Confirmed dates + quality score (0 alternatives)
 ```
 
-### Flexible date window
+### 2. Flexible date window (`DateMode.FLEXIBLE`)
 
 ```text
-Date window + duration
-        ↓
-Find suitable trip
+Preferred start_date + flexibility_days (±N days) + duration_days
+   ↓
+Generate 2N+1 candidate windows shifted by -N to +N days
+   ↓
+Multi-factor candidate scoring
+   ↓
+Top candidate recommended + 2–3 ranked alternatives with trade-offs
 ```
 
-### Find best dates within a window
+### 3. Find best dates within a window (`DateMode.FIND_BEST`)
 
-The planner evaluates candidate date ranges using:
+```text
+Calendar window (window_start to window_end) + duration_days
+   ↓
+Generate evenly spaced candidate windows of length duration_days
+   ↓
+Multi-factor candidate scoring
+   ↓
+Top candidate recommended + 2–3 ranked alternatives with trade-offs
+```
 
-- Live pricing/availability where possible
-- Weather
-- Attraction suitability
-- Route feasibility
-- Overall trip quality
+### Evaluation & Composite Scoring Engine
 
-The objective is **best overall trip quality**, not simply lowest cost.
+The date optimizer node (`src/nodes/date_node.py`) evaluates candidate date ranges across four dimensions:
 
-The result includes:
+1. **Logistics Pricing (Transport + Accommodation):**
+   - Outbound and return transport fares (with seasonal multipliers: peak ×1.35, shoulder ×1.15, off-peak ×1.00).
+   - Lodging cost estimates based on party size, rooms count, nights, and travel style.
+   - Price competitiveness scored 0–100 against user budget ceiling.
 
-- Recommended date range
-- 2–3 alternatives
-- Main trade-offs
+2. **Weather & Outdoor Activity Comfort:**
+   - Evaluates rain probability and temperature for the target destination and calendar month.
+   - Weather friendliness scored 0–100 based on precipitation risk and temperature extremes.
+
+3. **Calendar Convenience (Weekend Weighting):**
+   - Candidates spanning both Saturday and Sunday receive a +10 point weekend bonus to minimize working leave required.
+
+4. **Composite Quality Score (0–100):**
+   ```text
+   composite_score = round(0.45 * price_score + 0.45 * weather_score + weekend_bonus, 1)
+   ```
+
+### Downstream Synchronization & Graph Topology
+
+- **LangGraph Topology:** `START -> intake -> date_optimizer -> route_scope -> ...`
+- **Context Synchronization:** Once the recommended window is identified, `date_node` updates `trip_context.dates.start_date` and `end_date` with the recommended dates. Downstream logistics, experience, and budget nodes plan against concrete dates while preserving the user's original `DateMode` and alternatives in `final_itinerary.date_options`.
+- **Narrative Synthesis:** `synthesizer_node` inspects `date_options` and generates a dedicated "Date Strategy" section in the executive summary highlighting score, savings, and trade-offs.
 
 ---
 
