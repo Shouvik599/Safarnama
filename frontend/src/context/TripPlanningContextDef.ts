@@ -12,7 +12,7 @@ export interface TripPlanningContextType {
   moveDestinationUp: (index: number) => void;
   moveDestinationDown: (index: number) => void;
   seedCircuit: (circuitId: string) => void;
-  seedDestination: (destinationOrCircuit: string, scopeHint?: 'DOMESTIC' | 'INTERNATIONAL') => void;
+  seedDestination: (destinationOrCircuit: string | string[], scopeHint?: 'DOMESTIC' | 'INTERNATIONAL') => void;
   resetAll: () => void;
 }
 

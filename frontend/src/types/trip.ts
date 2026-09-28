@@ -44,6 +44,7 @@ export interface TripDetailsState {
   scope?: 'DOMESTIC' | 'INTERNATIONAL';
   origin: string;
   destination: string;
+  destinations?: string[]; // Multiple selected destinations (e.g. ['France', 'Italy'] or ['Rajasthan', 'Gujarat'])
   departureDate: string; // e.g. "Sat, Oct 18, 2025"
   returnDate: string; // e.g. "Tue, Oct 28, 2025"
   departureDateIso: string; // e.g. "2025-10-18"

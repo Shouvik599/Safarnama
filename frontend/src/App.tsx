@@ -9,7 +9,7 @@ type Screen = 'welcome' | 'trip-details' | 'destinations';
 
 const AppContent: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
-  const { updateTripDetails } = useTripPlanning();
+  const { updateTripDetails, seedDestination } = useTripPlanning();
 
   const handleStartPlanning = () => {
     setCurrentScreen('trip-details');
@@ -17,9 +17,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleSelectCuratedRoute = (route: { origin: string; destination: string }) => {
+    seedDestination(route.destination);
     updateTripDetails({
       origin: route.origin,
       destination: route.destination,
+      destinations: [route.destination],
     });
     setCurrentScreen('trip-details');
     window.scrollTo({ top: 0, behavior: 'smooth' });

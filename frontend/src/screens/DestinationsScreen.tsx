@@ -44,11 +44,15 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
   const [showNextStepAlert, setShowNextStepAlert] = useState(false);
   const [showReconciliationModal, setShowReconciliationModal] = useState(false);
 
-  // Dynamically resolve active destination and route template from user's chosen destination
-  const activeCircuit = resolveDestinationData(tripDetails.destination, tripDetails.scope);
+  // Dynamically resolve active destination and route template from user's chosen destination (supports single or multi-destination)
+  const effectiveDestInput =
+    tripDetails.destinations && tripDetails.destinations.length > 0
+      ? tripDetails.destinations
+      : tripDetails.destination;
+  const activeCircuit = resolveDestinationData(effectiveDestInput, tripDetails.scope);
 
   // Strict Contextual Scoping: Retrieve cities strictly belonging to the confirmed state or sovereign country
-  const contextualCities = getContextualCitiesForDestination(tripDetails.destination);
+  const contextualCities = getContextualCitiesForDestination(effectiveDestInput);
 
   // Dismiss dropdown on outside click
   useEffect(() => {
@@ -82,10 +86,10 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
         !activeFirstCountry.includes(currentFirstCountry) &&
         !currentFirstCountry.includes(activeFirstCountry))
     ) {
-      seedDestination(activeCircuit.id, tripDetails.scope);
+      seedDestination(effectiveDestInput, tripDetails.scope);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tripDetails.destination, activeCircuit.id]);
+  }, [tripDetails.destination, tripDetails.destinations, activeCircuit.id]);
 
   // Duration reconciliation calculations
   const totalAllocatedNights = destinations.reduce((sum, d) => sum + (d.nights || 0), 0);

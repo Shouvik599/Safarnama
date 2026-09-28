@@ -5,6 +5,7 @@ import { PRECONFIGURED_CIRCUITS } from '../data/locations';
 import {
   resolveDestinationData,
   generateScenicTransitConnector,
+  splitDestinationsString,
 } from '../data/destinationsRegistry';
 
 const formatLocalIso = (d: Date) => {
@@ -29,6 +30,7 @@ const createInitialTripDetails = (): TripDetailsState => {
     scope: 'INTERNATIONAL',
     origin: 'New Delhi (DEL - Indira Gandhi Intl)',
     destination: 'Kyoto, Japan (KIX - Kansai Intl / Shinkansen Rail)',
+    destinations: ['Kyoto, Japan (KIX - Kansai Intl / Shinkansen Rail)'],
     departureDate: formatLocalDisplay(now),
     returnDate: formatLocalDisplay(retDate),
     departureDateIso: formatLocalIso(now),
@@ -44,16 +46,22 @@ const createInitialTripDetails = (): TripDetailsState => {
   };
 };
 
-const initialTripDetails: TripDetailsState = createInitialTripDetails();
-
-const initialDestinations: RouteStop[] = PRECONFIGURED_CIRCUITS[0].defaultStops;
-
 export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [tripDetails, setTripDetails] = useState<TripDetailsState>(initialTripDetails);
-  const [destinations, setDestinations] = useState<RouteStop[]>(initialDestinations);
+  const [tripDetails, setTripDetails] = useState<TripDetailsState>(() => createInitialTripDetails());
+  const [destinations, setDestinations] = useState<RouteStop[]>(() =>
+    JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
+  );
 
   const updateTripDetails = (partial: Partial<TripDetailsState>) => {
-    setTripDetails((prev) => ({ ...prev, ...partial }));
+    setTripDetails((prev) => {
+      const next = { ...prev, ...partial };
+      if (partial.destination !== undefined && partial.destinations === undefined) {
+        next.destinations = splitDestinationsString(partial.destination);
+      } else if (partial.destinations !== undefined && partial.destination === undefined) {
+        next.destination = partial.destinations.join(', ');
+      }
+      return next;
+    });
   };
 
   const addDestination = (stop: RouteStop) => {
@@ -121,10 +129,25 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
   };
 
-  const seedDestination = (destinationQuery: string, scopeHint?: 'DOMESTIC' | 'INTERNATIONAL') => {
+  const seedDestination = (
+    destinationQuery: string | string[],
+    scopeHint?: 'DOMESTIC' | 'INTERNATIONAL'
+  ) => {
     const effectiveScope = scopeHint || tripDetails.scope;
     const destItem = resolveDestinationData(destinationQuery, effectiveScope);
     if (!destItem) return;
+
+    const rawParts = Array.isArray(destinationQuery)
+      ? destinationQuery
+      : splitDestinationsString(destinationQuery);
+
+    const parts =
+      rawParts.length <= 1
+        ? [destItem.name]
+        : rawParts.map((q) => {
+            const it = resolveDestinationData(q, effectiveScope);
+            return it ? it.name : q;
+          });
 
     // Calculate dates matching the destination's default duration
     const departure = tripDetails.departureDateIso
@@ -142,6 +165,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       ...prev,
       scope: destItem.scope,
       destination: destItem.name,
+      destinations: parts,
       durationDays: destItem.defaultDurationDays,
       departureDate: depFormatted,
       returnDate: retFormatted,
@@ -178,8 +202,8 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const resetAll = () => {
-    setTripDetails(initialTripDetails);
-    setDestinations(initialDestinations);
+    setTripDetails(createInitialTripDetails());
+    setDestinations(JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops)));
   };
 
   return (

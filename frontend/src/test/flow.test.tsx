@@ -198,7 +198,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(stopTitles[1]).toHaveTextContent('Osaka');
 
     // Add a suggestion stop (e.g. Nara)
-    const addNaraBtn = screen.getByRole('button', { name: /add as day trip/i });
+    const addNaraBtn = screen.getAllByRole('button', { name: /add as day trip/i })[0];
     fireEvent.click(addNaraBtn);
 
     // Now route should have 4 destinations
@@ -301,7 +301,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
 
     // Search for an international sovereign country (e.g. Spain)
     fireEvent.change(destInput, { target: { value: 'Spain' } });
-    expect(screen.getByText('Spain')).toBeInTheDocument();
+    expect(screen.getAllByText('Spain').length).toBeGreaterThan(0);
     expect(screen.getByText(/Madrid, Europe/i)).toBeInTheDocument();
   }, 15000);
 
@@ -442,6 +442,112 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(
       screen.getByText(/Batch 1 scope complete: Step 3 \(Preferences\) will be unlocked in Batch 2!/i)
+    ).toBeInTheDocument();
+  });
+
+  it('supports multi-country destination chips, unified Schengen visa guidance, and seeds stops from both countries with cross-border transit', () => {
+    render(<App />);
+
+    // Go to Trip Details
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    // Choose France from featured
+    const franceBtn = screen.getByRole('button', { name: /france \(riviera\)/i });
+    fireEvent.click(franceBtn);
+    expect(screen.getAllByText('France').length).toBeGreaterThan(0);
+
+    // Click Add Another Country
+    const addCountryBtn = screen.getByRole('button', { name: /add another country/i });
+    fireEvent.click(addCountryBtn);
+
+    // Search and select Italy
+    const destInput = screen.getByPlaceholderText(/type and select sovereign country to add/i);
+    fireEvent.change(destInput, { target: { value: 'Italy' } });
+    const italyOption = screen.getAllByRole('button', { name: /italy circuit/i })[0];
+    fireEvent.click(italyOption);
+
+    // Both chips must now be visible!
+    expect(screen.getAllByText('France').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Italy').length).toBeGreaterThan(0);
+
+    // Single unified Schengen visa verdict covering all 2 countries
+    expect(
+      screen.getByText(/Schengen Visa Required • Single Visa covers all 2 countries/i)
+    ).toBeInTheDocument();
+
+    // Continue to Destinations Screen 2
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+
+    // Verify stops from both France (Paris/Lyon) and Italy (Rome/Florence) are seeded
+    expect(screen.getByText('Paris')).toBeInTheDocument();
+    expect(screen.getByText('Rome')).toBeInTheDocument();
+
+    // Cross-border scenic connection connector must be present
+    expect(
+      screen.getByText(/Cross-Region Scenic Connection to Rome/i)
+    ).toBeInTheDocument();
+  });
+
+  it('supports multi-state/UT input, chip dismissal with ✕, and contextual city union on Screen 2', () => {
+    render(<App />);
+
+    // Go to Trip Details
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    // Switch to Domestic scope
+    fireEvent.click(screen.getByRole('button', { name: /domestic \(within india\)/i }));
+
+    // Rajasthan is selected; click Add Another State/UT/City
+    const addStateBtn = screen.getByRole('button', { name: /add another state\/ut\/city/i });
+    fireEvent.click(addStateBtn);
+
+    // Search and add Gujarat
+    const destInput = screen.getByPlaceholderText(/type and select indian state, ut, or city to add/i);
+    fireEvent.change(destInput, { target: { value: 'Gujarat' } });
+    const gujaratOption = screen.getAllByRole('button', { name: /gujarat/i })[0];
+    fireEvent.click(gujaratOption);
+
+    // Both chips should appear
+    expect(screen.getAllByText('Rajasthan').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Gujarat').length).toBeGreaterThan(0);
+
+    // Remove the Rajasthan chip
+    const removeBtns = screen.getAllByRole('button', { name: /remove destination/i });
+    fireEvent.click(removeBtns[0]);
+
+    // Only Gujarat remains as a chip
+    expect(screen.getAllByRole('button', { name: /remove destination/i }).length).toBe(1);
+    expect(screen.getAllByText('Gujarat').length).toBeGreaterThan(0);
+
+    // Continue to Screen 2
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+
+    // Verify Gujarat stops are seeded
+    expect(screen.getByText('Ahmedabad')).toBeInTheDocument();
+  });
+
+  it('aggregates border permit guidance when selecting multiple domestic permit regions (Ladakh & Sikkim)', () => {
+    render(<App />);
+
+    // Go to Trip Details
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    // Switch to Domestic scope
+    fireEvent.click(screen.getByRole('button', { name: /domestic \(within india\)/i }));
+
+    // Select Ladakh from featured
+    fireEvent.click(screen.getByRole('button', { name: /ladakh pass/i }));
+
+    // Add Sikkim
+    fireEvent.click(screen.getByRole('button', { name: /add another state\/ut\/city/i }));
+    const destInput = screen.getByPlaceholderText(/type and select indian state, ut, or city to add/i);
+    fireEvent.change(destInput, { target: { value: 'Sikkim' } });
+    const sikkimOption = screen.getAllByRole('button', { name: /sikkim/i })[0];
+    fireEvent.click(sikkimOption);
+
+    // Both permit regions aggregated in badge
+    expect(
+      screen.getByText(/Inner Line Permit \(ILP\) \/ PAP Required for.*Ladakh.*Sikkim/i)
     ).toBeInTheDocument();
   });
 });

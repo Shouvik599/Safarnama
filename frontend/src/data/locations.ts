@@ -221,7 +221,7 @@ export const PRECONFIGURED_CIRCUITS: CircuitDefinition[] = [
   },
   {
     id: 'italy',
-    name: 'Amalfi & Tuscany, Italy',
+    name: 'Italy (Rome, Florence, Venice & Amalfi)',
     alias: 'Italy Circuit',
     scope: 'INTERNATIONAL',
     visaStatus: 'Schengen Visa Required • ~15-30 Days Processing',
@@ -512,7 +512,15 @@ export function getVisaVerdict(destinationStr: string): string {
   if (primary.includes('japan')) {
     return 'eVisa Active • 90 Days Single Entry for Indian Passports';
   }
-  if (primary.includes('italy') || primary.includes('france') || primary.includes('schengen')) {
+  if (
+    primary.includes('italy') ||
+    primary.includes('france') ||
+    primary.includes('norway') ||
+    primary.includes('switzerland') ||
+    primary.includes('germany') ||
+    primary.includes('spain') ||
+    primary.includes('schengen')
+  ) {
     return 'Schengen Visa Required • ~15-30 Days Processing';
   }
   if (primary.includes('indonesia') || primary.includes('bali')) {
@@ -521,5 +529,82 @@ export function getVisaVerdict(destinationStr: string): string {
   if (primary.includes('thailand')) {
     return 'Visa Exemption / eVisa Available for Indian Passports';
   }
+  if (primary.includes('pakistan')) {
+    return 'eVisa or Visa on Arrival Available for Indian Passports';
+  }
   return 'International Destination • Visa Guidance Active';
+}
+
+/**
+ * Resolves aggregated visa and permit requirements across multiple selected destinations.
+ */
+export function getMultiDestinationVisaVerdict(
+  destinations: string[],
+  scopeHint?: 'DOMESTIC' | 'INTERNATIONAL'
+): string {
+  if (!destinations || destinations.length === 0) return '';
+  if (destinations.length === 1) return getVisaVerdict(destinations[0]);
+
+  // 1. Domestic scope: Check if any destinations require special border permits
+  if (scopeHint === 'DOMESTIC') {
+    const permitRegions: string[] = [];
+    for (const d of destinations) {
+      const permit = getDomesticPermitStatus(d);
+      if (permit) {
+        const cleanName = d.replace(/\s*\([^)]*\).*/, '').trim();
+        permitRegions.push(cleanName);
+      }
+    }
+    if (permitRegions.length > 0) {
+      return `ℹ️ Inner Line Permit (ILP) / PAP Required for ${permitRegions.join(' & ')}`;
+    }
+    return ''; // Standard domestic destinations have no visa badge
+  }
+
+  // 2. International scope: check for Schengen grouping and distinct visa requirements
+  const schengenKeywords = [
+    'france',
+    'italy',
+    'switzerland',
+    'norway',
+    'germany',
+    'spain',
+    'austria',
+    'netherlands',
+    'belgium',
+    'greece',
+    'portugal',
+    'finland',
+    'sweden',
+    'denmark',
+    'iceland',
+    'czech',
+    'hungary',
+  ];
+  const allSchengen = destinations.every((d) => {
+    const dl = d.toLowerCase();
+    return schengenKeywords.some((sk) => dl.includes(sk));
+  });
+
+  if (allSchengen) {
+    const cleanNames = destinations.map((d) => d.replace(/\s*\([^)]*\).*/, '').trim());
+    return `Schengen Visa Required • Single Visa covers all ${cleanNames.length} countries (${cleanNames.join(', ')})`;
+  }
+
+  const allVisaFree = destinations.every((d) => {
+    const dl = d.toLowerCase();
+    return dl.includes('nepal') || dl.includes('bhutan');
+  });
+
+  if (allVisaFree) {
+    return 'Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)';
+  }
+
+  // Mixed or distinct visa requirements
+  const verdicts = Array.from(new Set(destinations.map((d) => getVisaVerdict(d)).filter(Boolean)));
+  if (verdicts.length === 1) return verdicts[0];
+  if (verdicts.length > 1) {
+    return verdicts.join(' + ');
+  }
+  return 'International Destinations • Multi-Country Visa Guidance Active';
 }

@@ -1,5 +1,10 @@
 import type { RouteStop, DestinationSuggestion, ContextualCityItem } from '../types/trip';
-import { PRECONFIGURED_CIRCUITS, INDIAN_ORIGIN_AIRPORTS, getDomesticPermitStatus } from './locations';
+import {
+  PRECONFIGURED_CIRCUITS,
+  INDIAN_ORIGIN_AIRPORTS,
+  getDomesticPermitStatus,
+  getMultiDestinationVisaVerdict,
+} from './locations';
 import generatedCountries from './generated_countries.json';
 import indianStatesUts from './indian_states_uts.json';
 import indiaPlacesData from './india_places.json';
@@ -1390,8 +1395,8 @@ export function generateDomesticCityFallback(cityInput: string): DestinationItem
   };
 }
 
-// Master resolution function: given any destination text or circuitId, resolves accurate stops
-export function resolveDestinationData(
+// Internal single destination resolution function
+export function resolveSingleDestinationData(
   destinationInput: string,
   scopeHint?: 'DOMESTIC' | 'INTERNATIONAL'
 ): DestinationItem {
@@ -1455,11 +1460,7 @@ export function resolveDestinationData(
     const countryFallback = generateCountryFallback(destinationInput);
     if (countryFallback) return countryFallback;
 
-    // 3. Any curated match
-    const anyCurated = findCurated();
-    if (anyCurated) return anyCurated;
-
-    // 4. Default international destination
+    // 3. Default international destination
     return ALL_CURATED_DESTINATIONS.find((d) => d.scope === 'INTERNATIONAL') || ALL_CURATED_DESTINATIONS[0];
   }
 
@@ -1477,10 +1478,7 @@ export function resolveDestinationData(
     const domesticFallback = generateDomesticFallback(destinationInput);
     if (domesticFallback) return domesticFallback;
 
-    // 4. Any curated match
-    const anyCurated = findCurated();
-    if (anyCurated) return anyCurated;
-
+    // 4. Default domestic destination
     return ALL_CURATED_DESTINATIONS.find((d) => d.scope === 'DOMESTIC') || ALL_CURATED_DESTINATIONS[0];
   }
 
@@ -1505,6 +1503,103 @@ export function resolveDestinationData(
   return ALL_CURATED_DESTINATIONS[0];
 }
 
+// Helper to cleanly split destination strings without breaking commas inside parentheses
+export function splitDestinationsString(str: string): string[] {
+  if (!str) return [];
+  const parts: string[] = [];
+  let current = '';
+  let parenDepth = 0;
+  for (const char of str) {
+    if (char === '(') parenDepth++;
+    else if (char === ')') parenDepth = Math.max(0, parenDepth - 1);
+
+    if (char === ',' && parenDepth === 0) {
+      if (current.trim()) parts.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts;
+}
+
+// Master resolution function: given any destination string, array, or multi-destination input, resolves accurate stops
+export function resolveDestinationData(
+  destinationInput: string | string[],
+  scopeHint?: 'DOMESTIC' | 'INTERNATIONAL'
+): DestinationItem {
+  if (!destinationInput || (Array.isArray(destinationInput) && destinationInput.length === 0)) {
+    return resolveSingleDestinationData('', scopeHint);
+  }
+
+  // Parse destinations into individual parts respecting parentheses
+  const rawParts = Array.isArray(destinationInput)
+    ? destinationInput.map((s) => s.trim()).filter(Boolean)
+    : splitDestinationsString(destinationInput);
+
+  if (rawParts.length <= 1) {
+    return resolveSingleDestinationData(rawParts[0] || '', scopeHint);
+  }
+
+  // Multiple destinations provided
+  const items = rawParts.map((p) => resolveSingleDestinationData(p, scopeHint));
+
+  const combinedStops: RouteStop[] = [];
+  const combinedSuggestions: DestinationSuggestion[] = [];
+  let stopCounter = 1;
+
+  items.forEach((item, itemIdx) => {
+    // Take top 2 stops from each destination (or all if <= 2)
+    const stopsToTake = item.defaultStops.slice(0, 2);
+    stopsToTake.forEach((stop, stopIdx) => {
+      const isLastOfCurrentItem = stopIdx === stopsToTake.length - 1;
+      const isVeryLastStop = itemIdx === items.length - 1 && isLastOfCurrentItem;
+
+      let transit = stop.transitToNext;
+      if (isLastOfCurrentItem && !isVeryLastStop) {
+        const nextItem = items[itemIdx + 1];
+        const nextFirstStop = nextItem.defaultStops[0];
+        transit = {
+          mode: 'transit',
+          icon: 'alt_route',
+          duration: '~3-4 hrs transit',
+          title: `Cross-Region Scenic Connection to ${nextFirstStop?.name || nextItem.alias}`,
+        };
+      } else if (isVeryLastStop) {
+        transit = undefined;
+      }
+
+      combinedStops.push({
+        ...stop,
+        id: `${stop.id}-multi-${stopCounter++}`,
+        transitToNext: transit,
+      });
+    });
+
+    if (item.suggestions) {
+      combinedSuggestions.push(...item.suggestions.slice(0, 2));
+    }
+  });
+
+  const totalNights = combinedStops.reduce((sum, s) => sum + s.nights, 0);
+  const cleanAliases = items.map((it) => it.alias || it.name.replace(/\s*\([^)]*\).*/, '').trim());
+  const cleanNames = items.map((it) => it.name.replace(/\s*\([^)]*\).*/, '').trim());
+
+  return {
+    id: `multi-${items.map((it) => it.id).join('-')}`,
+    name: cleanNames.join(', '),
+    alias: `${cleanAliases.join(' & ')} Trail`,
+    scope: scopeHint || items[0].scope,
+    type: 'CIRCUIT',
+    visaStatus: getMultiDestinationVisaVerdict(rawParts, scopeHint || items[0].scope),
+    defaultDurationDays: Math.max(7, totalNights),
+    seasonSummary: items[0].seasonSummary || 'Optimal Season: Multi-Region Travel & Pleasant Conditions',
+    defaultStops: combinedStops,
+    suggestions: combinedSuggestions,
+  };
+}
+
 function getThematicImageUrl(stateOrCountry: string): string {
   const s = stateOrCountry.toLowerCase();
   if (s.includes('rajasthan')) return 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80';
@@ -1524,8 +1619,8 @@ function getThematicImageUrl(stateOrCountry: string): string {
   return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80';
 }
 
-// Strictly retrieves the contextual cities and stops for the confirmed destination
-export function getContextualCitiesForDestination(destinationInput: string): ContextualCityItem[] {
+// Internal single destination contextual city retriever
+export function getContextualCitiesForSingleDestination(destinationInput: string): ContextualCityItem[] {
   if (!destinationInput || !destinationInput.trim()) {
     return [];
   }
@@ -1586,7 +1681,7 @@ export function getContextualCitiesForDestination(destinationInput: string): Con
   );
 
   if (cityMatch) {
-    return getContextualCitiesForDestination(cityMatch.state_name);
+    return getContextualCitiesForSingleDestination(cityMatch.state_name);
   }
 
   // 3. Check if destination corresponds to a curated international circuit
@@ -1705,6 +1800,39 @@ export function getContextualCitiesForDestination(destinationInput: string): Con
   }
 
   return [];
+}
+
+// Master contextual city resolver supporting single or multi-destination input
+export function getContextualCitiesForDestination(
+  destinationInput: string | string[]
+): ContextualCityItem[] {
+  if (!destinationInput || (Array.isArray(destinationInput) && destinationInput.length === 0)) {
+    return [];
+  }
+
+  const rawParts = Array.isArray(destinationInput)
+    ? destinationInput.map((s) => s.trim()).filter(Boolean)
+    : splitDestinationsString(destinationInput);
+
+  if (rawParts.length <= 1) {
+    return getContextualCitiesForSingleDestination(rawParts[0] || '');
+  }
+
+  const combined: ContextualCityItem[] = [];
+  const seen = new Set<string>();
+
+  for (const part of rawParts) {
+    const partCities = getContextualCitiesForSingleDestination(part);
+    for (const city of partCities) {
+      const key = city.name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        combined.push(city);
+      }
+    }
+  }
+
+  return combined;
 }
 
 // Autocomplete search across all 250 countries + all 36 Indian states & UTs + 4,200 Indian cities + curated circuits

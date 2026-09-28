@@ -1359,6 +1359,22 @@ Refined route customization and entry requirements across `DestinationsScreen.ts
   - All international destinations continue to display high-value, passport-specific visa guidance (Schengen Visa, eVisa Active, Visa on Arrival, Visa Free, etc.).
 - **Verification**: 14 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors.
 
+## 22.6 Multi-Destination Input Support & Cross-Region Scoping (Completed)
+
+Implemented multi-state/UT/city (Domestic) and multi-country (International) input support and stop discovery across Screen 1 (`TripDetailsScreen.tsx`) and Screen 2 (`DestinationsScreen.tsx`):
+- **Screen 1 Interactive Destination Chips & Add Flow**:
+  - Each selected destination is displayed as an individual pill chip with a clear dismiss button (`✕`) with `aria-label="Remove destination"`.
+  - Added an interactive `+ Add Another Country` (International) or `+ Add Another State/UT/City` (Domestic) action button allowing users to incrementally add destinations to their journey.
+  - Active search typing during destination addition is isolated so it does not overwrite previously added destination chips.
+  - `splitDestinationsString(str)`: Parenthesis-safe delimiter parser ensuring commas inside region descriptions (e.g. `South Korea (Seoul, Busan, Daegu)` or `Rajasthan (Jaipur, Jodhpur, Udaipur & Jaisalmer)`) are never broken into invalid fragments.
+- **Screen 2 Multi-Destination Contextual Cities & Transit Connectors**:
+  - Consumes the effective multi-destination selection (`tripDetails.destinations || tripDetails.destination`).
+  - Top stops from each chosen destination are seeded into the route, interconnected by cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
+  - The stop selector dropdown (`getContextualCitiesForDestination`) returns the deduplicated union of cities across all selected states or countries without cross-scope leak.
+- **Aggregated Visa & Permit Verdicts**:
+  - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen destinations under a single badge (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (e.g. `ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
+- **Verification**: 17 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files.
+
 ---
 
 # 23. Phase 19 — End-to-End Test Matrix

@@ -7,12 +7,13 @@ import { CounterStepper } from '../components/planner/CounterStepper';
 import {
   INDIAN_ORIGIN_AIRPORTS,
   getSeasonDescription,
-  getVisaVerdict,
+  getMultiDestinationVisaVerdict,
 } from '../data/locations';
 import {
   searchAllDestinations,
   resolveDestinationData,
   searchOriginLocations,
+  splitDestinationsString,
   type OriginLocationOption,
 } from '../data/destinationsRegistry';
 import type { PartyType } from '../types/trip';
@@ -79,7 +80,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
     if (newScope === activeScope) return;
 
     if (newScope === 'DOMESTIC') {
-      const resolved = resolveDestinationData(tripDetails.destination, 'DOMESTIC');
+      const resolved = resolveDestinationData(tripDetails.destination);
       const isAlreadyDomestic = resolved.scope === 'DOMESTIC';
       const targetDest = isAlreadyDomestic
         ? tripDetails.destination
@@ -87,15 +88,16 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
       updateTripDetails({
         scope: 'DOMESTIC',
         destination: targetDest,
+        destinations: [targetDest],
       });
       setDestQuery(targetDest);
       seedDestination(targetDest, 'DOMESTIC');
     } else {
-      const resolved = resolveDestinationData(tripDetails.destination, 'INTERNATIONAL');
+      const resolved = resolveDestinationData(tripDetails.destination);
       const isAlreadyIntl = resolved.scope === 'INTERNATIONAL';
       const targetDest = isAlreadyIntl
         ? tripDetails.destination
-        : 'Norway (Fjords & Northern Lights)';
+        : 'Norway (Oslo, Flåm, Bergen & Tromsø)';
 
       // International origin strictly restricted to Indian commercial airports
       const isAirportOrigin = INDIAN_ORIGIN_AIRPORTS.some(
@@ -108,6 +110,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
       updateTripDetails({
         scope: 'INTERNATIONAL',
         destination: targetDest,
+        destinations: [targetDest],
         origin: safeOrigin,
       });
       setDestQuery(targetDest);
@@ -123,15 +126,65 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
     setShowOriginDropdown(false);
   };
 
+  // Selected destinations list respecting parentheses
+  const selectedDestinations =
+    tripDetails.destinations && tripDetails.destinations.length > 0
+      ? tripDetails.destinations
+      : splitDestinationsString(tripDetails.destination);
+  const [isAddingDestination, setIsAddingDestination] = useState(false);
+
   // Handle destination selection
   const handleSelectDestination = (destIdOrName: string) => {
+    if (isAddingDestination) {
+      const found = filteredDestinations.find(
+        (d) => d.id === destIdOrName || d.title.toLowerCase() === destIdOrName.toLowerCase()
+      );
+      const nameToAdd = found ? found.title : destIdOrName;
+      const alreadyHas = selectedDestinations.some(
+        (d) =>
+          d.toLowerCase() === nameToAdd.toLowerCase() ||
+          nameToAdd.toLowerCase().includes(d.toLowerCase()) ||
+          d.toLowerCase().includes(nameToAdd.toLowerCase())
+      );
+      const updated = alreadyHas ? selectedDestinations : [...selectedDestinations, nameToAdd];
+      updateTripDetails({
+        destination: updated.join(', '),
+        destinations: updated,
+      });
+      seedDestination(updated, activeScope);
+      setIsAddingDestination(false);
+      setDestQuery(updated.join(', '));
+      setShowDestDropdown(false);
+      return;
+    }
+
     seedDestination(destIdOrName, activeScope);
     setShowDestDropdown(false);
   };
 
+  // Handle removing an individual destination chip
+  const handleRemoveDestination = (indexToRemove: number) => {
+    const updated = selectedDestinations.filter((_, idx) => idx !== indexToRemove);
+    if (updated.length === 0) {
+      updateTripDetails({
+        destination: '',
+        destinations: [],
+      });
+      setDestQuery('');
+    } else {
+      const combined = updated.join(', ');
+      updateTripDetails({
+        destination: combined,
+        destinations: updated,
+      });
+      seedDestination(updated, activeScope);
+      setDestQuery(combined);
+    }
+  };
+
   // Safe continue handler ensuring route stops match destination
   const handleContinue = () => {
-    const targetDest = tripDetails.destination || destQuery;
+    const targetDest = destQuery || tripDetails.destination;
     const resolved = resolveDestinationData(targetDest, activeScope);
     const currentFirstCountry = destinations[0]?.country?.toLowerCase() || '';
     const resolvedFirstCountry = (resolved.defaultStops[0]?.country || resolved.name).toLowerCase();
@@ -277,9 +330,20 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
   };
 
   // Dynamic real-time weather badge & visa verdict
-  const activeResolved = resolveDestinationData(tripDetails.destination || destQuery, activeScope);
-  const seasonBadgeText = activeResolved.seasonSummary || getSeasonDescription(tripDetails.destination, tripDetails.departureDateIso);
-  const visaVerdictText = activeResolved.visaStatus || getVisaVerdict(tripDetails.destination);
+  const activeDestinations =
+    tripDetails.destinations && tripDetails.destinations.length > 0
+      ? tripDetails.destinations
+      : splitDestinationsString(tripDetails.destination || destQuery);
+  const activeResolved = resolveDestinationData(
+    activeDestinations.length > 0 ? activeDestinations : destQuery,
+    activeScope
+  );
+  const seasonBadgeText =
+    activeResolved.seasonSummary ||
+    getSeasonDescription(activeDestinations[0] || tripDetails.destination, tripDetails.departureDateIso);
+  const visaVerdictText =
+    activeResolved.visaStatus ||
+    getMultiDestinationVisaVerdict(activeDestinations, activeScope);
 
   const partyButtons: { type: PartyType; label: string; icon: string }[] = [
     { type: 'solo', label: 'Solo', icon: 'person' },
@@ -563,6 +627,60 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                       ) : null}
                     </div>
 
+                    {/* Selected Destinations Interactive Chips */}
+                    {selectedDestinations.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5 pb-1">
+                        {selectedDestinations.map((destName, idx) => {
+                          const cleanName = destName
+                            .replace(/\s*\([^)]*\).*/, '')
+                            .replace(/,\s*India$/i, '')
+                            .replace(/\s*Circuit$/i, '')
+                            .trim();
+                          return (
+                            <span
+                              key={`${destName}-${idx}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-on-surface font-label-md text-label-md shadow-xs"
+                            >
+                              <span className="material-symbols-outlined text-[15px] text-primary">
+                                {activeScope === 'DOMESTIC' ? 'location_city' : 'public'}
+                              </span>
+                              <span className="font-semibold text-on-surface">{cleanName}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveDestination(idx);
+                                }}
+                                className="w-4 h-4 ml-0.5 rounded-full hover:bg-primary/20 flex items-center justify-center text-outline hover:text-on-surface cursor-pointer transition-colors"
+                                title="Remove destination"
+                                aria-label="Remove destination"
+                              >
+                                <span className="material-symbols-outlined text-[13px] leading-none">close</span>
+                              </button>
+                            </span>
+                          );
+                        })}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingDestination(true);
+                            setDestQuery('');
+                            setShowDestDropdown(true);
+                            destRef.current?.querySelector('input')?.focus();
+                          }}
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-label-caption text-label-caption font-semibold transition-colors cursor-pointer border ${
+                            isAddingDestination
+                              ? 'bg-primary text-on-primary border-primary'
+                              : 'bg-surface-container text-primary hover:bg-surface-container-high border-outline-variant/50'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">add</span>
+                          {activeScope === 'DOMESTIC' ? 'Add Another State/UT/City' : 'Add Another Country'}
+                        </button>
+                      </div>
+                    )}
+
                     <div className="relative flex items-center">
                       <input
                         id="destination-input"
@@ -570,12 +688,18 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                         value={destQuery}
                         onChange={(e) => {
                           setDestQuery(e.target.value);
-                          updateTripDetails({ destination: e.target.value });
+                          if (!isAddingDestination) {
+                            updateTripDetails({ destination: e.target.value });
+                          }
                           setShowDestDropdown(true);
                         }}
                         onFocus={() => setShowDestDropdown(true)}
                         placeholder={
-                          activeScope === 'DOMESTIC'
+                          isAddingDestination
+                            ? activeScope === 'DOMESTIC'
+                              ? 'Type and select Indian state, UT, or city to add...'
+                              : 'Type and select sovereign country to add...'
+                            : activeScope === 'DOMESTIC'
                             ? 'Search Indian state, UT, or region (e.g. Rajasthan, Kerala)...'
                             : 'Search sovereign country or circuit (e.g. Norway, Japan)...'
                         }
@@ -611,6 +735,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                                 </span>
                                 <span className="font-label-caption text-label-caption text-on-surface-variant">
                                   {dest.subtitle}
+                                  {dest.visaStatus ? ` • ${dest.visaStatus}` : ''}
                                 </span>
                               </div>
                               <span

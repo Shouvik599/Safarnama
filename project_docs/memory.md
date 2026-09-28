@@ -4,20 +4,21 @@
 
 ## Current Status
 
-**Safarnama Frontend — Batch 1, Scope Partitioning & Destination Resolution / Visa Consistency Fix Complete.**
-1. **Destination Resolution & Scope-Aware Matching**:
-   - Upgraded `resolveDestinationData(destinationInput, scopeHint?)` with scope-first prioritization. When in `INTERNATIONAL` scope, sovereign country lookups (`generateCountryFallback`) and international curated circuits take strict precedence over domestic searches.
-   - Primary entity sanitization: Isolates the core destination prior to parentheses (e.g. `Pakistan (Islamabad, ...)` -> `Pakistan`), preventing sub-cities from interfering with master resolution.
-   - Eliminated greedy substring collisions: Removed `cleanQ.includes(c.name)` in `generateDomesticCityFallback`, preventing short 2-3 letter Indian cities (`Bah`, `South`, `Anta`, `Tral`, `Un`, `Gua`) from capturing international country searches (such as Pakistan resolving to `Bah, UP` due to Bahawalpur, or South Korea resolving to `South, Sikkim`).
-   - Strict word-boundary checks on short curated circuit IDs (`\buk\b`), ensuring strings containing sub-cities like `Lukla` (Nepal) or `Nuuk` (Greenland) never falsely resolve to the United Kingdom circuit.
-2. **Unified Visa Status Engine**:
-   - Created `getCountryVisaStatus()` ensuring consistent verdicts across autocomplete dropdowns, dynamic typing previews, and finalized destination badges.
-   - Added dedicated support for Freedom of Movement for Indian citizens traveling to Nepal and Bhutan (`Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)`).
-3. **Verification**: 13 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), 0 oxlint warnings/errors, and backend unit tests running clean.
+**Safarnama Frontend — Phase 22.6 Multi-Destination Input Support, Cross-Border Scoping & Contextual City Selection Complete.**
+1. **Multi-Destination Input Support**:
+   - Destination model backward compatibility: `tripDetails.destination` maintains comma-separated string representation while `tripDetails.destinations` maintains an array of individual destination strings.
+   - Parenthesis-safe destination parser: Implemented `splitDestinationsString()` which prevents internal commas (e.g. `South Korea (Seoul, Busan, Daegu)`) from accidentally splitting single destinations into fragments.
+   - Screen 1 Interactive Destination Chips: Each chosen country or state is displayed as an individual dismissible chip with `✕` button. Users can add multiple destinations via the "+ Add Another Country" or "+ Add Another State/UT/City" button without overwriting existing selections.
+2. **Multi-Destination Route Seeding & Cross-Region Scoping**:
+   - `resolveDestinationData(destinationInput, scopeHint)` handles arrays or comma-delimited strings, taking top stops from each chosen destination and generating cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
+   - Contextual stop selector on Screen 2 (`getContextualCitiesForDestination`): Returns the deduplicated union of cities across all selected states or countries without cross-region pollution.
+3. **Aggregated Multi-Destination Visa & Permit Engine**:
+   - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen countries into a single verdict (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (`ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
+4. **Verification**: 17/17 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files.
 
 ## Current implementation phase
 
-Frontend Batch 1 — Destination Resolution & Scope-Aware Visa Consistency (Completed)
+Frontend Batch 1 — Phase 22.6 Multi-Destination Input & Stop Resolution (Completed)
 
 ## Completed functionality
 
@@ -636,6 +637,30 @@ Frontend Batch 1 (Screens 1–3) is **100% complete, verified via 10 Vitest/Reac
 3. **Verification**:
    - 14/14 Vitest tests passing (`flow.test.tsx`).
    - Clean production build with Vite (`tsc -b && vite build`) and 0 oxlint warnings/errors.
+
+## Multi-Destination Input Support & Cross-Region Scoping (Phase 22.6)
+
+### Implementation Summary:
+1. **Multi-Destination State Model**:
+   - Extended `TripDetailsState` in `src/types/trip.ts` with optional `destinations?: string[]`.
+   - `TripPlanningContext.tsx` synchronizes `destination` (comma-separated string) and `destinations` (string array) bidirectionally on every state update, providing backward compatibility with single-string consumers while supporting granular multi-selection.
+2. **Parenthesis-Safe Parsing & Entity Sanitization**:
+   - Created `splitDestinationsString(str)` in `destinationsRegistry.ts` respecting nesting parentheses depth (`parenDepth`). This ensures descriptions like `"South Korea (Seoul, Busan, Daegu)"` or `"Rajasthan (Jaipur, Jodhpur, Udaipur & Jaisalmer)"` are not mistakenly fragmented.
+3. **Screen 1 Interactive Destination Chips & Add Flow (`TripDetailsScreen.tsx`)**:
+   - Displayed each chosen country/state as an individual badge with dismiss button (`✕`) labeled with `aria-label="Remove destination"`.
+   - Provided toggle button `+ Add Another Country` / `+ Add Another State/UT/City` with contextual placeholder.
+   - Protected ongoing search typing during `isAddingDestination` from prematurely clobbering existing selections.
+   - Enhanced `handleToggleScope` to strictly resolve existing scope without forced fallback cross-pollution.
+4. **Screen 2 Multi-Destination Contextual Cities & Route Seeding (`DestinationsScreen.tsx` & `destinationsRegistry.ts`)**:
+   - Consumes effective multi-destination input (`tripDetails.destinations || tripDetails.destination`).
+   - `resolveDestinationData(destinationInput, scopeHint)` handles arrays or comma-delimited strings, stitching top stops from each destination and auto-generating cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
+   - `getContextualCitiesForDestination` returns the deduplicated union of contextual cities across all chosen destinations without cross-scope leak.
+5. **Aggregated Multi-Destination Visa & Permit Guidance (`locations.ts`)**:
+   - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Groups multiple Schengen countries into a single unified verdict (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (e.g. `ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
+6. **Verification**:
+   - 17/17 Vitest tests passing in `flow.test.tsx` (100% green).
+   - Production bundle built cleanly with `tsc -b && vite build`.
+   - Zero linter warnings or errors (`oxlint`).
 
 ### Next Recommended Batch:
 
