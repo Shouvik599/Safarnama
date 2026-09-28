@@ -7,7 +7,19 @@
     "top_cities": [
       "Visakhapatnam",
       "Tirupati",
-      "Araku Valley"
+      "Araku Valley",
+      "Addanki",
+      "Adoni",
+      "Akasahebpet",
+      "Akividu",
+      "Akkarampalle",
+      "Amalapuram",
+      "Amudalavalasa",
+      "Anakapalle",
+      "Anantapur",
+      "Atmakur",
+      "Attili",
+      "Avanigadda"
     ],
     "alias": "Coastal Andhra & Hills",
     "season": "Pleasant Coastal Breezes & Temple Sanctuaries (Oct-Mar)"
@@ -20,7 +32,19 @@
     "top_cities": [
       "Tawang",
       "Ziro Valley",
-      "Dirang"
+      "Dirang",
+      "Ziro",
+      "Along",
+      "Anjaw",
+      "Basar",
+      "Bomdila",
+      "Changlang",
+      "Dibang Valley",
+      "East Kameng",
+      "East Siang",
+      "Hayuliang",
+      "Itanagar",
+      "Khonsa"
     ],
     "alias": "Eastern Himalayas",
     "season": "Lush Mountain Valleys & Monastic Highlands (Oct-Apr)"
@@ -33,7 +57,19 @@
     "top_cities": [
       "Guwahati",
       "Kaziranga National Park",
-      "Majuli Island"
+      "Majuli Island",
+      "Abhayapuri",
+      "Amguri",
+      "Badarpur",
+      "Baksa",
+      "Barpathar",
+      "Barpeta",
+      "Barpeta Road",
+      "Basugaon",
+      "Bihpuriagaon",
+      "Bijni",
+      "Bilasipara",
+      "Bokajan"
     ],
     "alias": "Brahmaputra Valley",
     "season": "Wildlife Safari Season & Verdant Tea Trails (Nov-Apr)"
@@ -46,7 +82,19 @@
     "top_cities": [
       "Bodh Gaya",
       "Nalanda",
-      "Rajgir"
+      "Rajgir",
+      "Aurangabad",
+      "Amarpur",
+      "Araria",
+      "Arrah",
+      "Arwal",
+      "Asarganj",
+      "Bagaha",
+      "Bahadurganj",
+      "Bairagnia",
+      "Baisi",
+      "Bakhtiyarpur",
+      "Bangaon"
     ],
     "alias": "Heritage & Enlightenment Trail",
     "season": "Pleasant Winter Sun & Buddhist Pilgrimage (Oct-Mar)"
@@ -59,7 +107,19 @@
     "top_cities": [
       "Bastar & Chitrakote Falls",
       "Jagdalpur",
-      "Barnawapara"
+      "Barnawapara",
+      "Akaltara",
+      "Ambagarh Chauki",
+      "Ambikapur",
+      "Arang",
+      "Baikunthpur",
+      "Balod",
+      "Baloda",
+      "Baloda Bazar",
+      "Basna",
+      "Bastar",
+      "Bemetara",
+      "Bhanpuri"
     ],
     "alias": "Tribal Heart & Waterfalls",
     "season": "Cascading Waterfalls & Mild Green Landscapes (Oct-Feb)"
@@ -72,7 +132,19 @@
     "top_cities": [
       "North Goa",
       "South Goa",
-      "Panaji Old Quarter"
+      "Panaji Old Quarter",
+      "Arambol",
+      "Baga",
+      "Calangute",
+      "Candolim",
+      "Panaji",
+      "Vasco da Gama",
+      "Aldona",
+      "Bambolim",
+      "Bandora",
+      "Benaulim",
+      "Carapur",
+      "Cavelossim"
     ],
     "alias": "Goa Coastal Sun & Heritage",
     "season": "Tropical Sun, Beach Shacks & Portuguese Heritage (Nov-Mar)"
@@ -86,7 +158,18 @@
       "Ahmedabad",
       "Rann of Kutch",
       "Gir National Park",
-      "Dwarka"
+      "Dwarka",
+      "Bhuj",
+      "Jodhpur",
+      "Vadodara",
+      "Abrama",
+      "Adalaj",
+      "Agol",
+      "Ahwa",
+      "Akrund",
+      "Amod",
+      "Amreli",
+      "Amroli"
     ],
     "alias": "Colors of Gujarat",
     "season": "White Desert Rann Utsav & Lion Safari (Nov-Feb)"
@@ -99,7 +182,19 @@
     "top_cities": [
       "Kurukshetra",
       "Gurugram",
-      "Pinjore Gardens"
+      "Pinjore Gardens",
+      "Ambala",
+      "Asandh",
+      "Ateli Mandi",
+      "Bahadurgarh",
+      "Bara Uchana",
+      "Barwala",
+      "Bawal",
+      "Beri Khas",
+      "Bhiwani",
+      "Bilaspur",
+      "Buriya",
+      "Charkhi Dadri"
     ],
     "alias": "Heritage & Vedic Landscapes",
     "season": "Cool Winter Sunshine & Cultural Heritage (Oct-Mar)"
@@ -112,7 +207,19 @@
     "top_cities": [
       "Shimla",
       "Manali",
-      "Dharamshala & McLeodGanj"
+      "Dharamshala & McLeodGanj",
+      "Dalhousie",
+      "Kasauli",
+      "Arki",
+      "Baddi",
+      "Banjar",
+      "Bilaspur",
+      "Chamba",
+      "Chaupal",
+      "Chowari",
+      "Chuari Khas",
+      "Dagshai",
+      "Daulatpur"
     ],
     "alias": "Himachal Pine Valleys",
     "season": "Snow-Capped Peaks & Fresh Mountain Pines (Year-round)"
@@ -125,7 +232,19 @@
     "top_cities": [
       "Ranchi Waterfalls",
       "Betla National Park",
-      "Netarhat"
+      "Netarhat",
+      "Bagra",
+      "Barka Kana",
+      "Barki Saria",
+      "Barwadih",
+      "Bhojudih",
+      "Bokaro",
+      "Bundu",
+      "Chaibasa",
+      "Chakradharpur",
+      "Chakulia",
+      "Chandil",
+      "Chas"
     ],
     "alias": "Land of Forests & Falls",
     "season": "Crisp Winter Sun & Plunging Waterfalls (Oct-Mar)"
@@ -139,7 +258,18 @@
       "Bengaluru",
       "Mysore",
       "Coorg Coffee Estates",
-      "Hampi Ruins"
+      "Hampi Ruins",
+      "Badami",
+      "Gokarna",
+      "Hampi",
+      "Madikeri",
+      "Mangaluru",
+      "Mysuru",
+      "Afzalpur",
+      "Ajjampur",
+      "Aland",
+      "Alnavar",
+      "Alur"
     ],
     "alias": "Karnataka Heritage & Coffee Hills",
     "season": "Pleasant Plateau Breezes & Spice Trails (Oct-Mar)"
@@ -152,7 +282,19 @@
     "top_cities": [
       "Kochi",
       "Munnar Tea Hills",
-      "Alleppey Backwaters"
+      "Alleppey Backwaters",
+      "Alappuzha",
+      "Cochin",
+      "Kovalam",
+      "Munnar",
+      "Thiruvananthapuram",
+      "Thrissur",
+      "Varkala",
+      "Wayanad",
+      "Adoor",
+      "Aluva",
+      "Alwaye",
+      "Angamali"
     ],
     "alias": "Gods Own Country",
     "season": "Serene Backwaters, Houseboats & Ayurvedic Retreats (Sep-Mar)"
@@ -166,7 +308,18 @@
       "Khajuraho Temples",
       "Bandhavgarh National Park",
       "Orchha",
-      "Gwalior"
+      "Gwalior",
+      "Bhopal",
+      "Indore",
+      "Pachmarhi",
+      "Ujjain",
+      "Agar",
+      "Ajaigarh",
+      "Akodia",
+      "Alampur",
+      "Alirajpur",
+      "Alot",
+      "Amanganj"
     ],
     "alias": "Heart of India & Tiger Reserves",
     "season": "Mild Winter Sunshine & Wilderness Safaris (Oct-Mar)"
@@ -180,7 +333,18 @@
       "Mumbai",
       "Lonavala & Khandala",
       "Ajanta & Ellora Caves",
-      "Mahabaleshwar"
+      "Mahabaleshwar",
+      "Aurangabad",
+      "Khandala",
+      "Nashik",
+      "Panchgani",
+      "Pune",
+      "Shirdi",
+      "Achalpur",
+      "Adawad",
+      "Agar Panchaitan",
+      "Aheri",
+      "Ahmadpur"
     ],
     "alias": "Western Ghats & Coastal Metro",
     "season": "Pleasant Coastal Breezes & Mist-Clad Ghats (Oct-Mar)"
@@ -193,7 +357,19 @@
     "top_cities": [
       "Imphal",
       "Loktak Floating Lake",
-      "Ukhrul"
+      "Ukhrul",
+      "Bishnupur",
+      "Chandel",
+      "Churachandpur",
+      "Imphal East",
+      "Imphal West",
+      "Jiribam",
+      "Kakching",
+      "Kamjong",
+      "Kangpokpi",
+      "Noney",
+      "Pherzawl",
+      "Senapati"
     ],
     "alias": "Jeweled Land & Floating Lake",
     "season": "Lush Highlands & Floating Phumdis (Oct-Apr)"
@@ -206,7 +382,19 @@
     "top_cities": [
       "Shillong",
       "Cherrapunji & Living Root Bridges",
-      "Dawki Umngot River"
+      "Dawki Umngot River",
+      "Cherrapunji",
+      "East Garo Hills",
+      "East Jaintia Hills",
+      "East Khasi Hills",
+      "Mairang",
+      "Mankachar",
+      "Nongpoh",
+      "Nongstoin",
+      "North Garo Hills",
+      "Ri-Bhoi",
+      "South Garo Hills",
+      "South West Garo Hills"
     ],
     "alias": "Abode of the Clouds",
     "season": "Crystal Clear Rivers & Dramatic Waterfalls (Oct-May)"
@@ -219,7 +407,19 @@
     "top_cities": [
       "Aizawl",
       "Reiek Mountain",
-      "Champhai"
+      "Champhai",
+      "Darlawn",
+      "Khawhai",
+      "Kolasib",
+      "Lawngtlai",
+      "Lunglei",
+      "Mamit",
+      "North Vanlaiphai",
+      "Saiha",
+      "Sairang",
+      "Saitlaw",
+      "Serchhip",
+      "Thenzawl"
     ],
     "alias": "Rolling Bamboo Hills",
     "season": "Cool Mountain Mists & Rolling Ridges (Oct-Apr)"
@@ -232,7 +432,15 @@
     "top_cities": [
       "Kohima",
       "Dzukou Valley",
-      "Mokokchung"
+      "Mokokchung",
+      "Dimapur",
+      "Mon",
+      "Peren",
+      "Phek",
+      "Tuensang",
+      "Tuensang District",
+      "Wokha",
+      "Zunheboto"
     ],
     "alias": "Falcon Capital & Hornbill Hills",
     "season": "Hornbill Cultural Festival & Valley Treks (Nov-Apr)"
@@ -246,7 +454,18 @@
       "Bhubaneswar",
       "Puri Beach",
       "Konark Sun Temple",
-      "Chilika Lake"
+      "Chilika Lake",
+      "Cuttack",
+      "Puri",
+      "Angul",
+      "Angul District",
+      "Asika",
+      "Athagarh",
+      "Bada Barabil",
+      "Balangir",
+      "Balasore",
+      "Baleshwar",
+      "Balimila"
     ],
     "alias": "Temple Coast & Golden Sands",
     "season": "Pleasant Coastal Sun & Migratory Flamingoes (Oct-Mar)"
@@ -259,7 +478,19 @@
     "top_cities": [
       "Amritsar Golden Temple",
       "Wagah Border",
-      "Patiala"
+      "Patiala",
+      "Amritsar",
+      "Abohar",
+      "Adampur",
+      "Ajitgarh",
+      "Ajnala",
+      "Akalgarh",
+      "Alawalpur",
+      "Amloh",
+      "Anandpur Sahib",
+      "Badhni Kalan",
+      "Bagha Purana",
+      "Bakloh"
     ],
     "alias": "Land of Five Rivers",
     "season": "Golden Mustard Fields & Crispy Winter Morning Langar (Oct-Mar)"
@@ -273,7 +504,18 @@
       "Jaipur",
       "Jodhpur",
       "Udaipur",
-      "Jaisalmer"
+      "Jaisalmer",
+      "Ajmer",
+      "Alwar",
+      "Bikaner",
+      "Pushkar",
+      "Abhaneri",
+      "Abu",
+      "Abu Road",
+      "Aklera",
+      "Amet",
+      "Anta",
+      "Anupgarh"
     ],
     "alias": "Rajasthan Royals",
     "season": "Mild Winter Sunshine & Desert Festivals (Oct-Mar)"
@@ -286,7 +528,18 @@
     "top_cities": [
       "Gangtok",
       "Pelling & Kanchenjunga",
-      "Lachung & Yumthang Valley"
+      "Lachung & Yumthang Valley",
+      "East",
+      "Gyalshing",
+      "Jorethang",
+      "Mangan",
+      "Namchi",
+      "Naya Bazar",
+      "North",
+      "Rangpo",
+      "Singtam",
+      "South",
+      "West"
     ],
     "alias": "Himalayan Shangri-La",
     "season": "Clear Kanchenjunga Views & Alpine Blooms (Mar-May, Oct-Dec)"
@@ -300,7 +553,18 @@
       "Chennai",
       "Madurai Meenakshi",
       "Ooty Nilgiri Hills",
-      "Kanyakumari"
+      "Kanyakumari",
+      "Coimbatore",
+      "Kodaikanal",
+      "Madurai",
+      "Manali",
+      "Ooty",
+      "Rameswaram",
+      "Thanjavur",
+      "Abiramam",
+      "Adirampattinam",
+      "Aduthurai",
+      "Alagapuram"
     ],
     "alias": "Dravidian Temples & Nilgiri Hills",
     "season": "Cooler Coastal Breezes & Nilgiri Mountain Air (Oct-Mar)"
@@ -313,7 +577,19 @@
     "top_cities": [
       "Hyderabad",
       "Warangal Thousand Pillar Temple",
-      "Nagarjuna Sagar"
+      "Nagarjuna Sagar",
+      "Adilabad",
+      "Alampur",
+      "Andol",
+      "Asifabad",
+      "Balapur",
+      "Banswada",
+      "Bellampalli",
+      "Bhadrachalam",
+      "Bhadradri Kothagudem",
+      "Bhaisa",
+      "Bhongir",
+      "Bodhan"
     ],
     "alias": "City of Pearls & Nizam Heritage",
     "season": "Pleasant Winter Sun & Culinary Biryani Trails (Oct-Mar)"
@@ -326,7 +602,19 @@
     "top_cities": [
       "Agartala",
       "Ujjayanta Palace",
-      "Unakoti Rock Carvings"
+      "Unakoti Rock Carvings",
+      "Udaipur",
+      "Amarpur",
+      "Ambasa",
+      "Barjala",
+      "Belonia",
+      "Dhalai",
+      "Dharmanagar",
+      "Gomati",
+      "Kailashahar",
+      "Kamalpur",
+      "Khowai",
+      "North Tripura"
     ],
     "alias": "Palaces of the East",
     "season": "Mild Winter Weather & Royal Lake Palaces (Oct-Mar)"
@@ -340,7 +628,18 @@
       "Varanasi Ghats",
       "Agra Taj Mahal",
       "Lucknow Nawabi Quarter",
-      "Ayodhya"
+      "Ayodhya",
+      "Agra",
+      "Allahabad",
+      "Lucknow",
+      "Mathura",
+      "Varanasi",
+      "Vrindavan",
+      "Achhnera",
+      "Afzalgarh",
+      "Ahraura",
+      "Aidalpur",
+      "Airwa"
     ],
     "alias": "Heritage of the Ganga Plains",
     "season": "Misty Winter Mornings & Ganga Aarti (Oct-Mar)"
@@ -353,7 +652,19 @@
     "top_cities": [
       "Rishikesh & Haridwar",
       "Mussoorie Queen of Hills",
-      "Nainital Lake"
+      "Nainital Lake",
+      "Almora",
+      "Dehradun",
+      "Haridwar",
+      "Mussoorie",
+      "Ranikhet",
+      "Rishikesh",
+      "Srinagar",
+      "Bageshwar",
+      "Banbasa",
+      "Barkot",
+      "Bazpur",
+      "Bhim Tal"
     ],
     "alias": "Devbhoomi Yoga & Alpine Lakes",
     "season": "Crisp Alpine Breeze & Sacred Ganga Ghats (Year-round)"
@@ -367,7 +678,18 @@
       "Kolkata Cultural Capital",
       "Darjeeling Himalayan Rail",
       "Kalimpong",
-      "Sundarbans"
+      "Sundarbans",
+      "Darjeeling",
+      "Digha",
+      "Kolkata",
+      "Siliguri",
+      "Adra",
+      "Ahmedpur",
+      "Aknapur",
+      "Alipurduar",
+      "Amlagora",
+      "Amta",
+      "Amtala"
     ],
     "alias": "Culture, Tea Gardens & Mangroves",
     "season": "Festive Autumn & Cool Himalayan Tea Terraces (Oct-Mar)"
@@ -393,7 +715,8 @@
     "top_cities": [
       "Chandigarh Capitol Complex",
       "Rock Garden",
-      "Sukhna Lake"
+      "Sukhna Lake",
+      "Chandigarh"
     ],
     "alias": "The City Beautiful",
     "season": "Pleasant Urban Architecture & Garden Walks (Oct-Mar)"
@@ -419,7 +742,19 @@
     "top_cities": [
       "New Delhi Central Vista",
       "Old Delhi & Red Fort",
-      "Qutub Minar & Mehrauli"
+      "Qutub Minar & Mehrauli",
+      "Delhi",
+      "New Delhi",
+      "Alipur",
+      "Bawana",
+      "Central Delhi",
+      "Deoli",
+      "East Delhi",
+      "Karol Bagh",
+      "Najafgarh",
+      "Nangloi Jat",
+      "Narela",
+      "North Delhi"
     ],
     "alias": "Capital Heartland & Mughal Monuments",
     "season": "Crisp Winter Sunshine & Heritage Walks (Oct-Mar)"
@@ -445,7 +780,8 @@
     "top_cities": [
       "Leh",
       "Nubra Valley",
-      "Pangong Tso Lake"
+      "Pangong Tso Lake",
+      "Kargil"
     ],
     "alias": "Ladakh High Passes",
     "season": "High Mountain Passes Open & Crystal Skies (May-Sep) / Chadar (Dec-Feb)"
@@ -458,7 +794,8 @@
     "top_cities": [
       "Agatti Coral Island",
       "Bangaram Lagoon",
-      "Kavaratti"
+      "Kavaratti",
+      "Lakshadweep"
     ],
     "alias": "Pristine Coral Atolls",
     "season": "Calm Crystal Lagoons & Scuba Adventures (Oct-Apr)"
@@ -471,7 +808,11 @@
     "top_cities": [
       "White Town French Quarter",
       "Auroville & Matrimandir",
-      "Paradise Beach"
+      "Paradise Beach",
+      "Puducherry",
+      "Karaikal",
+      "Mahe",
+      "Yanam"
     ],
     "alias": "French Riviera of the East",
     "season": "Mild Coastal Breezes & Heritage Boulevard Cafes (Oct-Mar)"

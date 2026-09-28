@@ -253,7 +253,33 @@ Extract and normalize:
 - Schengen Area & EU membership status
 - Border countries
 
-## 5.4 Ingestion behavior
+## 5.4 Indian States, UTs, and Cities Ingestion
+
+Implement:
+
+```text
+scripts/fetch_india_places.py
+```
+
+Source:
+
+`api.countrystatecity.in` (CountryStateCity API)
+
+Outputs:
+
+```text
+data/static/india_places.json
+frontend/src/data/india_places.json
+frontend/src/data/indian_states_uts.json (enriched with top cities)
+```
+
+Extract and normalize:
+- All 28 States and 8 Union Territories with standard ISO 3166-2 codes, coordinates, and types
+- All ~4,200 Indian cities categorized by parent state
+- Curated prominence tagging (`is_popular: true`) for top ~100 iconic tourist destinations (e.g. Udaipur, Manali, Rishikesh, Varanasi, Ooty, Munnar, Goa)
+- Automatic retry with exponential backoff for network resilience
+
+## 5.5 Ingestion behavior
 
 The scripts are **on-demand** in V1.
 
@@ -263,6 +289,7 @@ Run with:
 uv run python scripts/fetch_airports.py
 uv run python scripts/fetch_visa_rules.py
 uv run python scripts/fetch_country_profiles.py
+uv run python scripts/fetch_india_places.py
 ```
 
 Do not depend on a scheduled runtime ingestion process.
@@ -291,6 +318,7 @@ data/static/airports.json
 data/static/visa_rules.json
 data/static/visa_rules_enriched.json
 data/static/countries.json
+data/static/india_places.json
 ```
 
 and tests confirm that expected records resolve.

@@ -271,4 +271,32 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(screen.getByText('Jaisalmer')).toBeInTheDocument();
     expect(screen.queryByText('Osaka')).not.toBeInTheDocument();
   });
+
+  it('auto-populates Indian cities, states, UTs, and international countries in destination search bar', () => {
+    render(<App />);
+
+    // Go to Trip Details
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    const destInput = screen.getByPlaceholderText(/search city, circuit, or region/i) as HTMLInputElement;
+
+    // 1. Search for an Indian city (e.g. Udaipur)
+    fireEvent.change(destInput, { target: { value: 'Udaipur' } });
+    expect(screen.getByText('Udaipur')).toBeInTheDocument();
+    expect(screen.getByText(/City in Rajasthan, India/i)).toBeInTheDocument();
+
+    // Select Udaipur from dropdown
+    fireEvent.click(screen.getByText('Udaipur'));
+    expect(screen.getAllByText(/Domestic Trip • ₹0 Visa/i).length).toBeGreaterThan(0);
+
+    // 2. Search for an Indian state / UT (e.g. Himachal Pradesh)
+    fireEvent.change(destInput, { target: { value: 'Himachal' } });
+    expect(screen.getByText('Himachal Pradesh')).toBeInTheDocument();
+    expect(screen.getByText(/Himachal Pine Valleys/i)).toBeInTheDocument();
+
+    // 3. Search for an international sovereign country (e.g. Spain)
+    fireEvent.change(destInput, { target: { value: 'Spain' } });
+    expect(screen.getByText('Spain')).toBeInTheDocument();
+    expect(screen.getByText(/Madrid, Europe/i)).toBeInTheDocument();
+  }, 15000);
 });

@@ -132,12 +132,12 @@ Required.
 
 The user can select:
 
-- One or more countries for international travel.
-- One or more Indian states/UTs for domestic travel.
+- One or more countries for international travel (across all 250 sovereign nations).
+- One or more Indian states, union territories, or specific cities/districts for domestic travel (covering all 28 states, 8 UTs, and ~4,200 Indian cities/settlements with prominence ranking for iconic tourist hubs like Udaipur, Manali, Rishikesh, Varanasi, Ooty, Munnar, Goa).
 
-Destinations come from controlled searchable lists.
+Destinations come from a controlled, high-performance searchable index with real-time autocomplete and categorization badges (`DOMESTIC` vs `INTERNATIONAL`).
 
-The planner determines the internal city/region route automatically.
+The planner determines the internal city/region route automatically matching the chosen domestic city/state or international country.
 
 ### 5.3 Travel scope
 

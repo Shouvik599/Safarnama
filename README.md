@@ -322,6 +322,7 @@ Safarnama/
 │   └── static/               # Production static JSON datasets
 │       ├── airports.json     # 3,244 commercial airports worldwide
 │       ├── countries.json    # 250 enriched country profiles
+│       ├── india_places.json # 36 Indian states/UTs & 4,198 cities
 │       ├── visa_rules.json   # 199 base visa rules for Indian passport holders
 │       └── visa_rules_enriched.json # 199 multi-option enriched visa records
 ├── project_docs/             # Canonical project specifications & architectural guides
@@ -336,6 +337,7 @@ Safarnama/
 │   ├── enrich_visa_rules.py  # Gemini + Tavily on-demand visa rule enrichment
 │   ├── fetch_airports.py     # Ingests airports from ourairports-data
 │   ├── fetch_country_profiles.py # Ingests country metadata from REST Countries v5
+│   ├── fetch_india_places.py # Ingests 36 Indian states/UTs & 4,198 cities from CountryStateCity
 │   └── fetch_visa_rules.py   # Ingests passport visa baseline from passport-index
 ├── src/                      # Importable application source package (`import src.*`)
 │   ├── api/                  # FastAPI routers, app factory and endpoints (Phase 4)

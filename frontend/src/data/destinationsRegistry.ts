@@ -2,6 +2,7 @@ import type { RouteStop, DestinationSuggestion } from '../types/trip';
 import { PRECONFIGURED_CIRCUITS } from './locations';
 import generatedCountries from './generated_countries.json';
 import indianStatesUts from './indian_states_uts.json';
+import indiaPlacesData from './india_places.json';
 
 export interface DestinationItem {
   id: string;
@@ -1253,6 +1254,99 @@ export function generateCountryFallback(countryName: string): DestinationItem | 
   };
 }
 
+// Helper to generate dynamic fallback stops for any Indian city from the API dataset
+export function generateDomesticCityFallback(cityInput: string): DestinationItem | null {
+  const q = cityInput.toLowerCase().trim();
+  const cleanQ = q.startsWith('in-') ? q.slice(3).replace(/-/g, ' ') : q;
+
+  const cityList = (indiaPlacesData as {
+    cities: Array<{
+      id: string;
+      name: string;
+      state_name: string;
+      state_code: string;
+      state_id: string;
+      scope: 'DOMESTIC';
+      is_popular: boolean;
+    }>;
+  }).cities;
+
+  const cityMatch = cityList.find(
+    (c) =>
+      c.name.toLowerCase() === cleanQ ||
+      c.id.toLowerCase() === q ||
+      c.name.toLowerCase().startsWith(cleanQ) ||
+      cleanQ.includes(c.name.toLowerCase())
+  );
+
+  if (!cityMatch) return null;
+
+  const statesList = (indiaPlacesData as {
+    states: Array<{
+      id: string;
+      name: string;
+      code: string;
+      type: string;
+      popular_cities: string[];
+      cities: string[];
+    }>;
+  }).states;
+
+  const stateRecord = statesList.find(
+    (s) => s.name.toLowerCase() === cityMatch.state_name.toLowerCase() || s.code === cityMatch.state_code
+  );
+
+  const siblingCities = stateRecord
+    ? stateRecord.popular_cities.filter((c) => c.toLowerCase() !== cityMatch.name.toLowerCase()).slice(0, 3)
+    : [];
+
+  const routeCityNames = [cityMatch.name, ...siblingCities];
+  const stops: RouteStop[] = routeCityNames.map((city, idx) => ({
+    id: `in-${city.toLowerCase().replace(/\s+/g, '-')}-stop-${idx + 1}`,
+    name: city,
+    country: 'India',
+    region: cityMatch.state_name,
+    nights: idx === 0 ? 3 : 2,
+    role: idx === 0 ? 'Primary City & Arrival Quarter' : 'Regional Gateway & Scenic Stop',
+    imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80',
+    imageAlt: `${city} in ${cityMatch.state_name}, India`,
+    transitToNext:
+      idx < routeCityNames.length - 1
+        ? {
+            mode: 'transit',
+            icon: 'directions_transit',
+            duration: '~2 hrs 30 mins',
+            title: `Scenic Regional Connection to ${routeCityNames[idx + 1]}`,
+          }
+        : undefined,
+  }));
+
+  const totalNights = stops.reduce((acc, s) => acc + s.nights, 0);
+
+  return {
+    id: cityMatch.id,
+    name: `${cityMatch.name} (${cityMatch.state_name}, India)`,
+    alias: `${cityMatch.name} Trail`,
+    scope: 'DOMESTIC',
+    type: 'STATE',
+    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    defaultDurationDays: Math.max(5, totalNights),
+    seasonSummary: `Optimal Season: Pleasant Weather & Regional Explorations in ${cityMatch.state_name}`,
+    defaultStops: stops,
+    suggestions: [
+      {
+        id: `${cityMatch.id}-suggest-1`,
+        name: `${cityMatch.name} Heritage Quarter & Cultural Bazaars`,
+        region: `${cityMatch.state_name}, India`,
+        tag: 'Heritage & Local Flavors',
+        description: `Explore the vibrant local markets, historic monuments, and authentic regional cuisine of ${cityMatch.name}.`,
+        imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80',
+        actionLabel: '+ Add Stop',
+      },
+    ],
+  };
+}
+
 // Master resolution function: given any destination text or circuitId, resolves accurate stops
 export function resolveDestinationData(destinationInput: string): DestinationItem {
   if (!destinationInput || !destinationInput.trim()) {
@@ -1286,23 +1380,29 @@ export function resolveDestinationData(destinationInput: string): DestinationIte
     return curatedMatch;
   }
 
-  // 2. Fallback dynamically generated domestic Indian state or UT
+  // 2. Direct match in Indian Cities from the API dataset
+  const cityFallback = generateDomesticCityFallback(destinationInput);
+  if (cityFallback) {
+    return cityFallback;
+  }
+
+  // 3. Fallback dynamically generated domestic Indian state or UT
   const domesticFallback = generateDomesticFallback(destinationInput);
   if (domesticFallback) {
     return domesticFallback;
   }
 
-  // 3. Fallback dynamically generated country from static dataset
+  // 4. Fallback dynamically generated country from static dataset
   const countryFallback = generateCountryFallback(destinationInput);
   if (countryFallback) {
     return countryFallback;
   }
 
-  // 4. Default to first curated destination (Japan)
+  // 5. Default to first curated destination (Japan)
   return ALL_CURATED_DESTINATIONS[0];
 }
 
-// Autocomplete search across all 250 countries + all 36 Indian states & UTs + curated circuits
+// Autocomplete search across all 250 countries + all 36 Indian states & UTs + 4,200 Indian cities + curated circuits
 export function searchAllDestinations(query: string): Array<{
   id: string;
   title: string;
@@ -1321,10 +1421,99 @@ export function searchAllDestinations(query: string): Array<{
 
   const addedIds = new Set<string>();
 
-  // 1. Match in curated destinations first
+  const places = indiaPlacesData as {
+    states: Array<{
+      id: string;
+      name: string;
+      code: string;
+      type: string;
+      popular_cities: string[];
+      cities: string[];
+    }>;
+    popular_destinations: Array<{
+      id: string;
+      name: string;
+      state_name: string;
+      state_code: string;
+      state_id: string;
+    }>;
+    cities: Array<{
+      id: string;
+      name: string;
+      state_name: string;
+      state_code: string;
+      state_id: string;
+      is_popular: boolean;
+    }>;
+  };
+
+  if (!q) {
+    // 1. Featured curated destinations (6 items)
+    for (const d of ALL_CURATED_DESTINATIONS.slice(0, 6)) {
+      if (!addedIds.has(d.id)) {
+        addedIds.add(d.id);
+        results.push({
+          id: d.id,
+          title: d.alias,
+          subtitle: d.name,
+          scope: d.scope,
+          visaStatus: d.visaStatus,
+        });
+      }
+    }
+
+    // 2. Featured Indian states / UTs (4 items)
+    for (const s of (indianStatesUts as Array<{ id: string; name: string; alias: string; top_cities: string[] }>).slice(0, 4)) {
+      if (!addedIds.has(s.id)) {
+        addedIds.add(s.id);
+        results.push({
+          id: s.id,
+          title: s.name,
+          subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
+          scope: 'DOMESTIC',
+          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+        });
+      }
+    }
+
+    // 3. Iconic Indian tourist cities (4 items)
+    for (const c of places.popular_destinations.slice(0, 4)) {
+      if (!addedIds.has(c.id)) {
+        addedIds.add(c.id);
+        results.push({
+          id: c.id,
+          title: c.name,
+          subtitle: `City in ${c.state_name}, India`,
+          scope: 'DOMESTIC',
+          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+        });
+      }
+    }
+
+    // 4. Featured International sovereign countries (4 items)
+    for (const c of (generatedCountries as Array<{ code: string; name: string; capital: string; region: string; is_schengen: boolean }>).slice(0, 4)) {
+      const cId = c.name.toLowerCase().replace(/\s+/g, '-');
+      if (!addedIds.has(cId)) {
+        addedIds.add(cId);
+        results.push({
+          id: cId,
+          title: c.name,
+          subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
+          scope: 'INTERNATIONAL',
+          visaStatus: c.is_schengen
+            ? 'Schengen Visa Required • ~15-30 Days Processing'
+            : 'International • Tourist Visa / eVisa Active',
+        });
+      }
+    }
+
+    return results;
+  }
+
+  // Active query:
+  // 1. Curated destinations match
   for (const d of ALL_CURATED_DESTINATIONS) {
     if (
-      !q ||
       d.name.toLowerCase().includes(q) ||
       d.alias.toLowerCase().includes(q) ||
       d.id.toLowerCase().includes(q) ||
@@ -1343,10 +1532,9 @@ export function searchAllDestinations(query: string): Array<{
     }
   }
 
-  // 2. Match in all 36 Indian States & UTs
+  // 2. Indian States & UTs match
   for (const s of indianStatesUts) {
     if (
-      !q ||
       s.name.toLowerCase().includes(q) ||
       s.alias.toLowerCase().includes(q) ||
       s.top_cities.some((c: string) => c.toLowerCase().includes(q))
@@ -1364,13 +1552,33 @@ export function searchAllDestinations(query: string): Array<{
     }
   }
 
-  // 3. Match in all 250 sovereign countries from static dataset
+  // 3. Indian Cities match (prioritize popular destinations first, then all 4,200 cities)
+  for (const c of places.cities) {
+    if (results.length >= 25) break;
+    const nameLower = c.name.toLowerCase();
+    if (nameLower.startsWith(q) || nameLower.includes(q)) {
+      if (!addedIds.has(c.id)) {
+        addedIds.add(c.id);
+        results.push({
+          id: c.id,
+          title: c.name,
+          subtitle: `City in ${c.state_name}, India`,
+          scope: 'DOMESTIC',
+          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+        });
+      }
+    }
+  }
+
+  // 4. Sovereign Countries from static dataset
   for (const c of generatedCountries) {
+    if (results.length >= 25) break;
+    const cNameLower = c.name.toLowerCase();
     if (
-      q &&
-      (c.name.toLowerCase().includes(q) ||
-        (c.capital && c.capital.toLowerCase().includes(q)) ||
-        c.top_cities.some((city: string) => city.toLowerCase().includes(q)))
+      cNameLower.startsWith(q) ||
+      cNameLower.includes(q) ||
+      (c.capital && c.capital.toLowerCase().includes(q)) ||
+      c.top_cities.some((city: string) => city.toLowerCase().includes(q))
     ) {
       const cId = c.name.toLowerCase().replace(/\s+/g, '-');
       if (!addedIds.has(cId)) {
@@ -1388,5 +1596,5 @@ export function searchAllDestinations(query: string): Array<{
     }
   }
 
-  return results.slice(0, 10);
+  return results.slice(0, 16);
 }

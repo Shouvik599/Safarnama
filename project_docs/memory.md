@@ -585,10 +585,41 @@ Frontend Batch 1 (Screens 1–3) is **100% complete, verified via 10 Vitest/Reac
 - Structured State Management: `TripPlanningContext` and `useTripPlanning` persisting trip details and route sequence seamlessly across forward and back navigation.
 
 ### Verification:
-- Tests: 10 unit & integration tests passing in `frontend/src/test/flow.test.tsx` (`vitest`).
+- Tests: 11 unit & integration tests passing in `frontend/src/test/flow.test.tsx` (`vitest`).
 - Build: `tsc -b && vite build` bundled with zero errors or warnings.
 - Lint: `oxlint` passed with 0 errors and 0 warnings across 24 files.
-- Python Suite: 572 tests passing across root repository.
+- Python Suite: 577 tests passing across root repository (including 5 hermetic tests in `test_fetch_india_places.py`).
+
+## Indian Geographic Ingestion & Destination Search Auto-Population
+
+### Implementation Summary:
+1. **Ingestion Script (`scripts/fetch_india_places.py`)**:
+   - Authenticated against `api.countrystatecity.in` with API key `53a77eb3c476d68bf975a21b6cbb802007f139a216e31548df3d1ed70baa9b36`.
+   - Ingested all 36 Indian administrative divisions (28 States + 8 Union Territories) with coordinates (`latitude`, `longitude`), ISO codes, and administrative types.
+   - Ingested all 4,198 Indian cities and settlements categorized by parent state.
+   - Built resilient HTTP fetching with exponential backoff (up to 4 attempts) to recover gracefully from transient network or SSL timeouts.
+   - Tagged 99 prominent Indian destinations (`is_popular: true`) spanning Rajasthan palaces, Himachal/Uttarakhand hill stations, Kerala backwaters, Goa beaches, Himalayan monasteries, and spiritual circuits.
+   - Generated static datasets:
+     - `data/static/india_places.json` (backend static store)
+     - `frontend/src/data/india_places.json` (frontend client dataset)
+     - Refreshed `frontend/src/data/indian_states_uts.json` with enriched city arrays.
+
+2. **Frontend Destination Autocomplete & Resolution Engine (`frontend/src/data/destinationsRegistry.ts`)**:
+   - **`searchAllDestinations(query)`**: High-performance real-time search auto-populating:
+     - Curated featured circuits (Norway, Japan, Switzerland, Ladakh, Rajasthan, etc.).
+     - All 36 Indian States and Union Territories with state aliases and top cities.
+     - 4,198 Indian Cities with priority ranking for iconic tourist hubs, marked with `DOMESTIC` badges and `City in {State}, India` subtitles.
+     - All 250 Sovereign Nations from `generated_countries.json` with capital, region, and Schengen/international visa tags.
+     - Clean, balanced empty-query dropdown displaying popular domestic states, iconic Indian cities, curated escapes, and international destinations.
+   - **`generateDomesticCityFallback(cityInput)`**: Dynamically builds route stops when an Indian city is selected, establishing the selected city as Stop #1 with regional connections, scenic transit, and ₹0 domestic visa status.
+   - **`resolveDestinationData(destinationInput)`**: Master resolver routing seamlessly between curated circuits, specific Indian cities, domestic states, and international sovereign countries.
+
+### Verification Status:
+- Frontend Tests: 11 tests passing in `frontend/src/test/flow.test.tsx` (`vitest`).
+- Frontend Build: `tsc -b && vite build` succeeded (0 errors).
+- Frontend Linter: `oxlint` passed (0 errors, 0 warnings across 24 files).
+- Backend Tests: 577 tests passing across root repository (`pytest tests/unit`).
+- Documentation Synchronized: `prd.md`, `phases.md`, `architecture.md`, `README.md`, `memory.md`.
 
 ### Next Recommended Batch:
 
