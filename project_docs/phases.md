@@ -1345,7 +1345,19 @@ Implemented an intelligent, accessible modal dialog intercepting navigation from
   - **Dismiss Action**: `[ Review & Edit Stops Manually ]`.
 - **Atomic State Updates**:
   - Added `batchUpdateStopNights: (updates: { id: string; nights: number }[]) => void` to `TripPlanningContextDef.ts` and `TripPlanningContext.tsx` ensuring multi-stop rebalancing applies in a single React render cycle.
-- **Verification**: 14 automated Vitest tests passing (`flow.test.tsx`), 0 TypeScript compile errors, 0 oxlint warnings/errors.
+## 22.5 Route Template Decoupling & Domestic Permit Guidance Refinement (Completed)
+
+Refined route customization and entry requirements across `DestinationsScreen.tsx`, `TripDetailsScreen.tsx`, `locations.ts`, and `destinationsRegistry.ts`:
+- **Removed Global Circuit Template Switcher on Screen 2**:
+  - Completely removed the cross-destination template bar (`Curated Route Templates: [ Norway Fjords ] [ Japan ] [ Rajasthan ] ...`) from Screen 2 (`DestinationsScreen.tsx`).
+  - Ensures a user who chose Norway on Screen 1 is not presented with other countries' routes that could accidentally override their active itinerary.
+- **Regular Domestic Travel (Zero Visa/Passport Mention)**:
+  - For standard Indian domestic destinations (e.g. Rajasthan, Kerala, Goa, Himachal, Uttarakhand, Karnataka, Andaman), visa badges are completely hidden. Domestic Indian travel requires no visa or passport.
+- **Special Border Permit Regions (ILP / PAP)**:
+  - For special border states and union territories (Ladakh/Leh, Sikkim, Arunachal Pradesh, Lakshadweep, Nagaland, Mizoram, Manipur), replaced the redundant "₹0 Visa" label with a dedicated permit badge: `ℹ️ Inner Line Permit (ILP) / PAP Required`.
+- **International Destinations (Prominent Visa Guidance Retained)**:
+  - All international destinations continue to display high-value, passport-specific visa guidance (Schengen Visa, eVisa Active, Visa on Arrival, Visa Free, etc.).
+- **Verification**: 14 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors.
 
 ---
 

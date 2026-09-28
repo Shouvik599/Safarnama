@@ -623,6 +623,20 @@ Frontend Batch 1 (Screens 1–3) is **100% complete, verified via 10 Vitest/Reac
    - Unit & flow tests in `flow.test.tsx` expanded with full reconciliation dialog scenarios (14/14 tests passing).
    - Clean production build and zero linter warnings.
 
+## Route Template Decoupling & Domestic Permit Guidance Refinement (Phase 22.5)
+
+### Implementation Summary:
+1. **Decoupled Route Templates from Screen 2**:
+   - Removed the global circuit switcher bar from `DestinationsScreen.tsx`.
+   - Prevents cross-destination pollution where selecting an unrelated template (e.g. Japan or Rajasthan) would overwrite the user's chosen destination (e.g. Norway).
+2. **Refined Domestic Entry Requirements**:
+   - Standard Indian domestic travel (Rajasthan, Kerala, Goa, Himachal, Uttarakhand, Karnataka, Andaman, etc.): Visa and passport badges are completely hidden.
+   - Special border permit regions (Ladakh/Leh, Sikkim, Arunachal Pradesh, Lakshadweep, Nagaland, Mizoram, Manipur): Replaced the redundant "₹0 Visa" tag with `ℹ️ Inner Line Permit (ILP) / PAP Required`.
+   - International destinations: High-value visa guidance (Schengen, eVisa, Visa on Arrival, Visa Free) remains prominent.
+3. **Verification**:
+   - 14/14 Vitest tests passing (`flow.test.tsx`).
+   - Clean production build with Vite (`tsc -b && vite build`) and 0 oxlint warnings/errors.
+
 ### Next Recommended Batch:
 
 **Batch 2 — Completing the Wizard & Progress**

@@ -556,9 +556,11 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                           ? 'Going To (State, UT, or Region)'
                           : 'Going To (Destination)'}
                       </label>
-                      <span className="font-label-caption text-label-caption text-on-secondary-fixed-variant font-semibold bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
-                        {visaVerdictText}
-                      </span>
+                      {visaVerdictText ? (
+                        <span className="font-label-caption text-label-caption text-on-secondary-fixed-variant font-semibold bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
+                          {visaVerdictText}
+                        </span>
+                      ) : null}
                     </div>
 
                     <div className="relative flex items-center">

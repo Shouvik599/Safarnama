@@ -123,9 +123,9 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     const ladakhBtn = screen.getByRole('button', { name: /ladakh pass/i });
     fireEvent.click(ladakhBtn);
 
-    // Weather badge and Visa verdict adapt in real-time
+    // Weather badge and Visa verdict adapt in real-time: Ladakh requires ILP/PAP
     expect(
-      screen.getByText(/Domestic Trip • ₹0 Visa \(ILP\/PAP Required\)/i)
+      screen.getByText(/Inner Line Permit \(ILP\) \/ PAP Required/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Passes Open|Winter Adventure|Golden Poplars|Snowmelt/i)
@@ -181,7 +181,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     ).toBeInTheDocument();
   });
 
-  it('supports reordering, adding suggestions, and switching circuit templates on Screen 3', () => {
+  it('supports reordering and adding suggestions on Screen 3', () => {
     render(<App />);
 
     // Navigate to Destinations screen
@@ -204,15 +204,6 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     // Now route should have 4 destinations
     expect(screen.getByText(/4 destinations added/i)).toBeInTheDocument();
     expect(screen.getAllByText('Nara').length).toBeGreaterThan(1);
-
-    // Switch circuit template to Italy Circuit directly on Screen 3
-    const italyTemplateBtn = screen.getByRole('button', { name: /italy circuit/i });
-    fireEvent.click(italyTemplateBtn);
-
-    // Route should now feature Italian stops
-    expect(screen.getByText('Rome')).toBeInTheDocument();
-    expect(screen.getByText('Florence')).toBeInTheDocument();
-    expect(screen.getByText('Positano & Amalfi')).toBeInTheDocument();
   });
 
   it('stops at Batch 1 boundary when clicking Continue to Preferences', () => {
@@ -272,8 +263,9 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     const rajasthanBtn = screen.getByRole('button', { name: /rajasthan royals/i });
     fireEvent.click(rajasthanBtn);
 
-    // Verify domestic visa status
-    expect(screen.getAllByText(/Domestic Trip • ₹0 Visa/i).length).toBeGreaterThan(0);
+    // Verify regular domestic destinations completely hide the visa / passport badge
+    expect(screen.queryByText(/Domestic Trip • ₹0 Visa/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Visa/i)).not.toBeInTheDocument();
 
     // Continue to Destinations
     fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));

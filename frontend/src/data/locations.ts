@@ -133,7 +133,7 @@ export const PRECONFIGURED_CIRCUITS: CircuitDefinition[] = [
     name: 'Leh & Ladakh Circuit, India',
     alias: 'Ladakh Pass',
     scope: 'DOMESTIC',
-    visaStatus: 'Domestic Trip • ₹0 Visa (ILP/PAP Required)',
+    visaStatus: 'ℹ️ Inner Line Permit (ILP) / PAP Required',
     defaultDurationDays: 8,
     seasonInsights: {
       spring: 'Shoulder Season: Snowmelt Begins, Quiet Buddhist Monasteries',
@@ -315,7 +315,7 @@ export const PRECONFIGURED_CIRCUITS: CircuitDefinition[] = [
     name: 'Kerala Backwaters & Coast, India',
     alias: 'Kerala Stays',
     scope: 'DOMESTIC',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 7,
     seasonInsights: {
       spring: 'Tropical Warmth: Serene Coastal Lagoons & Spice Plantation Breezes',
@@ -437,10 +437,39 @@ export function getSeasonDescription(destinationStr: string, dateIsoStr: string)
   return 'Favorable Climate: Mild Temperatures & Pleasant Traveling Conditions';
 }
 
+/**
+ * Returns ILP/PAP permit status for Indian border states / UTs requiring special permits.
+ * Returns empty string for standard Indian domestic travel where no permit/visa is needed.
+ */
+export function getDomesticPermitStatus(destinationStr: string): string {
+  const destLower = destinationStr.toLowerCase().trim();
+  const specialPermitKeywords = [
+    'ladakh',
+    'leh',
+    'arunachal',
+    'sikkim',
+    'lakshadweep',
+    'nagaland',
+    'mizoram',
+    'manipur',
+  ];
+  if (specialPermitKeywords.some((kw) => destLower.includes(kw))) {
+    return 'ℹ️ Inner Line Permit (ILP) / PAP Required';
+  }
+  return '';
+}
+
 export function getVisaVerdict(destinationStr: string): string {
   const destLower = destinationStr.toLowerCase().trim();
   const primary = destLower.replace(/\s*\([^)]*\).*/, '').trim();
 
+  // 1. Check special domestic permit areas (Ladakh, Arunachal, Sikkim, Lakshadweep, etc.)
+  const permit = getDomesticPermitStatus(destLower);
+  if (permit) {
+    return permit;
+  }
+
+  // 2. Check preconfigured circuits
   const circuit = PRECONFIGURED_CIRCUITS.find((c) => {
     const id = c.id.toLowerCase();
     if (id.length <= 3) {
@@ -455,20 +484,28 @@ export function getVisaVerdict(destinationStr: string): string {
     );
   });
   if (circuit) {
-    return circuit.visaStatus;
+    return circuit.visaStatus || '';
   }
 
+  // 3. Regular Indian domestic destinations require no visa / permit badge
   if (
     primary.includes('india') ||
-    primary.includes('ladakh') ||
-    primary.includes('leh') ||
     primary.includes('kerala') ||
     primary.includes('rajasthan') ||
     primary.includes('goa') ||
-    primary.includes('jaipur')
+    primary.includes('jaipur') ||
+    primary.includes('himachal') ||
+    primary.includes('kashmir') ||
+    primary.includes('uttarakhand') ||
+    primary.includes('gujarat') ||
+    primary.includes('maharashtra') ||
+    primary.includes('karnataka') ||
+    primary.includes('tamil')
   ) {
-    return 'Domestic Trip • ₹0 Visa (No Passport Needed)';
+    return '';
   }
+
+  // 4. International destinations
   if (primary.includes('nepal') || primary.includes('bhutan')) {
     return 'Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)';
   }

@@ -1,5 +1,5 @@
 import type { RouteStop, DestinationSuggestion, ContextualCityItem } from '../types/trip';
-import { PRECONFIGURED_CIRCUITS, INDIAN_ORIGIN_AIRPORTS } from './locations';
+import { PRECONFIGURED_CIRCUITS, INDIAN_ORIGIN_AIRPORTS, getDomesticPermitStatus } from './locations';
 import generatedCountries from './generated_countries.json';
 import indianStatesUts from './indian_states_uts.json';
 import indiaPlacesData from './india_places.json';
@@ -27,7 +27,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Rajasthan Royals',
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 10,
     seasonSummary: 'Optimal Season: Mild Winter Sunshine & Desert Festivals',
     defaultStops: [
@@ -114,7 +114,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Himachal Hills',
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 8,
     seasonSummary: 'Optimal Season: Snow-Capped Peaks & Fresh Mountain Pines',
     defaultStops: [
@@ -186,7 +186,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Goa Stays',
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 6,
     seasonSummary: 'Optimal Season: Sunny Coastal Breezes & Vibrant Beach Life',
     defaultStops: [
@@ -244,7 +244,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Kashmir Valley',
     scope: 'DOMESTIC',
     type: 'UT',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 8,
     seasonSummary: 'Optimal Season: Emerald Valleys, Shikara Cruises & Snow Meadows',
     defaultStops: [
@@ -306,7 +306,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Devbhoomi Hills',
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 8,
     seasonSummary: 'Optimal Season: Crisp Alpine Air, Ganga Ghats & Lake Vistas',
     defaultStops: [
@@ -368,7 +368,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Andaman Islands',
     scope: 'DOMESTIC',
     type: 'UT',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 8,
     seasonSummary: 'Optimal Season: Turquoise Tropical Waters & Coral Snorkeling',
     defaultStops: [
@@ -431,7 +431,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Sikkim Peaks',
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (ILP/PAP Required for border areas)',
+    visaStatus: 'ℹ️ Inner Line Permit (ILP) / PAP Required',
     defaultDurationDays: 8,
     seasonSummary: 'Optimal Season: Kanchenjunga Panoramas & Buddhist Monasteries',
     defaultStops: [
@@ -494,7 +494,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
     alias: 'Karnataka Heritage',
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: '',
     defaultDurationDays: 9,
     seasonSummary: 'Optimal Season: Pleasant Deccan Weather & Coffee Harvest',
     defaultStops: [
@@ -1187,7 +1187,7 @@ export function generateDomesticFallback(stateOrUtName: string): DestinationItem
     alias: found.alias,
     scope: 'DOMESTIC',
     type: found.type,
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: getDomesticPermitStatus(found.name) || getDomesticPermitStatus(found.id),
     defaultDurationDays: Math.max(7, totalNights),
     seasonSummary: `Optimal Season: ${found.season}`,
     defaultStops: stops,
@@ -1372,7 +1372,7 @@ export function generateDomesticCityFallback(cityInput: string): DestinationItem
     alias: `${cityMatch.name} Trail`,
     scope: 'DOMESTIC',
     type: 'STATE',
-    visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+    visaStatus: getDomesticPermitStatus(cityMatch.name) || getDomesticPermitStatus(cityMatch.state_name),
     defaultDurationDays: Math.max(5, totalNights),
     seasonSummary: `Optimal Season: Pleasant Weather & Regional Explorations in ${cityMatch.state_name}`,
     defaultStops: stops,
@@ -1787,7 +1787,7 @@ export function searchAllDestinations(
             title: s.name,
             subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
             scope: 'DOMESTIC',
-            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+            visaStatus: getDomesticPermitStatus(s.name) || getDomesticPermitStatus(s.id),
           });
         }
       }
@@ -1801,7 +1801,7 @@ export function searchAllDestinations(
             title: c.name,
             subtitle: `City in ${c.state_name}, India`,
             scope: 'DOMESTIC',
-            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+            visaStatus: getDomesticPermitStatus(c.name) || getDomesticPermitStatus(c.state_name),
           });
         }
       }
@@ -1866,7 +1866,7 @@ export function searchAllDestinations(
             title: s.name,
             subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
             scope: 'DOMESTIC',
-            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+            visaStatus: getDomesticPermitStatus(s.name) || getDomesticPermitStatus(s.id),
           });
         }
       }
@@ -1884,7 +1884,7 @@ export function searchAllDestinations(
             title: c.name,
             subtitle: `City in ${c.state_name}, India`,
             scope: 'DOMESTIC',
-            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+            visaStatus: getDomesticPermitStatus(c.name) || getDomesticPermitStatus(c.state_name),
           });
         }
       }

@@ -377,49 +377,6 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
 
           {/* Main Planner Container */}
           <div className="max-w-4xl mx-auto w-full flex flex-col gap-space-xl">
-            {/* Quick Circuit Preset Switcher */}
-            <div className="bg-surface-container-lowest p-space-md sm:p-space-lg rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
-                <span className="font-label-md text-label-md font-bold text-on-surface">
-                  Curated Route Templates:
-                </span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {[
-                  { id: 'norway', alias: 'Norway Fjords' },
-                  { id: 'japan', alias: 'Japan (Autumn Trail)' },
-                  { id: 'ladakh', alias: 'Ladakh (High Passes)' },
-                  { id: 'italy', alias: 'Italy Circuit' },
-                  { id: 'rajasthan', alias: 'Rajasthan Royals' },
-                  { id: 'switzerland', alias: 'Swiss Alps' },
-                  { id: 'kerala', alias: 'Kerala Backwaters' },
-                  { id: 'goa', alias: 'Goa Coast' },
-                ].map((circuit) => {
-                  const isCircuitActive =
-                    activeCircuit.id === circuit.id ||
-                    tripDetails.destination.toLowerCase().includes(circuit.id);
-                  return (
-                    <button
-                      key={circuit.id}
-                      type="button"
-                      onClick={() => seedDestination(circuit.id, tripDetails.scope)}
-                      className={`px-3 py-1.5 rounded-full font-label-md text-label-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                        isCircuitActive
-                          ? 'bg-primary text-on-primary font-bold shadow-sm ring-2 ring-primary/30'
-                          : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[14px]">
-                        {isCircuitActive ? 'check_circle' : 'alt_route'}
-                      </span>
-                      <span>{circuit.alias}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Search & Quick Selection Section with Real-Time Contextual Scoping */}
             <div className="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col gap-space-md border border-outline-variant/30">
               <div className="flex flex-col relative" ref={searchBoxRef}>
