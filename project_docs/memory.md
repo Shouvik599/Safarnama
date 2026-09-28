@@ -4,17 +4,17 @@
 
 ## Current Status
 
-**Safarnama Frontend — Phase 22.6 Multi-Destination Input Support, Cross-Border Scoping & Contextual City Selection Complete.** Contextual-city matching now resolves international countries/circuits before domestic city fallback and requires a full normalized domestic city name or ID match, preventing `Italy` from colliding with the Indian city `Tal`.
+**Safarnama Frontend — Phase 22.6 Multi-Destination Input Support, Cross-Border Scoping & Contextual City Selection Complete.** Contextual-city matching resolves international countries/circuits before domestic city fallback and requires a full normalized domestic city name or ID match, preventing `Italy` from colliding with the Indian city `Tal`. Each selected destination array entry is normalized atomically so comma-containing labels do not duplicate. Mobile route cards now shrink/wrap within the viewport.
 1. **Multi-Destination Input Support**:
    - Destination model backward compatibility: `tripDetails.destination` maintains comma-separated string representation while `tripDetails.destinations` maintains an array of individual destination strings.
    - Parenthesis-safe destination parser: Implemented `splitDestinationsString()` which prevents internal commas (e.g. `South Korea (Seoul, Busan, Daegu)`) from accidentally splitting single destinations into fragments.
    - Screen 1 Interactive Destination Chips: Each chosen country or state is displayed as an individual dismissible chip with `✕` button. Users can add multiple destinations via the "+ Add Another Country" or "+ Add Another State/UT/City" button without overwriting existing selections.
 2. **Multi-Destination Route Seeding & Cross-Region Scoping**:
-   - `resolveDestinationData(destinationInput, scopeHint)` handles arrays or comma-delimited strings, taking top stops from each chosen destination and generating cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
+  - `resolveDestinationData(destinationInput, scopeHint)` handles arrays or comma-delimited strings, taking top stops from each chosen destination and generating cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`). The context normalizes each array item with the single-destination resolver to preserve comma-rich names such as Japan's `Kyoto, Japan` display name.
   - Contextual stop selector on Screen 2 (`getContextualCitiesForDestination`): Returns the deduplicated union of cities across all selected states or countries without cross-region pollution. Regression coverage confirms Japan + Italy returns cities from both countries without Madhya Pradesh cities, while a direct Indian city still resolves domestically.
 3. **Aggregated Multi-Destination Visa & Permit Engine**:
    - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen countries into a single verdict (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (`ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
-4. **Verification**: 18/18 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files.
+4. **Verification**: 19/19 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files. Playwright verified Japan + Italy chips and route seeding, and confirmed no page-level horizontal overflow at 390 px.
 
 ## Current implementation phase
 

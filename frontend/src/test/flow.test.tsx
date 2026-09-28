@@ -503,6 +503,26 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     ).toBeInTheDocument();
   });
 
+
+  it('keeps comma-containing destination names from duplicating in multi-country chips', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /add another country/i }));
+
+    const destinationInput = screen.getByPlaceholderText(/type and select sovereign country to add/i);
+    fireEvent.change(destinationInput, { target: { value: 'Italy' } });
+    fireEvent.click(screen.getAllByRole('button', { name: /italy circuit/i })[0]);
+
+    const japanChipText = screen.getAllByRole('button', { name: /remove destination/i })[0]
+      .parentElement?.textContent;
+    expect(japanChipText).toContain('Kyoto, Japan');
+    expect(japanChipText).not.toContain('Kyoto, Japan, Kyoto, Japan');
+
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+    expect(screen.getByText('Osaka')).toBeInTheDocument();
+    expect(screen.getByText('Rome')).toBeInTheDocument();
+  });
   it('supports multi-state/UT input, chip dismissal with ✕, and contextual city union on Screen 2', () => {
     render(<App />);
 

@@ -4,6 +4,7 @@ import { TripPlanningContext } from './TripPlanningContextDef';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
 import {
   resolveDestinationData,
+  resolveSingleDestinationData,
   generateScenicTransitConnector,
   splitDestinationsString,
 } from '../data/destinationsRegistry';
@@ -145,7 +146,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       rawParts.length <= 1
         ? [destItem.name]
         : rawParts.map((q) => {
-            const it = resolveDestinationData(q, effectiveScope);
+            const it = resolveSingleDestinationData(q, effectiveScope);
             return it ? it.name : q;
           });
 

@@ -27,8 +27,8 @@ export const RouteSequenceItem: React.FC<RouteSequenceItemProps> = ({
   const nodeIcon = isFirst ? 'pin_drop' : isLast ? 'flag' : 'location_on';
 
   return (
-    <div className="relative z-10 flex flex-col pb-6 sm:pb-8">
-      <div className="flex items-start gap-4">
+    <div className="relative z-10 flex w-full min-w-0 flex-col pb-6 sm:pb-8">
+      <div className="flex w-full min-w-0 items-start gap-4">
         {/* Waypoint Node */}
         <div className="w-10 h-10 rounded-full bg-surface-container-lowest shadow-md flex items-center justify-center ring-4 ring-surface shrink-0 text-primary font-headline-sm">
           <span className="material-symbols-outlined text-[20px] text-primary">
@@ -37,16 +37,16 @@ export const RouteSequenceItem: React.FC<RouteSequenceItemProps> = ({
         </div>
 
         {/* Stop Card */}
-        <div className="flex-1 bg-surface-container-low rounded-xl p-space-md sm:p-space-lg shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-outline-variant/30">
-          <div className="flex items-start gap-4">
+        <div className="min-w-0 flex-1 bg-surface-container-low rounded-xl p-space-md sm:p-space-lg shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-outline-variant/30">
+          <div className="flex min-w-0 flex-1 items-start gap-4">
             <img
               src={stop.imageUrl}
               alt={stop.imageAlt || stop.name}
               className="w-20 h-20 rounded-lg object-cover shadow-sm shrink-0 bg-surface-dim"
               loading="lazy"
             />
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-1">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="mb-1 flex flex-wrap items-center gap-2">
                 <span className="font-label-md text-label-md uppercase tracking-wider text-on-secondary-fixed-variant font-semibold">
                   Stop {String(index + 1).padStart(2, '0')}
                 </span>
@@ -54,10 +54,10 @@ export const RouteSequenceItem: React.FC<RouteSequenceItemProps> = ({
                   {stop.role}
                 </span>
               </div>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+              <h3 className="break-words font-headline-sm text-headline-sm text-on-surface font-bold">
                 {stop.name}
               </h3>
-              <div className="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+              <div className="mt-0.5 flex flex-wrap items-center gap-3 text-on-surface-variant font-body-sm text-body-sm">
                 <span className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-[15px]">public</span>
                   {stop.country}

@@ -10,7 +10,7 @@
 Status: In Active Development
 Current Phase: Phase 18 — Frontend (Batch 1 Complete)
 Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete), Phase 17 (API Streaming — Real-time LangGraph SSE Event Emission & Endpoints Complete), Phase 18 (Frontend Batch 1: Welcome, Trip Details, Destinations with Interactive Controls, Static Destination Auto-Population & Dynamic Route Seeding Complete)
-Test Suite: 572 Python unit tests + 18 Frontend unit/flow tests passing (100% offline, zero network reliance in tests)
+Test Suite: 572 Python unit tests + 19 Frontend unit/flow tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff and Oxlint
 ```
 
@@ -157,13 +157,14 @@ Generic conversational AI chatbots fail at this task because they:
     - **Partitioned Destination Search**: Domestic queries search across Indian States, Union Territories, and regional circuits; International queries search across 250 sovereign countries (`generated_countries.json`) and global circuits.
     - **Real-Time Contextual Intelligence**: Adapting seasonal weather badges and Indian passport visa guidance.
   - **Screen 3 (Destinations & Route Sequence) & Strict Contextual Scoping**:
-    - **Strict Contextual Scoping**: Search autocomplete returns the city union for all selected states or sovereign countries (`getContextualCitiesForDestination`). International destinations resolve before exact domestic city fallback, preventing cross-country/cross-state noise and incidental substring collisions.
+    - **Strict Contextual Scoping**: Search autocomplete returns the city union for all selected states or sovereign countries (`getContextualCitiesForDestination`). International destinations resolve before exact domestic city fallback, preventing cross-country/cross-state noise and incidental substring collisions. Multi-country chips normalize each selected destination independently, preserving comma-containing names.
+    - **Responsive Route Editing**: Route stop cards and category controls stay within the mobile viewport; category filters scroll within their container.
     - **Real-Time Autocomplete Dropdown**: Rich dropdown rendering City Name, Region tag, Prominence badge (`★ Popular Stop` vs `Scenic Gateway`), and imagery.
     - **Dynamic Route Seeding & Scenic Transit Connectors**: Newly added stops receive realistic night allocation (default 2 nights), tailored roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferry in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan).
     - **Contextual Add Button**: `+ Add another destination to route` dynamically picks the next unadded popular city from the contextual list rather than defaulting to Tokyo.
     - **Duration Reconciliation Engine**: Reconciles total stop nights against target duration with one-click return date synchronization.
 - **Dual Verification Testing Architecture**:
-  - **Hermetic Offline Test Harness**: 580+ backend unit tests running completely offline (`SAFARNAMA_USE_FIXTURES=true`) + 18 frontend Vitest component & flow tests (`flow.test.tsx`).
+  - **Hermetic Offline Test Harness**: 580+ backend unit tests running completely offline (`SAFARNAMA_USE_FIXTURES=true`) + 19 frontend Vitest component & flow tests (`flow.test.tsx`).
   - **Live Network Integration Verification**: Automated 8-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes.
 
 ### Planned Capabilities (Future Phases)

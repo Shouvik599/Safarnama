@@ -382,7 +382,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
           {/* Main Planner Container */}
           <div className="max-w-4xl mx-auto w-full flex flex-col gap-space-xl">
             {/* Search & Quick Selection Section with Real-Time Contextual Scoping */}
-            <div className="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col gap-space-md border border-outline-variant/30">
+            <div className="min-w-0 bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col gap-space-md border border-outline-variant/30">
               <div className="flex flex-col relative" ref={searchBoxRef}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1.5">
@@ -531,7 +531,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
               </div>
 
               {/* Quick Category Chips */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex w-full min-w-0 items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {categories.map((cat) => {
                   const isCatActive = activeCategory === cat;
                   return (
@@ -633,7 +633,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
               </div>
 
               {/* Linear Route Timeline Visualizer */}
-              <div className="flex flex-col relative pl-4 sm:pl-8">
+              <div className="flex min-w-0 flex-col relative pl-4 sm:pl-8">
                 {/* Continuous Route Spine Line */}
                 {destinations.length > 1 && (
                   <div className="absolute left-9 sm:left-13 top-6 bottom-16 w-[2px] bg-primary/20 -z-0" />
