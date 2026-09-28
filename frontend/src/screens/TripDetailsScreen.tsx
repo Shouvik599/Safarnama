@@ -79,7 +79,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
     if (newScope === activeScope) return;
 
     if (newScope === 'DOMESTIC') {
-      const resolved = resolveDestinationData(tripDetails.destination);
+      const resolved = resolveDestinationData(tripDetails.destination, 'DOMESTIC');
       const isAlreadyDomestic = resolved.scope === 'DOMESTIC';
       const targetDest = isAlreadyDomestic
         ? tripDetails.destination
@@ -89,9 +89,9 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
         destination: targetDest,
       });
       setDestQuery(targetDest);
-      seedDestination(targetDest);
+      seedDestination(targetDest, 'DOMESTIC');
     } else {
-      const resolved = resolveDestinationData(tripDetails.destination);
+      const resolved = resolveDestinationData(tripDetails.destination, 'INTERNATIONAL');
       const isAlreadyIntl = resolved.scope === 'INTERNATIONAL';
       const targetDest = isAlreadyIntl
         ? tripDetails.destination
@@ -112,7 +112,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
       });
       setDestQuery(targetDest);
       setOriginQuery(safeOrigin);
-      seedDestination(targetDest);
+      seedDestination(targetDest, 'INTERNATIONAL');
     }
   };
 
@@ -125,18 +125,18 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 
   // Handle destination selection
   const handleSelectDestination = (destIdOrName: string) => {
-    seedDestination(destIdOrName);
+    seedDestination(destIdOrName, activeScope);
     setShowDestDropdown(false);
   };
 
   // Safe continue handler ensuring route stops match destination
   const handleContinue = () => {
     const targetDest = tripDetails.destination || destQuery;
-    const resolved = resolveDestinationData(targetDest);
+    const resolved = resolveDestinationData(targetDest, activeScope);
     const currentFirstCountry = destinations[0]?.country?.toLowerCase() || '';
     const resolvedFirstCountry = (resolved.defaultStops[0]?.country || resolved.name).toLowerCase();
     if (!currentFirstCountry.includes(resolvedFirstCountry) && !resolvedFirstCountry.includes(currentFirstCountry)) {
-      seedDestination(targetDest);
+      seedDestination(targetDest, activeScope);
     }
     onContinueToDestinations();
   };
@@ -277,7 +277,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
   };
 
   // Dynamic real-time weather badge & visa verdict
-  const activeResolved = resolveDestinationData(tripDetails.destination || destQuery);
+  const activeResolved = resolveDestinationData(tripDetails.destination || destQuery, activeScope);
   const seasonBadgeText = activeResolved.seasonSummary || getSeasonDescription(tripDetails.destination, tripDetails.departureDateIso);
   const visaVerdictText = activeResolved.visaStatus || getVisaVerdict(tripDetails.destination);
 

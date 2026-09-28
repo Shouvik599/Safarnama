@@ -8,10 +8,11 @@ export interface TripPlanningContextType {
   addDestination: (stop: RouteStop) => void;
   removeDestination: (id: string) => void;
   updateStopNights: (id: string, nights: number) => void;
+  batchUpdateStopNights: (updates: { id: string; nights: number }[]) => void;
   moveDestinationUp: (index: number) => void;
   moveDestinationDown: (index: number) => void;
   seedCircuit: (circuitId: string) => void;
-  seedDestination: (destinationOrCircuit: string) => void;
+  seedDestination: (destinationOrCircuit: string, scopeHint?: 'DOMESTIC' | 'INTERNATIONAL') => void;
   resetAll: () => void;
 }
 

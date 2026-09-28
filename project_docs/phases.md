@@ -1315,6 +1315,38 @@ Implemented strict scope partitioning and contextual scoping across Screen 1 (`T
   - **Replaced Hardcoded Tokyo Fallback**: The `+ Add another destination to route` quick button dynamically selects the next unadded popular city from the active destination's contextual list, rather than defaulting to Tokyo.
 - **Verification**: 12 automated Vitest tests passing, 0 TypeScript build errors, 0 oxlint warnings, and 100% backend unit tests passing (580+ passed).
 
+## 22.3 Destination Resolution & Scope-Aware Visa Consistency (Completed)
+
+Fixed destination resolution, greedy substring matching, and visa consistency across `destinationsRegistry.ts`, `locations.ts`, and `TripDetailsScreen.tsx`:
+- **Scope-Aware Destination Resolution**:
+  - `resolveDestinationData(destinationInput, scopeHint?)` now accepts an active scope hint. When in `INTERNATIONAL` scope, sovereign country lookups and international curated circuits are prioritized over domestic cities/states.
+  - Primary entity isolation: `query.replace(/\s*\([^)]*\).*/, '').trim()` extracts the core state/country before parentheses (e.g. `Pakistan (Islamabad, ...)` isolates to `Pakistan`), preventing sub-city names from triggering false matches.
+  - Eliminated greedy substring collisions: Removed `cleanQ.includes(c.name)` in `generateDomesticCityFallback`, stopping short 2–3 letter Indian cities (`Bah`, `South`, `Anta`, `Tral`, `Un`, `Gua`) from capturing international country searches (such as Pakistan matching `Bah, UP` due to Bahawalpur, or South Korea matching `South, Sikkim`).
+  - Strict word-boundary checks on short curated circuit IDs (`\buk\b`), ensuring strings containing sub-cities like `Lukla` (Nepal) or `Nuuk` (Greenland) never falsely resolve to the United Kingdom circuit.
+- **Unified Visa Status Engine**:
+  - Created `getCountryVisaStatus()` ensuring identical verdicts across autocomplete dropdowns, dynamic typing previews, and finalized destination badges.
+  - Added dedicated support for Freedom of Movement for Indian citizens traveling to Nepal and Bhutan (`Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)`).
+- **Verification**: 13 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors.
+
+## 22.4 Smart Reconciliation Dialog on Continue (Completed)
+
+Implemented an intelligent, accessible modal dialog intercepting navigation from Screen 2 (Destinations & Route Sequence) to Screen 3 (Preferences / Travelers) when total allocated stop nights differ from the planned trip calendar duration:
+- **Interception Logic**:
+  - Clicking "Continue to Preferences" checks `durationDiff = totalAllocatedNights - durationDays`.
+  - When `durationDiff === 0`: Directly transitions to the next planner step (`onContinue()`).
+  - When `durationDiff !== 0`: Intercepts navigation and presents a tailored reconciliation dialog with side-by-side metric comparison (`Allocated across stops` vs `Planned trip duration`).
+- **Over-Allocated Handling (`durationDiff > 0`)**:
+  - **Primary Action**: `[ Extend Trip to {X} Nights ]` (`handleReconcileAndContinue`) — synchronizes the calendar return date and trip duration to match total stop nights and advances seamlessly.
+  - **Secondary Action**: `[ Fit Stops to {Y} Days ]` (`handleFitStopsAndContinue`) — uses atomic batch update (`batchUpdateStopNights`) to scale down stop nights to fit planned duration (preserving minimum 1 night per stop, clamping if stops > planned days) and advances.
+  - **Dismiss Action**: `[ Review & Edit Stops Manually ]` — dismisses the modal so the user can fine-tune stops and steppers manually.
+- **Under-Allocated Handling (`durationDiff < 0`)**:
+  - **Primary Action**: `[ Shorten Trip to {X} Nights ]` (`handleReconcileAndContinue`) — adjusts the calendar return date to match allocated stop nights and advances.
+  - **Secondary Action**: `[ Distribute Remaining {Z} Nights ]` (`handleDistributeRemainingAndContinue`) — evenly spreads unallocated nights across existing stops and advances.
+  - **Dismiss Action**: `[ Review & Edit Stops Manually ]`.
+- **Atomic State Updates**:
+  - Added `batchUpdateStopNights: (updates: { id: string; nights: number }[]) => void` to `TripPlanningContextDef.ts` and `TripPlanningContext.tsx` ensuring multi-stop rebalancing applies in a single React render cycle.
+- **Verification**: 14 automated Vitest tests passing (`flow.test.tsx`), 0 TypeScript compile errors, 0 oxlint warnings/errors.
+
 ---
 
 # 23. Phase 19 — End-to-End Test Matrix

@@ -28,6 +28,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
     addDestination,
     removeDestination,
     updateStopNights,
+    batchUpdateStopNights,
     moveDestinationUp,
     moveDestinationDown,
     tripDetails,
@@ -41,9 +42,10 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState('All');
   const [showNextStepAlert, setShowNextStepAlert] = useState(false);
+  const [showReconciliationModal, setShowReconciliationModal] = useState(false);
 
   // Dynamically resolve active destination and route template from user's chosen destination
-  const activeCircuit = resolveDestinationData(tripDetails.destination);
+  const activeCircuit = resolveDestinationData(tripDetails.destination, tripDetails.scope);
 
   // Strict Contextual Scoping: Retrieve cities strictly belonging to the confirmed state or sovereign country
   const contextualCities = getContextualCitiesForDestination(tripDetails.destination);
@@ -80,7 +82,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
         !activeFirstCountry.includes(currentFirstCountry) &&
         !currentFirstCountry.includes(activeFirstCountry))
     ) {
-      seedDestination(activeCircuit.id);
+      seedDestination(activeCircuit.id, tripDetails.scope);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripDetails.destination, activeCircuit.id]);
@@ -89,6 +91,20 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
   const totalAllocatedNights = destinations.reduce((sum, d) => sum + (d.nights || 0), 0);
   const targetDurationDays = tripDetails.durationDays || 1;
   const durationDiff = totalAllocatedNights - targetDurationDays;
+
+  // Calculate preview of newly aligned return date when extending / shortening
+  const getAlignedReturnDateDisplay = (nightsCount: number) => {
+    const departure = tripDetails.departureDateIso
+      ? new Date(tripDetails.departureDateIso)
+      : new Date();
+    const returnD = new Date(departure);
+    returnD.setDate(departure.getDate() + nightsCount);
+    return returnD.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   // Sync trip return date to match total allocated stop nights
   const handleAlignTripDuration = () => {
@@ -111,6 +127,93 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
       returnDateIso: retIso,
       returnLegInfo: `${returnD.getFullYear()} • Evening leg`,
     });
+  };
+
+  const proceedToPreferences = () => {
+    if (onContinueToPreferences) {
+      onContinueToPreferences();
+    } else {
+      setShowNextStepAlert(true);
+    }
+  };
+
+  const handleContinueClicked = () => {
+    if (durationDiff !== 0) {
+      setShowReconciliationModal(true);
+      return;
+    }
+    proceedToPreferences();
+  };
+
+  // Option A (Extend / Shorten): Sync trip calendar to allocated stop nights and advance
+  const handleReconcileAndContinue = () => {
+    handleAlignTripDuration();
+    setShowReconciliationModal(false);
+    proceedToPreferences();
+  };
+
+  // Option B: Fit stops to target calendar duration
+  const handleFitStopsAndContinue = () => {
+    const n = destinations.length;
+    if (n === 0) return;
+    const effectiveDays = Math.max(n, targetDurationDays);
+    const base = Math.floor(effectiveDays / n);
+    let rem = effectiveDays % n;
+
+    const updates = destinations.map((stop) => {
+      let nights = base;
+      if (rem > 0) {
+        nights += 1;
+        rem -= 1;
+      }
+      return { id: stop.id, nights: Math.max(1, nights) };
+    });
+
+    batchUpdateStopNights(updates);
+
+    if (effectiveDays !== targetDurationDays) {
+      const departure = tripDetails.departureDateIso
+        ? new Date(tripDetails.departureDateIso)
+        : new Date();
+      const returnD = new Date(departure);
+      returnD.setDate(departure.getDate() + effectiveDays);
+
+      updateTripDetails({
+        durationDays: effectiveDays,
+        returnDate: returnD.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        }),
+        returnDateIso: returnD.toISOString().split('T')[0],
+        returnLegInfo: `${returnD.getFullYear()} • Evening leg`,
+      });
+    }
+
+    setShowReconciliationModal(false);
+    proceedToPreferences();
+  };
+
+  // Option C (Under-allocated): Distribute remaining unallocated nights across stops
+  const handleDistributeRemainingAndContinue = () => {
+    const n = destinations.length;
+    if (n === 0) return;
+    const unallocated = Math.abs(durationDiff);
+    const addPerStop = Math.floor(unallocated / n);
+    let rem = unallocated % n;
+
+    const updates = destinations.map((stop) => {
+      let extra = addPerStop;
+      if (rem > 0) {
+        extra += 1;
+        rem -= 1;
+      }
+      return { id: stop.id, nights: (stop.nights || 1) + extra };
+    });
+
+    batchUpdateStopNights(updates);
+    setShowReconciliationModal(false);
+    proceedToPreferences();
   };
 
   const categories = [
@@ -300,7 +403,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
                     <button
                       key={circuit.id}
                       type="button"
-                      onClick={() => seedDestination(circuit.id)}
+                      onClick={() => seedDestination(circuit.id, tripDetails.scope)}
                       className={`px-3 py-1.5 rounded-full font-label-md text-label-md transition-all cursor-pointer flex items-center gap-1.5 ${
                         isCircuitActive
                           ? 'bg-primary text-on-primary font-bold shadow-sm ring-2 ring-primary/30'
@@ -751,13 +854,8 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    if (onContinueToPreferences) {
-                      onContinueToPreferences();
-                    } else {
-                      setShowNextStepAlert(true);
-                    }
-                  }}
+                  id="btn-continue-preferences"
+                  onClick={handleContinueClicked}
                   className="px-8 py-3.5 rounded-xl bg-primary text-on-primary hover:opacity-95 shadow-md font-label-md text-label-md font-bold transition-all flex items-center gap-2 cursor-pointer active:scale-98"
                 >
                   <span>Continue to Preferences</span>
@@ -765,6 +863,190 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Smart Reconciliation Dialog Modal */}
+            {showReconciliationModal && (
+              <div
+                id="modal-smart-reconciliation"
+                className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="reconciliation-dialog-title"
+              >
+                <div className="bg-surface-container-lowest text-on-surface rounded-2xl shadow-2xl border border-outline-variant/30 max-w-lg w-full p-6 sm:p-7 flex flex-col gap-5 relative animate-in fade-in zoom-in-95 duration-200">
+                  {/* Dismiss X button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowReconciliationModal(false)}
+                    className="absolute top-5 right-5 p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors cursor-pointer"
+                    aria-label="Close dialog"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">close</span>
+                  </button>
+
+                  {/* Header with Icon */}
+                  <div className="flex items-start gap-3.5 pr-8">
+                    <div
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                        durationDiff > 0
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                          : 'bg-primary-container text-on-primary-container'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[24px]">
+                        {durationDiff > 0 ? 'pending_actions' : 'more_time'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <h3
+                        id="reconciliation-dialog-title"
+                        className="font-headline-sm text-headline-sm font-bold text-on-surface"
+                      >
+                        {durationDiff > 0
+                          ? 'Itinerary Duration Mismatch'
+                          : 'Unallocated Days in Trip'}
+                      </h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                        {durationDiff > 0 ? (
+                          <>
+                            Your route stops require <strong>{totalAllocatedNights} nights</strong>, but your trip calendar is set to <strong>{targetDurationDays} days</strong> ({tripDetails.departureDate} → {tripDetails.returnDate}).
+                          </>
+                        ) : (
+                          <>
+                            You have <strong>{Math.abs(durationDiff)} unallocated {Math.abs(durationDiff) === 1 ? 'night' : 'nights'}</strong> in your {targetDurationDays}-day trip ({tripDetails.departureDate} → {tripDetails.returnDate}).
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Comparison Badge Card */}
+                  <div className="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-center justify-between text-[13px]">
+                    <div className="flex flex-col">
+                      <span className="text-on-surface-variant font-label-caption text-label-caption uppercase tracking-wider">
+                        Current Calendar
+                      </span>
+                      <span className="font-bold text-on-surface">
+                        {targetDurationDays} Days ({tripDetails.departureDate} – {tripDetails.returnDate})
+                      </span>
+                    </div>
+                    <span className="material-symbols-outlined text-outline text-[18px]">arrow_forward</span>
+                    <div className="flex flex-col text-right">
+                      <span className="text-on-surface-variant font-label-caption text-label-caption uppercase tracking-wider">
+                        Stops Total
+                      </span>
+                      <span className="font-bold text-primary">
+                        {totalAllocatedNights} Nights across {destinations.length} stop{destinations.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Options */}
+                  <div className="flex flex-col gap-2.5 pt-1">
+                    {durationDiff > 0 ? (
+                      <>
+                        {/* Primary Option: Extend trip */}
+                        <button
+                          type="button"
+                          id="btn-reconcile-extend"
+                          onClick={handleReconcileAndContinue}
+                          className="w-full p-3.5 rounded-xl bg-primary text-on-primary hover:opacity-95 font-label-md text-label-md font-bold transition-all shadow-sm flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-[20px]">more_time</span>
+                            <div className="flex flex-col">
+                              <span>Extend Trip to {totalAllocatedNights} Nights</span>
+                              <span className="font-normal text-[11px] opacity-85">
+                                Adjusts return date to {getAlignedReturnDateDisplay(totalAllocatedNights)} and continues
+                              </span>
+                            </div>
+                          </div>
+                          <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
+                            arrow_forward
+                          </span>
+                        </button>
+
+                        {/* Secondary Option: Fit stops */}
+                        <button
+                          type="button"
+                          id="btn-reconcile-fit"
+                          onClick={handleFitStopsAndContinue}
+                          className="w-full p-3.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-bold transition-all border border-outline-variant/30 flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-[20px] text-primary">compress</span>
+                            <div className="flex flex-col">
+                              <span>Fit Stops to {targetDurationDays} Days</span>
+                              <span className="font-normal text-[11px] text-on-surface-variant">
+                                Evenly scales stop nights to fit your current calendar dates
+                              </span>
+                            </div>
+                          </div>
+                          <span className="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform group-hover:translate-x-1">
+                            arrow_forward
+                          </span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {/* Primary Option: Shorten trip */}
+                        <button
+                          type="button"
+                          id="btn-reconcile-shorten"
+                          onClick={handleReconcileAndContinue}
+                          className="w-full p-3.5 rounded-xl bg-primary text-on-primary hover:opacity-95 font-label-md text-label-md font-bold transition-all shadow-sm flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-[20px]">content_cut</span>
+                            <div className="flex flex-col">
+                              <span>Shorten Trip to {totalAllocatedNights} Nights</span>
+                              <span className="font-normal text-[11px] opacity-85">
+                                Adjusts return date to {getAlignedReturnDateDisplay(totalAllocatedNights)} and continues
+                              </span>
+                            </div>
+                          </div>
+                          <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
+                            arrow_forward
+                          </span>
+                        </button>
+
+                        {/* Secondary Option: Distribute remaining nights */}
+                        <button
+                          type="button"
+                          id="btn-reconcile-distribute"
+                          onClick={handleDistributeRemainingAndContinue}
+                          className="w-full p-3.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-bold transition-all border border-outline-variant/30 flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-[20px] text-primary">more_time</span>
+                            <div className="flex flex-col">
+                              <span>Distribute Remaining Nights to Stops</span>
+                              <span className="font-normal text-[11px] text-on-surface-variant">
+                                Spreads {Math.abs(durationDiff)} extra nights across existing stops
+                              </span>
+                            </div>
+                          </div>
+                          <span className="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform group-hover:translate-x-1">
+                            arrow_forward
+                          </span>
+                        </button>
+                      </>
+                    )}
+
+                    {/* Tertiary: Dismiss and edit manually */}
+                    <button
+                      type="button"
+                      id="btn-reconcile-dismiss"
+                      onClick={() => setShowReconciliationModal(false)}
+                      className="w-full py-2.5 rounded-xl hover:bg-surface-container text-on-surface-variant font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                      <span>Review & Edit Stops Manually</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

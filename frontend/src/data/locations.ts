@@ -438,39 +438,50 @@ export function getSeasonDescription(destinationStr: string, dateIsoStr: string)
 }
 
 export function getVisaVerdict(destinationStr: string): string {
-  const destLower = destinationStr.toLowerCase();
+  const destLower = destinationStr.toLowerCase().trim();
+  const primary = destLower.replace(/\s*\([^)]*\).*/, '').trim();
 
-  const circuit = PRECONFIGURED_CIRCUITS.find(
-    (c) =>
-      destLower.includes(c.id) ||
+  const circuit = PRECONFIGURED_CIRCUITS.find((c) => {
+    const id = c.id.toLowerCase();
+    if (id.length <= 3) {
+      const idRegex = new RegExp(`(^|\\b|\\s|\\-)${id}(\\b|\\s|\\-|$)`, 'i');
+      return idRegex.test(primary);
+    }
+    return (
+      primary === id ||
+      primary.includes(id) ||
       destLower.includes(c.alias.toLowerCase()) ||
       destLower.includes(c.name.toLowerCase())
-  );
+    );
+  });
   if (circuit) {
     return circuit.visaStatus;
   }
 
   if (
-    destLower.includes('india') ||
-    destLower.includes('ladakh') ||
-    destLower.includes('leh') ||
-    destLower.includes('kerala') ||
-    destLower.includes('rajasthan') ||
-    destLower.includes('goa') ||
-    destLower.includes('jaipur')
+    primary.includes('india') ||
+    primary.includes('ladakh') ||
+    primary.includes('leh') ||
+    primary.includes('kerala') ||
+    primary.includes('rajasthan') ||
+    primary.includes('goa') ||
+    primary.includes('jaipur')
   ) {
     return 'Domestic Trip • ₹0 Visa (No Passport Needed)';
   }
-  if (destLower.includes('japan')) {
+  if (primary.includes('nepal') || primary.includes('bhutan')) {
+    return 'Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)';
+  }
+  if (primary.includes('japan')) {
     return 'eVisa Active • 90 Days Single Entry for Indian Passports';
   }
-  if (destLower.includes('italy') || destLower.includes('france') || destLower.includes('schengen')) {
+  if (primary.includes('italy') || primary.includes('france') || primary.includes('schengen')) {
     return 'Schengen Visa Required • ~15-30 Days Processing';
   }
-  if (destLower.includes('indonesia') || destLower.includes('bali')) {
+  if (primary.includes('indonesia') || primary.includes('bali')) {
     return 'Visa on Arrival (e-VOA) • 30 Days Instant';
   }
-  if (destLower.includes('thailand')) {
+  if (primary.includes('thailand')) {
     return 'Visa Exemption / eVisa Available for Indian Passports';
   }
   return 'International Destination • Visa Guidance Active';

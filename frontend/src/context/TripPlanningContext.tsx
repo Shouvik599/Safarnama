@@ -92,6 +92,13 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
     );
   };
 
+  const batchUpdateStopNights = (updates: { id: string; nights: number }[]) => {
+    const map = new Map(updates.map((u) => [u.id, Math.max(1, u.nights)]));
+    setDestinations((prev) =>
+      prev.map((stop) => (map.has(stop.id) ? { ...stop, nights: map.get(stop.id)! } : stop))
+    );
+  };
+
   const moveDestinationUp = (index: number) => {
     if (index <= 0) return;
     setDestinations((prev) => {
@@ -114,8 +121,9 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
   };
 
-  const seedDestination = (destinationQuery: string) => {
-    const destItem = resolveDestinationData(destinationQuery);
+  const seedDestination = (destinationQuery: string, scopeHint?: 'DOMESTIC' | 'INTERNATIONAL') => {
+    const effectiveScope = scopeHint || tripDetails.scope;
+    const destItem = resolveDestinationData(destinationQuery, effectiveScope);
     if (!destItem) return;
 
     // Calculate dates matching the destination's default duration
@@ -132,6 +140,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     setTripDetails((prev) => ({
       ...prev,
+      scope: destItem.scope,
       destination: destItem.name,
       durationDays: destItem.defaultDurationDays,
       departureDate: depFormatted,
@@ -146,7 +155,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const seedCircuit = (circuitId: string) => {
-    seedDestination(circuitId);
+    seedDestination(circuitId, tripDetails.scope);
   };
 
   const syncTransitConnectors = (list: RouteStop[]): RouteStop[] => {
@@ -182,6 +191,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
         addDestination,
         removeDestination,
         updateStopNights,
+        batchUpdateStopNights,
         moveDestinationUp,
         moveDestinationDown,
         seedCircuit,

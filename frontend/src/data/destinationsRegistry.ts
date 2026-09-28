@@ -1113,9 +1113,26 @@ export const ALL_CURATED_DESTINATIONS: DestinationItem[] = [
   ...DOMESTIC_DESTINATIONS,
 ];
 
+// Helper to compute unified, accurate visa status for sovereign countries for Indian citizens
+export function getCountryVisaStatus(c: { name: string; region: string; is_schengen: boolean }): string {
+  const nameLower = c.name.toLowerCase();
+  if (nameLower === 'nepal' || nameLower === 'bhutan') {
+    return 'Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)';
+  }
+  if (c.is_schengen) {
+    return 'Schengen Visa Required • ~15-30 Days Processing';
+  }
+  if (c.region === 'Asia') {
+    return 'eVisa or Visa on Arrival Available for Indian Passports';
+  }
+  return 'International Destination • Tourist Visa / eVisa Active';
+}
+
 // Helper to generate dynamic fallback stops for any of the 36 Indian states & UTs
 export function generateDomesticFallback(stateOrUtName: string): DestinationItem | null {
   const query = stateOrUtName.toLowerCase().trim();
+  const primaryQuery = query.replace(/\s*\([^)]*\).*/, '').trim();
+
   const found = (indianStatesUts as Array<{
     id: string;
     name: string;
@@ -1124,14 +1141,20 @@ export function generateDomesticFallback(stateOrUtName: string): DestinationItem
     top_cities: string[];
     alias: string;
     season: string;
-  }>).find(
-    (s) =>
-      s.name.toLowerCase() === query ||
-      s.name.toLowerCase().includes(query) ||
-      query.includes(s.name.toLowerCase()) ||
-      s.id.toLowerCase() === query ||
-      s.alias.toLowerCase().includes(query)
-  );
+  }>).find((s) => {
+    const sNameLower = s.name.toLowerCase();
+    const sIdLower = s.id.toLowerCase();
+    return (
+      sNameLower === query ||
+      sNameLower === primaryQuery ||
+      sIdLower === query ||
+      sIdLower === `in-${query}` ||
+      sIdLower === primaryQuery ||
+      s.alias.toLowerCase() === query ||
+      s.alias.toLowerCase() === primaryQuery ||
+      (primaryQuery.length >= 4 && sNameLower.startsWith(primaryQuery))
+    );
+  });
 
   if (!found) return null;
 
@@ -1185,6 +1208,9 @@ export function generateDomesticFallback(stateOrUtName: string): DestinationItem
 // Helper to generate dynamic fallback stops for any of the 250 sovereign countries
 export function generateCountryFallback(countryName: string): DestinationItem | null {
   const cLower = countryName.toLowerCase().trim();
+  const cleanCLower = cLower.replace(/\s*\([^)]*\).*/, '').trim();
+  const cId = cleanCLower.replace(/\s+/g, '-');
+
   const cData = (generatedCountries as Array<{
     code: string;
     name: string;
@@ -1193,20 +1219,22 @@ export function generateCountryFallback(countryName: string): DestinationItem | 
     subregion: string;
     is_schengen: boolean;
     top_cities: string[];
-  }>).find(
-    (c) =>
-      c.name.toLowerCase() === cLower ||
-      c.name.toLowerCase().includes(cLower) ||
-      cLower.includes(c.name.toLowerCase())
-  );
+  }>).find((c) => {
+    const nameLower = c.name.toLowerCase();
+    const countryId = nameLower.replace(/\s+/g, '-');
+    return (
+      nameLower === cleanCLower ||
+      countryId === cId ||
+      countryId === cLower ||
+      nameLower === cLower ||
+      (c.code && c.code.toLowerCase() === cleanCLower) ||
+      (cleanCLower.length >= 4 && nameLower.startsWith(cleanCLower))
+    );
+  });
 
   if (!cData) return null;
 
-  const visa = cData.is_schengen
-    ? 'Schengen Visa Required • ~15-30 Days Processing'
-    : cData.region === 'Asia'
-    ? 'eVisa or Visa on Arrival Available for Indian Passports'
-    : 'International Destination • Tourist Visa Required';
+  const visa = getCountryVisaStatus(cData);
 
   const cities = cData.top_cities.length > 0 ? cData.top_cities : [cData.capital || cData.name];
   const stops: RouteStop[] = cities.map((city, idx) => ({
@@ -1258,6 +1286,7 @@ export function generateCountryFallback(countryName: string): DestinationItem | 
 export function generateDomesticCityFallback(cityInput: string): DestinationItem | null {
   const q = cityInput.toLowerCase().trim();
   const cleanQ = q.startsWith('in-') ? q.slice(3).replace(/-/g, ' ') : q;
+  const primaryCleanQ = cleanQ.replace(/\s*\([^)]*\).*/, '').trim();
 
   const cityList = (indiaPlacesData as {
     cities: Array<{
@@ -1271,13 +1300,27 @@ export function generateDomesticCityFallback(cityInput: string): DestinationItem
     }>;
   }).cities;
 
-  const cityMatch = cityList.find(
-    (c) =>
-      c.name.toLowerCase() === cleanQ ||
-      c.id.toLowerCase() === q ||
-      c.name.toLowerCase().startsWith(cleanQ) ||
-      cleanQ.includes(c.name.toLowerCase())
-  );
+  const cityMatch = cityList.find((c) => {
+    const cNameLower = c.name.toLowerCase();
+    const cIdLower = c.id.toLowerCase();
+    // 1. Exact match on ID
+    if (cIdLower === q || cIdLower === `in-${q}` || cIdLower === `in-${primaryCleanQ.replace(/\s+/g, '-')}`) {
+      return true;
+    }
+    // 2. Exact match on name
+    if (cNameLower === cleanQ || cNameLower === primaryCleanQ) {
+      return true;
+    }
+    // 3. Exact city with state: "mumbai, maharashtra" or "mumbai (maharashtra, india)"
+    if (cleanQ === `${cNameLower}, ${c.state_name.toLowerCase()}` || cleanQ.startsWith(`${cNameLower} (`)) {
+      return true;
+    }
+    // 4. Clean prefix match ONLY if input is at least 4 characters
+    if (primaryCleanQ.length >= 4 && cNameLower.startsWith(primaryCleanQ)) {
+      return true;
+    }
+    return false;
+  });
 
   if (!cityMatch) return null;
 
@@ -1348,57 +1391,117 @@ export function generateDomesticCityFallback(cityInput: string): DestinationItem
 }
 
 // Master resolution function: given any destination text or circuitId, resolves accurate stops
-export function resolveDestinationData(destinationInput: string): DestinationItem {
+export function resolveDestinationData(
+  destinationInput: string,
+  scopeHint?: 'DOMESTIC' | 'INTERNATIONAL'
+): DestinationItem {
   if (!destinationInput || !destinationInput.trim()) {
-    return ALL_CURATED_DESTINATIONS[0];
+    return scopeHint === 'DOMESTIC'
+      ? ALL_CURATED_DESTINATIONS.find((d) => d.scope === 'DOMESTIC') || ALL_CURATED_DESTINATIONS[0]
+      : ALL_CURATED_DESTINATIONS[0];
   }
   const query = destinationInput.toLowerCase().trim();
+  const primaryQuery = query.replace(/\s*\([^)]*\).*/, '').trim();
 
-  // Special direct matching for Norway to ensure instant exact hit
-  if (query.includes('norway') || query.includes('oslo') || query.includes('bergen')) {
-    const norway = ALL_CURATED_DESTINATIONS.find((d) => d.id === 'norway');
-    if (norway) return norway;
+  // Helper to safely match curated destinations without accidental substring collisions (e.g. 'uk' inside 'lukla')
+  const findCurated = (targetScope?: 'DOMESTIC' | 'INTERNATIONAL') => {
+    return ALL_CURATED_DESTINATIONS.find((d) => {
+      if (targetScope && d.scope !== targetScope) return false;
+      const id = d.id.toLowerCase();
+      const alias = d.alias.toLowerCase();
+      const name = d.name.toLowerCase();
+      const primaryName = name.replace(/\s*\([^)]*\).*/, '').trim().toLowerCase();
+
+      // 1. Exact match on ID, alias, name, or primary name
+      if (
+        query === id ||
+        query === alias ||
+        query === name ||
+        primaryQuery === id ||
+        primaryQuery === primaryName ||
+        primaryQuery === alias
+      ) {
+        return true;
+      }
+
+      // 2. Strict ID matching with word boundaries to prevent 'uk' matching inside words like 'lukla'
+      if (id.length <= 3) {
+        const idRegex = new RegExp(`(^|\\b|\\s|\\-)${id}(\\b|\\s|\\-|$)`, 'i');
+        if (idRegex.test(primaryQuery) || idRegex.test(query)) {
+          return true;
+        }
+      } else {
+        if (
+          primaryQuery.includes(id) ||
+          id.includes(primaryQuery) ||
+          query.includes(alias) ||
+          alias.includes(primaryQuery)
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  };
+
+  // If scope is explicitly INTERNATIONAL:
+  if (scopeHint === 'INTERNATIONAL') {
+    // 1. Curated international match
+    const curatedIntl = findCurated('INTERNATIONAL');
+    if (curatedIntl) return curatedIntl;
+
+    // 2. International sovereign country fallback
+    const countryFallback = generateCountryFallback(destinationInput);
+    if (countryFallback) return countryFallback;
+
+    // 3. Any curated match
+    const anyCurated = findCurated();
+    if (anyCurated) return anyCurated;
+
+    // 4. Default international destination
+    return ALL_CURATED_DESTINATIONS.find((d) => d.scope === 'INTERNATIONAL') || ALL_CURATED_DESTINATIONS[0];
   }
 
-  // 1. Direct match in curated destinations
-  const curatedMatch = ALL_CURATED_DESTINATIONS.find((d) => {
-    const id = d.id.toLowerCase();
-    const alias = d.alias.toLowerCase();
-    const name = d.name.toLowerCase();
-    return (
-      query === id ||
-      query === alias ||
-      query.includes(id) ||
-      (id.length > 3 && id.includes(query)) ||
-      query.includes(alias) ||
-      name.includes(query) ||
-      (query.length > 3 && query.includes(name))
-    );
-  });
+  // If scope is explicitly DOMESTIC:
+  if (scopeHint === 'DOMESTIC') {
+    // 1. Curated domestic match
+    const curatedDom = findCurated('DOMESTIC');
+    if (curatedDom) return curatedDom;
 
-  if (curatedMatch) {
-    return curatedMatch;
+    // 2. Direct match in Indian Cities from the dataset
+    const cityFallback = generateDomesticCityFallback(destinationInput);
+    if (cityFallback) return cityFallback;
+
+    // 3. Direct match in Indian States & UTs
+    const domesticFallback = generateDomesticFallback(destinationInput);
+    if (domesticFallback) return domesticFallback;
+
+    // 4. Any curated match
+    const anyCurated = findCurated();
+    if (anyCurated) return anyCurated;
+
+    return ALL_CURATED_DESTINATIONS.find((d) => d.scope === 'DOMESTIC') || ALL_CURATED_DESTINATIONS[0];
   }
 
-  // 2. Direct match in Indian Cities from the API dataset
-  const cityFallback = generateDomesticCityFallback(destinationInput);
-  if (cityFallback) {
-    return cityFallback;
-  }
+  // If no scopeHint is provided:
+  // 1. Direct exact match in curated destinations
+  const curatedMatch = findCurated();
+  if (curatedMatch) return curatedMatch;
 
-  // 3. Fallback dynamically generated domestic Indian state or UT
-  const domesticFallback = generateDomesticFallback(destinationInput);
-  if (domesticFallback) {
-    return domesticFallback;
-  }
-
-  // 4. Fallback dynamically generated country from static dataset
+  // 2. Direct exact country match from static dataset
   const countryFallback = generateCountryFallback(destinationInput);
-  if (countryFallback) {
-    return countryFallback;
-  }
+  if (countryFallback) return countryFallback;
 
-  // 5. Default to first curated destination (Japan)
+  // 3. Direct match in Indian Cities
+  const cityFallback = generateDomesticCityFallback(destinationInput);
+  if (cityFallback) return cityFallback;
+
+  // 4. Fallback dynamically generated domestic Indian state or UT
+  const domesticFallback = generateDomesticFallback(destinationInput);
+  if (domesticFallback) return domesticFallback;
+
+  // 5. Default curated destination
   return ALL_CURATED_DESTINATIONS[0];
 }
 
@@ -1715,9 +1818,7 @@ export function searchAllDestinations(
             title: c.name,
             subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
             scope: 'INTERNATIONAL',
-            visaStatus: c.is_schengen
-              ? 'Schengen Visa Required • ~15-30 Days Processing'
-              : 'International • Tourist Visa / eVisa Active',
+            visaStatus: getCountryVisaStatus(c),
           });
         }
       }
@@ -1809,9 +1910,7 @@ export function searchAllDestinations(
             title: c.name,
             subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
             scope: 'INTERNATIONAL',
-            visaStatus: c.is_schengen
-              ? 'Schengen Visa Required • ~15-30 Days Processing'
-              : 'International • Tourist Visa / eVisa Active',
+            visaStatus: getCountryVisaStatus(c),
           });
         }
       }

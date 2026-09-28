@@ -358,4 +358,98 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     // Verify Tokyo is NOT added
     expect(screen.queryByText('Tokyo')).not.toBeInTheDocument();
   }, 15000);
+
+  it('preserves accurate visa status for international destinations and prevents domestic city collisions (Pakistan, Nepal, South Korea)', () => {
+    render(<App />);
+
+    // Go to Trip Details
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    // Switch to International scope
+    const intlToggle = screen.getByRole('button', { name: /international/i });
+    fireEvent.click(intlToggle);
+
+    const destInput = screen.getByPlaceholderText(/search.*(country|circuit|state|region)/i) as HTMLInputElement;
+
+    // 1. Pakistan test: Type "pakistan", choose Pakistan, ensure visa stays eVisa/VOA and NOT Domestic
+    fireEvent.change(destInput, { target: { value: 'pakistan' } });
+    const pakistanOption = screen.getByRole('button', { name: /pakistan/i });
+    fireEvent.click(pakistanOption);
+
+    // Input must contain Pakistan
+    expect(destInput.value).toContain('Pakistan');
+    // Visa badge must NOT say Domestic Trip
+    expect(screen.queryByText(/Domestic Trip • ₹0 Visa/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/eVisa or Visa on Arrival Available for Indian Passports/i).length).toBeGreaterThan(0);
+
+    // 2. Nepal test: Type "nepal", choose Nepal, ensure visa does NOT flip to UK Visitor Visa
+    fireEvent.change(destInput, { target: { value: 'nepal' } });
+    const nepalOption = screen.getByRole('button', { name: /nepal/i });
+    fireEvent.click(nepalOption);
+
+    expect(destInput.value).toContain('Nepal');
+    expect(screen.queryByText(/UK Standard Visitor Visa Required/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/Visa Free • Freedom of Movement for Indian Citizens/i).length).toBeGreaterThan(0);
+
+    // 3. South Korea test: Type "south korea", choose South Korea, ensure it does NOT become South Sikkim
+    fireEvent.change(destInput, { target: { value: 'south korea' } });
+    const skOption = screen.getByRole('button', { name: /south korea/i });
+    fireEvent.click(skOption);
+
+    expect(destInput.value).toContain('South Korea');
+    expect(destInput.value).not.toContain('Sikkim');
+    expect(screen.queryByText(/Domestic Trip • ₹0 Visa/i)).not.toBeInTheDocument();
+
+    // Continue to Destinations Screen 2 to verify route stops
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+    // Verify South Korea stops appear, not Sikkim (Gangtok/Pelling/Darjeeling)
+    expect(screen.getByText('Seoul')).toBeInTheDocument();
+    expect(screen.queryByText('Gangtok')).not.toBeInTheDocument();
+    expect(screen.queryByText('Pelling')).not.toBeInTheDocument();
+  }, 15000);
+
+  it('prompts Smart Reconciliation Dialog on Continue when duration mismatch exists, and allows 1-click sync or fit', () => {
+    render(<App />);
+
+    // Navigate to Trip Details and then Screen 2 (Destinations)
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+
+    // By default, Japan circuit is seeded (10 nights total)
+    // Add extra nights using [+] button on the first stop to create durationDiff > 0
+    const plusButtons = screen.getAllByRole('button', { name: /\+/i });
+    fireEvent.click(plusButtons[0]); // Osaka: 2 -> 3 nights (total 11 nights for 10-day trip)
+
+    // Verify over-allocation banner appears
+    expect(screen.getByText(/Over-allocated: 11 nights assigned/i)).toBeInTheDocument();
+
+    // Click Continue to Preferences
+    const continuePrefBtn = screen.getByRole('button', { name: /continue to preferences/i });
+    fireEvent.click(continuePrefBtn);
+
+    // Modal dialog must appear!
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Itinerary Duration Mismatch')).toBeInTheDocument();
+    expect(screen.getByText(/Extend Trip to 11 Nights/i)).toBeInTheDocument();
+    expect(screen.getByText(/Fit Stops to 10 Days/i)).toBeInTheDocument();
+
+    // Test "Review & Edit Stops Manually" dismisses dialog
+    const dismissBtn = screen.getByRole('button', { name: /review & edit stops manually/i });
+    fireEvent.click(dismissBtn);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // Re-click Continue to Preferences to re-open modal
+    fireEvent.click(continuePrefBtn);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // Click "Extend Trip to 11 Nights"
+    const extendBtn = screen.getByRole('button', { name: /extend trip to 11 nights/i });
+    fireEvent.click(extendBtn);
+
+    // Dialog closes and proceeds to preferences (Batch 1 scope complete notice)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Batch 1 scope complete: Step 3 \(Preferences\) will be unlocked in Batch 2!/i)
+    ).toBeInTheDocument();
+  });
 });
