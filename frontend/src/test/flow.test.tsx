@@ -1,8 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import App from '../App';
+import { getContextualCitiesForDestination } from '../data/destinationsRegistry';
 
 describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features', () => {
+  it('keeps multi-country contextual city results within each selected country', () => {
+    const cities = getContextualCitiesForDestination([
+      'Japan (Autumn Trail)',
+      'Italy Circuit',
+    ]);
+    expect(cities.some((city) => city.name === 'Tokyo' && city.country === 'Japan')).toBe(true);
+    expect(cities.some((city) => city.name === 'Rome' && city.country === 'Italy')).toBe(true);
+    expect(cities.every((city) => city.country !== 'India')).toBe(true);
+    expect(cities.some((city) => city.name === 'Bodri' || city.name === 'Daboh')).toBe(false);
+
+    const domesticCityResults = getContextualCitiesForDestination('Bodri');
+    expect(domesticCityResults.some((city) => city.name === 'Bodri' && city.country === 'India')).toBe(true);
+  });
+
   it('renders Welcome screen by default with branding and CTAs', () => {
     render(<App />);
 

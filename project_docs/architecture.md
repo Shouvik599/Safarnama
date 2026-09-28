@@ -580,7 +580,7 @@ Used for:
 - Automatic domestic route leg generation seeding regional cities and scenic connectors
 - **Scope Partitioning & Dynamic Origin Routing**:
   - Screen 1: Domestic scope enables origin searches across all 4,198 Indian cities, towns, and rail hubs alongside airports; International scope strictly restricts departure origins to Indian commercial airports with valid IATA designations (`INDIAN_ORIGIN_AIRPORTS`). Destination search is strictly partitioned (Domestic: Indian states/UTs/regions; International: 250 sovereign countries & circuits).
-  - Screen 2: Strict Contextual City Scoping (`getContextualCitiesForDestination`) restricts city autocompletion to settlements within the active destination, generates dynamic scenic transit connectors, and replaces hardcoded fallbacks with unadded contextual stops.
+   - Screen 2: Strict Contextual City Scoping (`getContextualCitiesForDestination`) restricts city autocompletion to settlements within every selected destination, generates dynamic scenic transit connectors, and replaces hardcoded fallbacks with unadded contextual stops. International country/circuit resolution precedes domestic city fallback, and domestic city fallback uses full normalized name or ID matching to avoid substring collisions (for example, `Italy` matching the Indian city `Tal`).
 
 ## Ingestion policy
 

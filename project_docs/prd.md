@@ -559,7 +559,7 @@ The frontend provides an intuitive 5-step journey planner adhering to editorial 
    - **Real-Time Intelligence**: Dynamic seasonal weather descriptions and Indian passport visa guidance update dynamically as the user modifies dates and destinations.
 
 2. **Step 2 (Destinations & Route Sequence) Contextual Scoping**:
-   - **Strict Contextual Scoping**: Search autocomplete detects the confirmed state or sovereign country and strictly restricts suggestions to cities within that territory (e.g. Rajasthan trips only allow Rajasthan cities; Norway trips only allow Norwegian cities). Cross-state and cross-country noise is prevented.
+   - **Strict Contextual Scoping**: Search autocomplete detects each confirmed state or sovereign country and restricts suggestions to the union of cities within the selected territories (e.g. Rajasthan trips only allow Rajasthan cities; Norway trips only allow Norwegian cities). International country/circuit selections must not be mistaken for domestic cities due to incidental substring matches; cross-state and cross-country noise is prevented.
    - **Real-Time Autocomplete Dropdown**: Rich dropdown displaying city name, region/district tag, prominence badge (`★ Popular Stop` vs `Scenic Gateway`), and imagery.
    - **Smart Stop Seeding**: Newly added stops receive realistic default night allocations (2 nights), tailored regional roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferries in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan).
    - **Contextual Fallback**: The `+ Add another destination to route` quick button dynamically selects the next unadded popular stop from the active destination's contextual list, rather than defaulting to Tokyo.

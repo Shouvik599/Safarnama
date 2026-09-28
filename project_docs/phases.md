@@ -1370,7 +1370,7 @@ Implemented multi-state/UT/city (Domestic) and multi-country (International) inp
 - **Screen 2 Multi-Destination Contextual Cities & Transit Connectors**:
   - Consumes the effective multi-destination selection (`tripDetails.destinations || tripDetails.destination`).
   - Top stops from each chosen destination are seeded into the route, interconnected by cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
-  - The stop selector dropdown (`getContextualCitiesForDestination`) returns the deduplicated union of cities across all selected states or countries without cross-scope leak.
+      - The stop selector dropdown (`getContextualCitiesForDestination`) returns the deduplicated union of cities across all selected states or countries without cross-scope leak. International circuits and countries resolve before domestic city fallback; domestic city fallback requires a full normalized name or ID match, preventing incidental substring collisions such as `Italy` matching the Indian city `Tal`.
 - **Aggregated Visa & Permit Verdicts**:
   - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen destinations under a single badge (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (e.g. `ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
 - **Verification**: 17 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files.

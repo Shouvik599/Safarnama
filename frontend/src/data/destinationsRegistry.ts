@@ -1666,25 +1666,7 @@ export function getContextualCitiesForSingleDestination(destinationInput: string
     });
   }
 
-  // 2. Check if destination corresponds to an Indian City (e.g. Udaipur) -> return sibling cities in its parent state
-  const cityMatch = (indiaPlacesData.cities as Array<{
-    id: string;
-    name: string;
-    state_name: string;
-    state_code: string;
-    state_id: string;
-  }>).find(
-    (c) =>
-      c.name.toLowerCase() === q ||
-      c.id.toLowerCase() === q ||
-      q.includes(c.name.toLowerCase())
-  );
-
-  if (cityMatch) {
-    return getContextualCitiesForSingleDestination(cityMatch.state_name);
-  }
-
-  // 3. Check if destination corresponds to a curated international circuit
+  // 2. Check if destination corresponds to a curated international circuit
   const curatedMatch = ALL_CURATED_DESTINATIONS.find((d) => {
     const dId = d.id.toLowerCase();
     const dName = d.name.toLowerCase();
@@ -1759,7 +1741,7 @@ export function getContextualCitiesForSingleDestination(destinationInput: string
     return items;
   }
 
-  // 4. Check in generatedCountries directly for international country
+  // 3. Check in generatedCountries directly for international country
   const sovereignMatch = (generatedCountries as Array<{
     name: string;
     capital: string;
@@ -1797,6 +1779,25 @@ export function getContextualCitiesForSingleDestination(destinationInput: string
       }
     }
     return items;
+  }
+
+  // Match domestic cities only when the whole destination identifies that city.
+  const primaryQuery = q.replace(/\s*\([^)]*\).*/, '').trim();
+  const cityMatch = (indiaPlacesData.cities as Array<{
+    id: string;
+    name: string;
+    state_name: string;
+    state_code: string;
+    state_id: string;
+  }>).find(
+    (c) =>
+      c.name.toLowerCase() === primaryQuery ||
+      c.id.toLowerCase() === q ||
+      c.id.toLowerCase() === primaryQuery
+  );
+
+  if (cityMatch) {
+    return getContextualCitiesForSingleDestination(cityMatch.state_name);
   }
 
   return [];
