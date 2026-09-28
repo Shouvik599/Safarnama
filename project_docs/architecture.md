@@ -578,6 +578,9 @@ Used for:
 - Comprehensive Indian city search autocomplete across ~4,200 settlements
 - Priority tagging for top ~100 iconic tourist and spiritual destinations (e.g. Udaipur, Manali, Rishikesh, Varanasi, Ooty, Munnar, Goa)
 - Automatic domestic route leg generation seeding regional cities and scenic connectors
+- **Scope Partitioning & Dynamic Origin Routing**:
+  - Screen 1: Domestic scope enables origin searches across all 4,198 Indian cities, towns, and rail hubs alongside airports; International scope strictly restricts departure origins to Indian commercial airports with valid IATA designations (`INDIAN_ORIGIN_AIRPORTS`). Destination search is strictly partitioned (Domestic: Indian states/UTs/regions; International: 250 sovereign countries & circuits).
+  - Screen 2: Strict Contextual City Scoping (`getContextualCitiesForDestination`) restricts city autocompletion to settlements within the active destination, generates dynamic scenic transit connectors, and replaces hardcoded fallbacks with unadded contextual stops.
 
 ## Ingestion policy
 

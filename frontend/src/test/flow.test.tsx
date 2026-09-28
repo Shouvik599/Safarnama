@@ -32,9 +32,11 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
 
     // Should now be on Screen 2 (Trip Details)
     expect(screen.getByText('Where are you going?')).toBeInTheDocument();
-    expect(screen.getByText('Starting From (Origin)')).toBeInTheDocument();
-    expect(screen.getByText('Going To (Destination)')).toBeInTheDocument();
+    expect(screen.getByText(/starting from \(origin/i)).toBeInTheDocument();
+    expect(screen.getByText(/going to/i)).toBeInTheDocument();
     expect(screen.getByText('Step 1 of 5 • Basic Journey Details')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /domestic \(within india\)/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /international/i })).toBeInTheDocument();
   });
 
   it('supports origin airport autocomplete, quick origin chips, and traveler counters', () => {
@@ -44,7 +46,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
 
     // Check default values
-    const originInput = screen.getByLabelText(/starting from \(origin\)/i) as HTMLInputElement;
+    const originInput = screen.getByLabelText(/starting from \(origin/i) as HTMLInputElement;
     expect(originInput.value).toContain('New Delhi');
 
     // Click quick origin 'Mumbai (BOM)' chip
@@ -113,6 +115,10 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
       screen.getByText(/eVisa Active • 90 Days Single Entry/i)
     ).toBeInTheDocument();
 
+    // Switch to Domestic scope
+    const domToggle = screen.getByRole('button', { name: /domestic \(within india\)/i });
+    fireEvent.click(domToggle);
+
     // Switch to domestic Ladakh circuit
     const ladakhBtn = screen.getByRole('button', { name: /ladakh pass/i });
     fireEvent.click(ladakhBtn);
@@ -131,6 +137,10 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
 
     // Go to Trip Details
     fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    // Switch to Domestic scope
+    const domToggle = screen.getByRole('button', { name: /domestic \(within india\)/i });
+    fireEvent.click(domToggle);
 
     // Choose Ladakh circuit
     const ladakhBtn = screen.getByRole('button', { name: /ladakh pass/i });
@@ -229,7 +239,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
 
     // Type "Norway" into destination input
-    const destInput = screen.getByPlaceholderText(/search city, circuit, or region/i) as HTMLInputElement;
+    const destInput = screen.getByPlaceholderText(/search.*(country|circuit|state|region)/i) as HTMLInputElement;
     fireEvent.change(destInput, { target: { value: 'Norway' } });
 
     // Verify autocomplete option appears and displays Schengen visa requirement
@@ -254,6 +264,10 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     // Go to Trip Details
     fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
 
+    // Switch to Domestic scope
+    const domToggle = screen.getByRole('button', { name: /domestic \(within india\)/i });
+    fireEvent.click(domToggle);
+
     // Click quick featured chip for Rajasthan
     const rajasthanBtn = screen.getByRole('button', { name: /rajasthan royals/i });
     fireEvent.click(rajasthanBtn);
@@ -272,31 +286,76 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(screen.queryByText('Osaka')).not.toBeInTheDocument();
   });
 
-  it('auto-populates Indian cities, states, UTs, and international countries in destination search bar', () => {
+  it('auto-populates Indian cities, states, UTs, and international countries partitioned by scope', () => {
     render(<App />);
 
     // Go to Trip Details
     fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
 
-    const destInput = screen.getByPlaceholderText(/search city, circuit, or region/i) as HTMLInputElement;
+    // 1. Switch to Domestic scope
+    const domToggle = screen.getByRole('button', { name: /domestic \(within india\)/i });
+    fireEvent.click(domToggle);
 
-    // 1. Search for an Indian city (e.g. Udaipur)
-    fireEvent.change(destInput, { target: { value: 'Udaipur' } });
-    expect(screen.getByText('Udaipur')).toBeInTheDocument();
-    expect(screen.getByText(/City in Rajasthan, India/i)).toBeInTheDocument();
+    const destInput = screen.getByPlaceholderText(/search.*(country|circuit|state|region)/i) as HTMLInputElement;
 
-    // Select Udaipur from dropdown
-    fireEvent.click(screen.getByText('Udaipur'));
-    expect(screen.getAllByText(/Domestic Trip • ₹0 Visa/i).length).toBeGreaterThan(0);
-
-    // 2. Search for an Indian state / UT (e.g. Himachal Pradesh)
+    // Search for an Indian state / UT (e.g. Himachal Pradesh)
     fireEvent.change(destInput, { target: { value: 'Himachal' } });
     expect(screen.getByText('Himachal Pradesh')).toBeInTheDocument();
     expect(screen.getByText(/Himachal Pine Valleys/i)).toBeInTheDocument();
 
-    // 3. Search for an international sovereign country (e.g. Spain)
+    // 2. Switch to International scope
+    const intlToggle = screen.getByRole('button', { name: /international/i });
+    fireEvent.click(intlToggle);
+
+    // Search for an international sovereign country (e.g. Spain)
     fireEvent.change(destInput, { target: { value: 'Spain' } });
     expect(screen.getByText('Spain')).toBeInTheDocument();
     expect(screen.getByText(/Madrid, Europe/i)).toBeInTheDocument();
+  }, 15000);
+
+  it('Part A & B: strictly enforces contextual city scoping on Screen 2 and replaces Tokyo fallback', () => {
+    render(<App />);
+
+    // Go to Trip Details
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+
+    // Switch to Domestic scope
+    fireEvent.click(screen.getByRole('button', { name: /domestic \(within india\)/i }));
+
+    // Select Rajasthan
+    fireEvent.click(screen.getByRole('button', { name: /rajasthan royals/i }));
+
+    // Continue to Destinations (Screen 2)
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+
+    // Verify on Screen 2 for Rajasthan
+    expect(screen.getByText(/Add Stops in Rajasthan Royals/i)).toBeInTheDocument();
+
+    // Contextual search bar
+    const searchInput = screen.getByPlaceholderText(/search cities strictly within/i);
+
+    // Type a city outside Rajasthan (e.g. Paris or Tokyo) and click Add Stop
+    fireEvent.change(searchInput, { target: { value: 'Paris' } });
+    fireEvent.click(screen.getByRole('button', { name: /add stop/i }));
+
+    // Validation alert must appear blocking cross-country noise!
+    expect(
+      screen.getByText(/is not located within/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Paris')).not.toBeInTheDocument();
+
+    // Now type a valid Rajasthan city (e.g. Pushkar or Bikaner)
+    fireEvent.change(searchInput, { target: { value: 'Pushkar' } });
+
+    // Autocomplete dropdown should show Pushkar
+    expect(screen.getAllByText('Pushkar').length).toBeGreaterThan(0);
+
+    // Click "+ Add another destination to route" quick button
+    // It must pick the next unadded contextual city for Rajasthan, NEVER Tokyo!
+    const addAnotherBtn = screen.getByRole('button', { name: /\+ add another destination to route/i });
+    fireEvent.click(addAnotherBtn);
+
+    // Verify Tokyo is NOT added
+    expect(screen.queryByText('Tokyo')).not.toBeInTheDocument();
   }, 15000);
 });

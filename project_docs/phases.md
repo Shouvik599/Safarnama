@@ -1294,7 +1294,26 @@ Implemented the first 3 screens aligned with the approved Stitch project `Safarn
   - Duration Reconciliation Engine comparing total allocated stop nights against target trip duration, alerting to gaps/surpluses, with one-click date synchronization.
   - Stop reordering, deletion, and custom destination insertion with automatic transit connector recalculation.
   - Curated suggestions dynamically filtered by active destination.
-- **Verification**: 10 automated flow and regression tests passing in Vitest (`flow.test.tsx`), production bundle verified with Vite/tsc (`pnpm build`), and zero linter warnings/errors (`oxlint`).
+- **Verification**: 12 automated flow and regression tests passing in Vitest (`flow.test.tsx`), production bundle verified with Vite/tsc (`pnpm build`), and zero linter warnings/errors (`oxlint`).
+
+## 22.2 Scope Partitioning & Contextual City Scoping (Screen 1 & 2 Upgrade) (Completed)
+
+Implemented strict scope partitioning and contextual scoping across Screen 1 (`TripDetailsScreen.tsx`) and Screen 2 (`DestinationsScreen.tsx`):
+- **Screen 1: Domestic vs. International Toggle & Origin Routing**:
+  - **Scope Toggle**: Added interactive Scope Toggle at the top of Step 1 (`[ 🇮🇳 Domestic (Within India) ]` vs `[ ✈️ International ]`).
+  - **Dynamic Origin Field**:
+    - **Domestic**: Searches and auto-populates from the full 4,198 Indian cities, towns, and rail hubs dataset (`india_places.json`) alongside commercial airports, supporting multi-modal domestic travel (train, cab, drive, flight).
+    - **International**: Strictly restricted to Indian commercial departure airports with valid IATA codes (`INDIAN_ORIGIN_AIRPORTS`, e.g. DEL, BOM, BLR, CCU, MAA, HYD) for immigration and flight legs.
+  - **Partitioned Destination Search**:
+    - If Domestic: Searches only across Indian States, UTs, and major regions.
+    - If International: Searches only across 250 Sovereign Countries and global circuits.
+    - Dynamic featured destination inspiration chips strictly aligned with the chosen scope.
+- **Screen 2: Strict Contextual City Auto-Population & Scenic Transit Connectors**:
+  - **Strict Contextual Scoping**: Detects confirmed state/country from Screen 1; `getContextualCitiesForDestination` strictly populates stops belonging to that destination (e.g. Rajasthan → Jaipur, Udaipur, Jodhpur, Jaisalmer, Pushkar...; Kerala → Munnar, Kochi, Alleppey...; Norway → Oslo, Bergen, Flåm, Tromsø...). Prevents adding cross-country or cross-state noise with validation alerts.
+  - **Real-Time Autocomplete Dropdown**: Rich dropdown rendering City Name, Region/District tag, Prominence indicator (`★ Popular Stop` vs `Scenic Gateway`), and image thumbnail.
+  - **Smart Stop Seeding & Scenic Transit Connectors**: Newly added cities receive realistic night allocation (default 2 nights), tailored roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferry in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan, Mountain Pass Drive in Ladakh).
+  - **Replaced Hardcoded Tokyo Fallback**: The `+ Add another destination to route` quick button dynamically selects the next unadded popular city from the active destination's contextual list, rather than defaulting to Tokyo.
+- **Verification**: 12 automated Vitest tests passing, 0 TypeScript build errors, 0 oxlint warnings, and 100% backend unit tests passing (580+ passed).
 
 ---
 

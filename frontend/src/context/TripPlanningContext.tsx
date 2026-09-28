@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import type { TripDetailsState, RouteStop } from '../types/trip';
 import { TripPlanningContext } from './TripPlanningContextDef';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
-import { resolveDestinationData } from '../data/destinationsRegistry';
+import {
+  resolveDestinationData,
+  generateScenicTransitConnector,
+} from '../data/destinationsRegistry';
 
 const formatLocalIso = (d: Date) => {
   const y = d.getFullYear();
@@ -23,6 +26,7 @@ const createInitialTripDetails = (): TripDetailsState => {
   retDate.setDate(retDate.getDate() + 10);
 
   return {
+    scope: 'INTERNATIONAL',
     origin: 'New Delhi (DEL - Indira Gandhi Intl)',
     destination: 'Kyoto, Japan (KIX - Kansai Intl / Shinkansen Rail)',
     departureDate: formatLocalDisplay(now),
@@ -58,12 +62,11 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (updated.length > 0 && !updated[updated.length - 1].transitToNext) {
         updated[updated.length - 1] = {
           ...updated[updated.length - 1],
-          transitToNext: {
-            mode: 'transit',
-            icon: 'directions_transit',
-            duration: '~1 hr 30 mins',
-            title: 'Regional Scenic Transit',
-          },
+          transitToNext: generateScenicTransitConnector(
+            stop.name,
+            tripDetails.destination,
+            tripDetails.scope
+          ),
         };
       }
       return [...updated, stop];
@@ -151,14 +154,16 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (i === list.length - 1) {
         return { ...stop, transitToNext: undefined };
       }
+      const nextStop = list[i + 1];
       return {
         ...stop,
-        transitToNext: stop.transitToNext || {
-          mode: 'transit',
-          icon: 'directions_transit',
-          duration: '~1 hr 45 mins',
-          title: 'Scenic Rail / Regional Express',
-        },
+        transitToNext:
+          stop.transitToNext ||
+          generateScenicTransitConnector(
+            nextStop.name,
+            tripDetails.destination,
+            tripDetails.scope
+          ),
       };
     });
   };

@@ -544,6 +544,28 @@ Planning complex domestic or international journeys across multiple agents and p
 
 ---
 
+### 6.15 Interactive Journey Onboarding & Scope-Partitioned Route Planning
+
+The frontend provides an intuitive 5-step journey planner adhering to editorial aesthetics and strict logistical integrity:
+
+1. **Step 1 (Trip Details) Scope Partitioning**:
+   - **Scope Toggle**: Users toggle between `[ 🇮🇳 Domestic (Within India) ]` and `[ ✈️ International ]`.
+   - **Dynamic Origin Field**:
+     - *Domestic*: Accepts any Indian city, town, or rail hub from the 4,198 settlements dataset (`india_places.json`) alongside commercial airports, enabling flexible multi-modal travel (train, cab, self-drive, domestic flight).
+     - *International*: Strictly restricted to Indian commercial departure airports with standard IATA designations (`INDIAN_ORIGIN_AIRPORTS`, e.g. DEL, BOM, BLR, CCU, MAA, HYD) for passport control, immigration, and international flight routing.
+   - **Partitioned Destination Search**:
+     - *Domestic*: Searches exclusively across Indian States, Union Territories, and major regional circuits.
+     - *International*: Searches exclusively across 250 sovereign countries and global circuits.
+   - **Real-Time Intelligence**: Dynamic seasonal weather descriptions and Indian passport visa guidance update dynamically as the user modifies dates and destinations.
+
+2. **Step 2 (Destinations & Route Sequence) Contextual Scoping**:
+   - **Strict Contextual Scoping**: Search autocomplete detects the confirmed state or sovereign country and strictly restricts suggestions to cities within that territory (e.g. Rajasthan trips only allow Rajasthan cities; Norway trips only allow Norwegian cities). Cross-state and cross-country noise is prevented.
+   - **Real-Time Autocomplete Dropdown**: Rich dropdown displaying city name, region/district tag, prominence badge (`★ Popular Stop` vs `Scenic Gateway`), and imagery.
+   - **Smart Stop Seeding**: Newly added stops receive realistic default night allocations (2 nights), tailored regional roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferries in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan).
+   - **Contextual Fallback**: The `+ Add another destination to route` quick button dynamically selects the next unadded popular stop from the active destination's contextual list, rather than defaulting to Tokyo.
+
+---
+
 
 ## 7. Data and Tool Architecture Requirements
 

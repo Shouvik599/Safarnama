@@ -8,11 +8,12 @@ import {
   INDIAN_ORIGIN_AIRPORTS,
   getSeasonDescription,
   getVisaVerdict,
-  type LocationAirport,
 } from '../data/locations';
 import {
   searchAllDestinations,
   resolveDestinationData,
+  searchOriginLocations,
+  type OriginLocationOption,
 } from '../data/destinationsRegistry';
 import type { PartyType } from '../types/trip';
 
@@ -26,6 +27,8 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
   onContinueToDestinations,
 }) => {
   const { tripDetails, updateTripDetails, seedDestination, destinations } = useTripPlanning();
+
+  const activeScope: 'DOMESTIC' | 'INTERNATIONAL' = tripDetails.scope || 'INTERNATIONAL';
 
   // Autocomplete dropdown states
   const [originQuery, setOriginQuery] = useState(tripDetails.origin);
@@ -65,23 +68,58 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Filtered Indian airports
-  const filteredAirports = INDIAN_ORIGIN_AIRPORTS.filter((airport) => {
-    const q = originQuery.toLowerCase();
-    return (
-      airport.code.toLowerCase().includes(q) ||
-      airport.city.toLowerCase().includes(q) ||
-      airport.name.toLowerCase().includes(q)
-    );
-  });
+  // Filtered Indian origins based on scope (Domestic = 4,198 cities + airports; International = strictly IATA departure airports)
+  const filteredOrigins = searchOriginLocations(originQuery, activeScope);
 
-  // Filtered destination options using full static datasets (250 countries + 36 Indian states/UTs + curated)
-  const filteredDestinations = searchAllDestinations(destQuery);
+  // Filtered destination options using full static datasets strictly partitioned by scope
+  const filteredDestinations = searchAllDestinations(destQuery, activeScope);
+
+  // Handle scope toggle switch
+  const handleToggleScope = (newScope: 'DOMESTIC' | 'INTERNATIONAL') => {
+    if (newScope === activeScope) return;
+
+    if (newScope === 'DOMESTIC') {
+      const resolved = resolveDestinationData(tripDetails.destination);
+      const isAlreadyDomestic = resolved.scope === 'DOMESTIC';
+      const targetDest = isAlreadyDomestic
+        ? tripDetails.destination
+        : 'Rajasthan (Jaipur, Jodhpur, Udaipur & Jaisalmer)';
+      updateTripDetails({
+        scope: 'DOMESTIC',
+        destination: targetDest,
+      });
+      setDestQuery(targetDest);
+      seedDestination(targetDest);
+    } else {
+      const resolved = resolveDestinationData(tripDetails.destination);
+      const isAlreadyIntl = resolved.scope === 'INTERNATIONAL';
+      const targetDest = isAlreadyIntl
+        ? tripDetails.destination
+        : 'Norway (Fjords & Northern Lights)';
+
+      // International origin strictly restricted to Indian commercial airports
+      const isAirportOrigin = INDIAN_ORIGIN_AIRPORTS.some(
+        (a) =>
+          tripDetails.origin.toLowerCase().includes(a.code.toLowerCase()) ||
+          tripDetails.origin.toLowerCase().includes(a.city.toLowerCase())
+      );
+      const safeOrigin = isAirportOrigin ? tripDetails.origin : 'New Delhi (DEL)';
+
+      updateTripDetails({
+        scope: 'INTERNATIONAL',
+        destination: targetDest,
+        origin: safeOrigin,
+      });
+      setDestQuery(targetDest);
+      setOriginQuery(safeOrigin);
+      seedDestination(targetDest);
+    }
+  };
 
   // Handle origin selection
-  const handleSelectAirport = (airport: LocationAirport) => {
-    updateTripDetails({ origin: airport.label });
-    setOriginQuery(airport.label);
+  const handleSelectOrigin = (opt: OriginLocationOption) => {
+    updateTripDetails({ origin: opt.name });
+    setOriginQuery(opt.name);
     setShowOriginDropdown(false);
   };
 
@@ -309,6 +347,58 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
           <section className="max-w-4xl mx-auto w-full mb-space-xl">
             <div className="bg-surface-container-lowest rounded-xl shadow-md p-space-lg sm:p-space-xl border border-outline-variant/30">
               <div className="space-y-space-xl">
+                {/* 0. SCOPE TOGGLE: Domestic (Within India) vs International */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+                  <div className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-primary text-[22px]">
+                      travel_explore
+                    </span>
+                    <div>
+                      <span className="font-label-md text-label-md font-bold text-on-surface block">
+                        Travel Scope
+                      </span>
+                      <span className="font-label-caption text-label-caption text-on-surface-variant">
+                        {activeScope === 'DOMESTIC'
+                          ? 'Domestic Travel: Indian states, UTs & 4,198 rail hubs/cities'
+                          : 'International: 250 sovereign countries & major global circuits'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    className="inline-flex p-1 rounded-xl bg-surface-container-high/90 border border-outline-variant/40 shadow-inner self-start sm:self-auto"
+                    role="group"
+                    aria-label="Scope Toggle"
+                  >
+                    <button
+                      type="button"
+                      id="btn-scope-domestic"
+                      onClick={() => handleToggleScope('DOMESTIC')}
+                      className={`px-4 py-2 rounded-lg font-label-md text-label-md font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                        activeScope === 'DOMESTIC'
+                          ? 'bg-primary text-on-primary shadow-sm font-bold ring-2 ring-primary/20'
+                          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                      }`}
+                    >
+                      <span className="text-[16px]">🇮🇳</span>
+                      <span>Domestic (Within India)</span>
+                    </button>
+                    <button
+                      type="button"
+                      id="btn-scope-international"
+                      onClick={() => handleToggleScope('INTERNATIONAL')}
+                      className={`px-4 py-2 rounded-lg font-label-md text-label-md font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                        activeScope === 'INTERNATIONAL'
+                          ? 'bg-primary text-on-primary shadow-sm font-bold ring-2 ring-primary/20'
+                          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                      }`}
+                    >
+                      <span className="text-[16px]">✈️</span>
+                      <span>International</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* 1. ORIGIN & DESTINATION SPLIT ROW WITH AUTOCOMPLETE */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg relative">
                   {/* Origin Box */}
@@ -321,10 +411,14 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                         <span className="material-symbols-outlined text-primary-container text-[18px]">
                           flight_takeoff
                         </span>
-                        Starting From (Origin)
+                        {activeScope === 'DOMESTIC'
+                          ? 'Starting From (Origin City, Rail Hub, or Airport)'
+                          : 'Starting From (Origin Airport)'}
                       </label>
                       <span className="font-label-caption text-label-caption text-outline">
-                        Indian Hub
+                        {activeScope === 'DOMESTIC'
+                          ? 'Any Indian City or Hub'
+                          : 'IATA Airport Only'}
                       </span>
                     </div>
 
@@ -339,7 +433,11 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                           setShowOriginDropdown(true);
                         }}
                         onFocus={() => setShowOriginDropdown(true)}
-                        placeholder="Search Indian city, station, or airport code..."
+                        placeholder={
+                          activeScope === 'DOMESTIC'
+                            ? 'Search any Indian city, town, station, or airport...'
+                            : 'Search departure airport (e.g. DEL, BOM, BLR, CCU)...'
+                        }
                         className="w-full h-13 pl-11 pr-10 py-3 text-on-surface font-body-md text-body-md rounded-lg focus:outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#e87524] transition-all border border-outline-variant/40 bg-surface-container-low"
                       />
                       <span className="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px]">
@@ -366,30 +464,38 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                     {/* Autocomplete Dropdown for Origin */}
                     {showOriginDropdown && (
                       <div className="absolute top-[80px] left-0 right-0 z-30 bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/40 max-h-56 overflow-y-auto divide-y divide-outline-variant/20">
-                        {filteredAirports.length > 0 ? (
-                          filteredAirports.map((airport) => (
+                        {filteredOrigins.length > 0 ? (
+                          filteredOrigins.map((opt) => (
                             <button
-                              key={airport.code}
+                              key={opt.id}
                               type="button"
-                              onClick={() => handleSelectAirport(airport)}
+                              onClick={() => handleSelectOrigin(opt)}
                               className="w-full px-4 py-2.5 text-left hover:bg-surface-container-low transition-colors flex items-center justify-between cursor-pointer"
                             >
-                              <div className="flex flex-col">
+                              <div className="flex flex-col pr-2">
                                 <span className="font-label-md text-label-md font-semibold text-on-surface">
-                                  {airport.city} ({airport.code})
+                                  {opt.name}
                                 </span>
                                 <span className="font-label-caption text-label-caption text-on-surface-variant">
-                                  {airport.name}
+                                  {opt.detail}
                                 </span>
                               </div>
-                              <span className="font-label-caption text-label-caption bg-surface-container px-2 py-0.5 rounded text-outline font-mono">
-                                {airport.code}
+                              <span
+                                className={`font-label-caption text-label-caption px-2 py-0.5 rounded font-mono ${
+                                  opt.type === 'AIRPORT'
+                                    ? 'bg-primary-fixed text-on-primary-fixed font-bold'
+                                    : 'bg-surface-container text-outline'
+                                }`}
+                              >
+                                {opt.code ? opt.code : 'CITY'}
                               </span>
                             </button>
                           ))
                         ) : (
                           <div className="px-4 py-3 text-on-surface-variant font-label-caption text-label-caption">
-                            No matching Indian airports found. Type custom city name.
+                            {activeScope === 'DOMESTIC'
+                              ? 'No matching Indian cities found. Type custom city name.'
+                              : 'Restricted strictly to Indian commercial departure airports (DEL, BOM, BLR, etc.).'}
                           </div>
                         )}
                       </div>
@@ -400,16 +506,39 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                       <span className="font-label-caption text-label-caption text-outline">
                         Frequent:
                       </span>
-                      {INDIAN_ORIGIN_AIRPORTS.slice(0, 4).map((a) => (
-                        <button
-                          key={a.code}
-                          type="button"
-                          onClick={() => handleSelectAirport(a)}
-                          className="px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-label-caption text-label-caption hover:bg-surface-container-high transition-colors cursor-pointer"
-                        >
-                          {a.city} ({a.code})
-                        </button>
-                      ))}
+                      {activeScope === 'DOMESTIC'
+                        ? [
+                            { name: 'New Delhi (DEL)', city: 'Delhi' },
+                            { name: 'Mumbai (BOM)', city: 'Mumbai' },
+                            { name: 'Bengaluru (BLR)', city: 'Bengaluru' },
+                            { name: 'Kolkata (CCU)', city: 'Kolkata' },
+                            { name: 'Jaipur (JAI)', city: 'Jaipur' },
+                          ].map((hub) => (
+                            <button
+                              key={hub.name}
+                              type="button"
+                              onClick={() => {
+                                updateTripDetails({ origin: hub.name });
+                                setOriginQuery(hub.name);
+                              }}
+                              className="px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-label-caption text-label-caption hover:bg-surface-container-high transition-colors cursor-pointer"
+                            >
+                              {hub.name}
+                            </button>
+                          ))
+                        : INDIAN_ORIGIN_AIRPORTS.slice(0, 4).map((a) => (
+                            <button
+                              key={a.code}
+                              type="button"
+                              onClick={() => {
+                                updateTripDetails({ origin: a.label });
+                                setOriginQuery(a.label);
+                              }}
+                              className="px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-label-caption text-label-caption hover:bg-surface-container-high transition-colors cursor-pointer"
+                            >
+                              {a.city} ({a.code})
+                            </button>
+                          ))}
                     </div>
                   </div>
 
@@ -423,7 +552,9 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                         <span className="material-symbols-outlined text-on-secondary-fixed-variant text-[18px]">
                           location_on
                         </span>
-                        Going To (Destination)
+                        {activeScope === 'DOMESTIC'
+                          ? 'Going To (State, UT, or Region)'
+                          : 'Going To (Destination)'}
                       </label>
                       <span className="font-label-caption text-label-caption text-on-secondary-fixed-variant font-semibold bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
                         {visaVerdictText}
@@ -441,7 +572,11 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                           setShowDestDropdown(true);
                         }}
                         onFocus={() => setShowDestDropdown(true)}
-                        placeholder="Search city, circuit, or region..."
+                        placeholder={
+                          activeScope === 'DOMESTIC'
+                            ? 'Search Indian state, UT, or region (e.g. Rajasthan, Kerala)...'
+                            : 'Search sovereign country or circuit (e.g. Norway, Japan)...'
+                        }
                         className="w-full h-13 pl-11 pr-10 py-3 text-on-surface font-body-md text-body-md rounded-lg focus:outline-none focus:bg-surface focus:shadow-[0_0_0_2px_#e87524] transition-all border border-outline-variant/40 bg-surface-container-low"
                       />
                       <span className="material-symbols-outlined absolute left-3.5 text-on-secondary-fixed-variant text-[20px]">
@@ -489,7 +624,9 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                           ))
                         ) : (
                           <div className="px-4 py-3 text-on-surface-variant font-label-caption text-label-caption">
-                            Press Continue or select to explore {destQuery}
+                            {activeScope === 'DOMESTIC'
+                              ? 'No matching Indian states or regions found. Please choose an Indian state or UT.'
+                              : `Press Continue or select to explore ${destQuery}`}
                           </div>
                         )}
                       </div>
@@ -500,15 +637,24 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                       <span className="font-label-caption text-label-caption text-outline">
                         Featured:
                       </span>
-                      {[
-                        { id: 'norway', label: 'Norway (Fjords)' },
-                        { id: 'japan', label: 'Japan (Autumn Trail)' },
-                        { id: 'ladakh', label: 'Ladakh Passes' },
-                        { id: 'rajasthan', label: 'Rajasthan Royals' },
-                        { id: 'switzerland', label: 'Switzerland (Alps)' },
-                        { id: 'kerala', label: 'Kerala (Backwaters)' },
-                        { id: 'goa', label: 'Goa (Beaches)' },
-                      ].map((c) => {
+                      {(activeScope === 'DOMESTIC'
+                        ? [
+                            { id: 'rajasthan', label: 'Rajasthan Royals' },
+                            { id: 'kerala', label: 'Kerala Backwaters' },
+                            { id: 'ladakh', label: 'Ladakh Passes' },
+                            { id: 'goa', label: 'Goa Beaches' },
+                            { id: 'himachal-pradesh', label: 'Himachal Valleys' },
+                            { id: 'kashmir', label: 'Kashmir Meadows' },
+                          ]
+                        : [
+                            { id: 'norway', label: 'Norway (Fjords)' },
+                            { id: 'japan', label: 'Japan (Autumn Trail)' },
+                            { id: 'switzerland', label: 'Switzerland (Alps)' },
+                            { id: 'italy', label: 'Italy Circuit' },
+                            { id: 'france', label: 'France (Riviera)' },
+                            { id: 'iceland', label: 'Iceland (Ring Road)' },
+                          ]
+                      ).map((c) => {
                         const isCurrent = tripDetails.destination.toLowerCase().includes(c.id);
                         return (
                           <button

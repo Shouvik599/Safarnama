@@ -149,16 +149,26 @@ Generic conversational AI chatbots fail at this task because they:
   - Composite quality score on a 0–100 scale (`0.45 * price_score + 0.45 * weather_score + weekend_bonus`).
   - Transparent trade-offs: Surfaces estimated logistics costs, weather summaries, and leave/crowd observations across top recommendation and 2–3 ranked alternatives.
   - Downstream graph integration: Updates `trip_context` dates so downstream nodes plan on concrete optimal dates while preserving alternatives in `FinalItinerary.date_options`.
+- **Warm Indian-Inspired Web Frontend (`frontend/`, Vite / React / TypeScript / Tailwind CSS / pnpm)**:
+  - **Screen 1 (Welcome / Landing Screen)**: Editorial hero, flat-lay aesthetics, 6-card bento architecture, popular preview routes, and primary navigation.
+  - **Screen 2 (Trip Details) & Scope Partitioning**:
+    - **Scope Toggle**: Interactive toggle between `[ 🇮🇳 Domestic (Within India) ]` and `[ ✈️ International ]`.
+    - **Dynamic Origin Routing**: Domestic travel allows selection from all 4,198 Indian cities, towns, and rail hubs from `india_places.json` + airports for train, cab, self-drive, or domestic flights; International travel strictly restricts departure origin to Indian commercial airports with valid IATA designations (`INDIAN_ORIGIN_AIRPORTS`, e.g. DEL, BOM, BLR, CCU, MAA, HYD) for immigration.
+    - **Partitioned Destination Search**: Domestic queries search across Indian States, Union Territories, and regional circuits; International queries search across 250 sovereign countries (`generated_countries.json`) and global circuits.
+    - **Real-Time Contextual Intelligence**: Adapting seasonal weather badges and Indian passport visa guidance.
+  - **Screen 3 (Destinations & Route Sequence) & Strict Contextual Scoping**:
+    - **Strict Contextual Scoping**: Search autocomplete detects confirmed destination and strictly restricts stops to cities within that state or sovereign country (`getContextualCitiesForDestination`). Prevents cross-country/cross-state noise.
+    - **Real-Time Autocomplete Dropdown**: Rich dropdown rendering City Name, Region tag, Prominence badge (`★ Popular Stop` vs `Scenic Gateway`), and imagery.
+    - **Dynamic Route Seeding & Scenic Transit Connectors**: Newly added stops receive realistic night allocation (default 2 nights), tailored roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferry in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan).
+    - **Contextual Add Button**: `+ Add another destination to route` dynamically picks the next unadded popular city from the contextual list rather than defaulting to Tokyo.
+    - **Duration Reconciliation Engine**: Reconciles total stop nights against target duration with one-click return date synchronization.
 - **Dual Verification Testing Architecture**:
-  - **Hermetic Offline Test Harness**: 545 unit tests running completely offline with zero network reliance or live API key dependencies (`SAFARNAMA_USE_FIXTURES=true`).
-  - **Live Network Integration Verification**: Automated 8-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes, domestic vertical slice, and international vertical slice.
+  - **Hermetic Offline Test Harness**: 580+ backend unit tests running completely offline (`SAFARNAMA_USE_FIXTURES=true`) + 12 frontend Vitest component & flow tests (`flow.test.tsx`).
+  - **Live Network Integration Verification**: Automated 8-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes.
 
 ### Planned Capabilities (Future Phases)
 
-- **Flexible Dates Optimization** (Candidate date window optimization) — *Phase 15*
-- **Budget Conflict & Human Decision Flow** (Interactive trade-off resolution) — *Phase 16*
-- **API Streaming Engine** (Real-time SSE event emission from LangGraph) — *Phase 17*
-- **Warm Indian-Inspired Web Frontend** (Vite / React / TypeScript / pnpm) — *Phase 18*
+- **Frontend Batch 2** (Preferences, Budget, Review & Itinerary Stream Screens) — *Phase 18 Continued*
 - **End-to-End Test Matrix & Hardening** — *Phases 19–20*
 
 ---

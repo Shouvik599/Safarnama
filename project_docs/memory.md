@@ -4,36 +4,27 @@
 
 ## Current Status
 
-**Safarnama Frontend — Batch 1 & Interactive Features Complete.** Implemented the first 3 screens of the Safarnama frontend faithfully following the approved designs in the Stitch project **`Safarnama`**, complete with interactive planning controls:
-1. Screen 1: **Welcome / Landing Screen**
-   - Header with official logo, navigation links, and primary CTA.
-   - Editorial hero section with travel diary flat-lay composition, floating contextual indicator cards, and dual CTAs.
-   - 6-card bento architecture section detailing smart itineraries, transit, stays, weather, visa guidance, and budget planning.
-   - Popular journey preview routes (Ladakh, Kyoto, Amalfi) with direct planner launch.
-   - Personal Safarnama closing banner and 5-column comprehensive footer.
-2. Screen 2: **Trip Planner — Trip Details**
-   - 5-step progress stepper (Step 1 active with primary container glow).
-   - Origin search autocomplete for 14 major Indian origin airports with IATA labels (Delhi DEL, Mumbai BOM, Bengaluru BLR, Kolkata CCU, Chennai MAA, Hyderabad HYD, Goa GOI, Kochi COK, etc.).
-   - Destination search autocomplete and featured circuit selectors (Japan Autumn Trail, Ladakh Pass, Italy Circuit, Kerala Stays).
-   - Interactive date pickers (`<input type="date">`) with automated journey duration calculation (`durationDays = return - departure`).
-   - Departure and return leg cycling preference buttons (Morning leg → Afternoon leg → Evening leg).
-   - Real-time Seasonal Weather Badge dynamically adapting to the selected month and destination via `getSeasonDescription`.
-   - Real-time Visa Verdict Badge dynamically adapting to destination via `getVisaVerdict`.
-   - Party dynamic buttons (Solo, Couple / Pair, Family, Friends Group) and counter steppers for Adults, Children, and Infants.
-   - Concierge editorial insight callout and autosave status indicator.
-3. Screen 3: **Trip Planner — Destinations & Route Sequence**
-   - 5-step progress stepper (Step 1 completed with checkmark, Step 2 active route).
-   - Dynamic Route Seeding: Selecting a circuit (Japan, Ladakh, Italy, Kerala) automatically populates curated stops with real transit connectors and durations.
-   - Stop Night Counters: Interactive `[ - ] X nights [ + ]` steppers on each stop card.
-   - Duration Reconciliation Engine: Live reconciliation banner comparing total allocated stop nights against target trip duration, alerting to duration gaps or over-allocations, with a one-click "Sync Trip Duration" action.
-   - Route Timeline Sequence: Reorder stops up/down with automatic transit connector recalculation, remove stops, and add custom destinations.
-   - Curated suggestions dynamically filtered by the active circuit and categories, with "+ Add Stop" and "Add as Day Trip" actions.
-   - Connected flow: Welcome ↔ Trip Details ↔ Destinations with bidirectional synchronization and state persistence.
-   - Stops cleanly at Batch 1 boundary when advancing to Step 3 (Preferences).
+**Safarnama Frontend — Batch 1 & Scope Partitioning / Contextual Scoping Upgrade Complete.**
+Implemented strict scope partitioning and contextual scoping across Screen 1 (`TripDetailsScreen.tsx`) and Screen 2 (`DestinationsScreen.tsx`):
+1. **Screen 1 (Trip Details) — Scope Partitioning & Dynamic Origin Routing**:
+   - Scope Toggle at the top of Step 1 (`[ 🇮🇳 Domestic (Within India) ]` vs `[ ✈️ International ]`).
+   - Dynamic Origin Field:
+     - Domestic: Searches and auto-populates from the full 4,198 Indian cities, towns, and rail hubs dataset (`india_places.json`) alongside commercial airports, enabling flexible multi-modal travel (train, cab, drive, domestic flight).
+     - International: Strictly restricted to Indian commercial departure airports with valid IATA designations (`INDIAN_ORIGIN_AIRPORTS`, e.g. DEL, BOM, BLR, CCU, MAA, HYD) for passport control and flight legs.
+   - Filtered Destination Search:
+     - Domestic: Searches strictly across Indian States, Union Territories, and major regional circuits.
+     - International: Searches strictly across 250 sovereign countries (`generated_countries.json`) and global circuits.
+   - Dynamic featured destination inspiration chips strictly partitioned by the active scope.
+2. **Screen 2 (Destinations & Route Sequence) — Strict Contextual City Scoping**:
+   - Strict Contextual Scoping: Automatically detects confirmed destination from Screen 1; `getContextualCitiesForDestination` strictly filters cities to settlements within that state or sovereign country (e.g. Rajasthan → Jaipur, Udaipur, Jodhpur, Jaisalmer, Pushkar...; Kerala → Munnar, Kochi, Alleppey...; Norway → Oslo, Bergen, Flåm, Tromsø...). Prevents cross-country or cross-state noise with validation alerts.
+   - Real-Time Autocomplete Dropdown: Replaces plain text box with a rich dropdown showing City Name, Region tag, Prominence badge (`★ Popular Stop` vs `Scenic Gateway`), and imagery.
+   - Smart Stop Seeding & Scenic Transit Connectors: Added cities receive realistic night allocation (default 2 nights), tailored roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferry in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan).
+   - Replaced Hardcoded Tokyo Fallback: `+ Add another destination to route` dynamically picks the next unadded popular city from the active destination's contextual list rather than defaulting to Tokyo.
+3. **Verification**: 12 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), 0 oxlint warnings/errors, and 100% backend unit tests passing (580+ passed).
 
 ## Current implementation phase
 
-Frontend Batch 1 — Screens 1–3 + Interactive Planning Controls (Completed)
+Frontend Batch 1 — Screen 1 & 2 Scope Partitioning & Contextual City Scoping (Completed)
 
 ## Completed functionality
 

@@ -29,7 +29,19 @@ export interface DestinationSuggestion {
   isDayTrip?: boolean;
 }
 
+export interface ContextualCityItem {
+  id: string;
+  name: string;
+  region: string;
+  country: string;
+  isPopular: boolean;
+  role: string;
+  imageUrl: string;
+  imageAlt?: string;
+}
+
 export interface TripDetailsState {
+  scope?: 'DOMESTIC' | 'INTERNATIONAL';
   origin: string;
   destination: string;
   departureDate: string; // e.g. "Sat, Oct 18, 2025"

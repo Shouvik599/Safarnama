@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTripPlanning } from '../context/useTripPlanning';
 import { PlannerHeader } from '../components/layout/PlannerHeader';
 import { PlannerFooter } from '../components/layout/PlannerFooter';
 import { ProgressStepper } from '../components/planner/ProgressStepper';
 import { RouteSequenceItem } from '../components/planner/RouteSequenceItem';
 import { SuggestionCard } from '../components/planner/SuggestionCard';
-import type { DestinationSuggestion, RouteStop } from '../types/trip';
+import type { DestinationSuggestion, RouteStop, ContextualCityItem } from '../types/trip';
 import {
   resolveDestinationData,
   ALL_CURATED_DESTINATIONS,
+  getContextualCitiesForDestination,
 } from '../data/destinationsRegistry';
 
 interface DestinationsScreenProps {
@@ -35,11 +36,38 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
   } = useTripPlanning();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [searchValidationAlert, setSearchValidationAlert] = useState<string | null>(null);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState('All');
   const [showNextStepAlert, setShowNextStepAlert] = useState(false);
 
   // Dynamically resolve active destination and route template from user's chosen destination
   const activeCircuit = resolveDestinationData(tripDetails.destination);
+
+  // Strict Contextual Scoping: Retrieve cities strictly belonging to the confirmed state or sovereign country
+  const contextualCities = getContextualCitiesForDestination(tripDetails.destination);
+
+  // Dismiss dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setShowSearchDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter contextual cities by search query
+  const filteredContextualCities = searchQuery.trim()
+    ? contextualCities.filter(
+        (c) =>
+          c.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+          c.region.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+          c.role.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      )
+    : contextualCities.slice(0, 8);
 
   // Ensure stops are synced with activeCircuit if destination changed
   useEffect(() => {
@@ -140,20 +168,55 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
 
   const currentSuggestions = getFilteredSuggestions();
 
-  const handleAddCustomDestination = () => {
-    if (!searchQuery.trim()) return;
-    const name = searchQuery.trim();
+  // Adds a validated contextual city into the route timeline with smart defaults
+  const handleSelectContextualCity = (city: ContextualCityItem) => {
+    if (
+      destinations.some(
+        (d) => d.name.toLowerCase() === city.name.toLowerCase() || d.id === city.id
+      )
+    ) {
+      setSearchValidationAlert(`'${city.name}' is already in your route sequence.`);
+      return;
+    }
+
     const newStop: RouteStop = {
-      id: `custom-${Date.now()}`,
-      name,
-      country: activeCircuit.scope === 'DOMESTIC' ? 'India' : 'International',
-      nights: 2,
-      role: 'Custom Stop',
-      imageUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuD6mcxF54MPkKZuSc4IKenZHCkkj4fqa7VhihkWiSrZSkPj1t56XCkq7yA_tl7gobd3cqHYwesjfCWhbuSnaBjsalbEyub274sIagz887vs-R5V1iB3iguh3AgVFU2Na8y-oVAXvd7ZTFh_6fp-pPAcwYZ0jE-KK5YlQ3zBBwdfJKe0eYP_yShgXMqJMWF3SoOxSVBpPtTOW3lkx67sCW53IxFaw6Uo2gkmsYFVgoY0XcJCntKjZClZqw',
+      id: city.id || `stop-${Date.now()}`,
+      name: city.name,
+      country: city.country,
+      region: city.region,
+      nights: 2, // Realistic night allocation (default 2 nights)
+      role: city.role, // Tailored role
+      imageUrl: city.imageUrl,
+      imageAlt: city.imageAlt || `${city.name} in ${city.region}`,
     };
+
     addDestination(newStop);
     setSearchQuery('');
+    setShowSearchDropdown(false);
+    setSearchValidationAlert(null);
+  };
+
+  // Handles adding from text input strictly validating against the active destination scope
+  const handleAddCustomDestination = () => {
+    if (!searchQuery.trim()) return;
+    const q = searchQuery.trim().toLowerCase();
+
+    // Check if entered name matches any city in the contextual cities list
+    const match = contextualCities.find(
+      (c) =>
+        c.name.toLowerCase() === q ||
+        c.name.toLowerCase().startsWith(q) ||
+        c.id.toLowerCase() === q
+    );
+
+    if (match) {
+      handleSelectContextualCity(match);
+    } else {
+      // Strictly prevent cross-country / cross-state noise
+      setSearchValidationAlert(
+        `"${searchQuery}" is not located within ${activeCircuit.name || tripDetails.destination}. Only destinations within this state or country can be added.`
+      );
+    }
   };
 
   const handleAddSuggestion = (s: DestinationSuggestion) => {
@@ -167,6 +230,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
       imageAlt: s.imageAlt,
     };
     addDestination(newStop);
+    setSearchValidationAlert(null);
   };
 
   return (
@@ -253,31 +317,153 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
               </div>
             </div>
 
-            {/* Search & Quick Selection Section */}
+            {/* Search & Quick Selection Section with Real-Time Contextual Scoping */}
             <div className="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm flex flex-col gap-space-md border border-outline-variant/30">
-              <div className="relative flex items-center w-full">
-                <span className="material-symbols-outlined absolute left-4 text-on-surface-variant text-[24px]">
-                  search
-                </span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAddCustomDestination();
-                  }}
-                  placeholder="Search destinations (e.g. Kyoto, Jaipur, Florence, Leh, Tokyo)..."
-                  className="w-full pl-12 pr-36 py-3.5 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/60 rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all border border-outline-variant/30"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddCustomDestination}
-                  className="absolute right-2 px-space-md py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-1.5 shadow hover:opacity-95 transition-opacity cursor-pointer"
-                  id="btn-add-destination"
-                >
-                  <span className="material-symbols-outlined text-[18px]">add_location_alt</span>
-                  <span>Add Stop</span>
-                </button>
+              <div className="flex flex-col relative" ref={searchBoxRef}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-primary text-[18px]">
+                      add_location_alt
+                    </span>
+                    Add Stops in {activeCircuit.alias || activeCircuit.name}
+                  </span>
+                  <span className="font-label-caption text-label-caption text-outline">
+                    {contextualCities.length} Contextual Cities Available
+                  </span>
+                </div>
+
+                <div className="relative flex items-center w-full">
+                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant text-[24px]">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSearchDropdown(true);
+                      setSearchValidationAlert(null);
+                    }}
+                    onFocus={() => setShowSearchDropdown(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddCustomDestination();
+                    }}
+                    placeholder={`Search cities strictly within ${activeCircuit.name || tripDetails.destination}...`}
+                    className="w-full pl-12 pr-36 py-3.5 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/60 rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all border border-outline-variant/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomDestination}
+                    className="absolute right-2 px-space-md py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-1.5 shadow hover:opacity-95 transition-opacity cursor-pointer"
+                    id="btn-add-destination"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add_location_alt</span>
+                    <span>Add Stop</span>
+                  </button>
+                </div>
+
+                {/* Validation message preventing cross-state or cross-country noise */}
+                {searchValidationAlert && (
+                  <div className="mt-2 p-2.5 rounded-lg bg-error-container/20 border border-error/30 text-on-error-container flex items-center gap-2 font-body-sm text-body-sm">
+                    <span className="material-symbols-outlined text-[18px] text-error">
+                      warning
+                    </span>
+                    <span>{searchValidationAlert}</span>
+                  </div>
+                )}
+
+                {/* Real-Time Autocomplete Dropdown */}
+                {showSearchDropdown && (
+                  <div className="absolute top-[82px] left-0 right-0 z-30 bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/40 max-h-72 overflow-y-auto divide-y divide-outline-variant/20">
+                    <div className="px-4 py-2 bg-surface-container-low text-on-surface-variant font-label-caption text-label-caption font-semibold flex items-center justify-between">
+                      <span>
+                        Contextual Stops for {activeCircuit.alias || activeCircuit.name}
+                      </span>
+                      <span>
+                        {filteredContextualCities.length} match{filteredContextualCities.length !== 1 ? 'es' : ''}
+                      </span>
+                    </div>
+
+                    {filteredContextualCities.length > 0 ? (
+                      filteredContextualCities.map((city) => {
+                        const isAlreadyInRoute = destinations.some(
+                          (d) =>
+                            d.name.toLowerCase() === city.name.toLowerCase() ||
+                            d.id === city.id
+                        );
+                        return (
+                          <div
+                            key={city.id}
+                            onClick={() => !isAlreadyInRoute && handleSelectContextualCity(city)}
+                            className={`w-full px-4 py-2.5 text-left transition-colors flex items-center justify-between gap-3 ${
+                              isAlreadyInRoute
+                                ? 'bg-surface-container-low/50 opacity-60 cursor-default'
+                                : 'hover:bg-surface-container-low cursor-pointer'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={city.imageUrl}
+                                alt={city.name}
+                                className="w-10 h-10 rounded-lg object-cover bg-surface-dim shrink-0 shadow-xs"
+                              />
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-label-md text-label-md font-semibold text-on-surface">
+                                    {city.name}
+                                  </span>
+                                  {city.isPopular ? (
+                                    <span className="font-label-caption text-[11px] px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-bold">
+                                      ★ Popular Stop
+                                    </span>
+                                  ) : (
+                                    <span className="font-label-caption text-[11px] px-2 py-0.5 rounded-full bg-surface-container text-outline">
+                                      Scenic Gateway
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="font-label-caption text-label-caption text-on-surface-variant">
+                                  {city.region} • {city.role}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div>
+                              {isAlreadyInRoute ? (
+                                <span className="text-[12px] font-semibold text-on-surface-variant flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[14px] text-primary">
+                                    check
+                                  </span>
+                                  In Route
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectContextualCity(city);
+                                  }}
+                                  className="px-3 py-1 bg-primary text-on-primary rounded-lg font-label-caption text-label-caption font-semibold shadow hover:opacity-90 transition-opacity cursor-pointer"
+                                >
+                                  + Add
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="px-4 py-4 text-center text-on-surface-variant font-body-sm text-body-sm">
+                        <p className="font-semibold text-on-surface mb-1">
+                          No matching stops found in {activeCircuit.name || tripDetails.destination}
+                        </p>
+                        <p className="text-[12px] text-outline">
+                          To maintain realistic journey logistics, you cannot add cities from other countries or states to this route.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Quick Category Chips */}
@@ -403,28 +589,57 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
                   />
                 ))}
 
-                {/* Add Stop Placeholder Trigger */}
+                {/* Add Stop Placeholder Trigger - Contextually seeded stop */}
                 <button
                   type="button"
+                  id="btn-add-another-stop"
                   onClick={() => {
+                    // 1. Try to find next unadded suggestion
                     const nextSuggestion = currentSuggestions.find(
-                      (s) => !destinations.some((d) => d.id === s.id)
+                      (s) =>
+                        !destinations.some(
+                          (d) =>
+                            d.id === s.id ||
+                            d.name.toLowerCase() === s.name.toLowerCase()
+                        )
                     );
                     if (nextSuggestion) {
                       handleAddSuggestion(nextSuggestion);
-                    } else {
-                      handleAddSuggestion({
-                        id: `stop-${Date.now()}`,
-                        name: 'Tokyo',
-                        region: 'Kanto, Japan',
-                        tag: 'Metropolitan Finale',
-                        description:
-                          'High-energy cityscape, world-class gastronomy, and historic Asakusa.',
-                        imageUrl:
-                          'https://lh3.googleusercontent.com/aida-public/AB6AXuD6mcxF54MPkKZuSc4IKenZHCkkj4fqa7VhihkWiSrZSkPj1t56XCkq7yA_tl7gobd3cqHYwesjfCWhbuSnaBjsalbEyub274sIagz887vs-R5V1iB3iguh3AgVFU2Na8y-oVAXvd7ZTFh_6fp-pPAcwYZ0jE-KK5YlQ3zBBwdfJKe0eYP_yShgXMqJMWF3SoOxSVBpPtTOW3lkx67sCW53IxFaw6Uo2gkmsYFVgoY0XcJCntKjZClZqw',
-                        actionLabel: '+ Add Stop',
-                      });
+                      return;
                     }
+
+                    // 2. Dynamically pick next unadded popular city from active destination's contextual list
+                    const nextPopularCity = contextualCities.find(
+                      (c) =>
+                        c.isPopular &&
+                        !destinations.some(
+                          (d) =>
+                            d.name.toLowerCase() === c.name.toLowerCase() ||
+                            d.id === c.id
+                        )
+                    );
+                    if (nextPopularCity) {
+                      handleSelectContextualCity(nextPopularCity);
+                      return;
+                    }
+
+                    // 3. Pick next unadded city from active destination's contextual list
+                    const nextContextualCity = contextualCities.find(
+                      (c) =>
+                        !destinations.some(
+                          (d) =>
+                            d.name.toLowerCase() === c.name.toLowerCase() ||
+                            d.id === c.id
+                        )
+                    );
+                    if (nextContextualCity) {
+                      handleSelectContextualCity(nextContextualCity);
+                      return;
+                    }
+
+                    setSearchValidationAlert(
+                      `All primary stops for ${activeCircuit.alias || activeCircuit.name} are already in your route!`
+                    );
                   }}
                   className="mt-2 ml-14 sm:ml-16 py-3 px-4 rounded-xl bg-surface-container-high/60 hover:bg-surface-container-high text-primary font-label-md text-label-md flex items-center justify-center gap-2 transition-all cursor-pointer self-start"
                 >

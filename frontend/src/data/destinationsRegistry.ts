@@ -1,5 +1,5 @@
-import type { RouteStop, DestinationSuggestion } from '../types/trip';
-import { PRECONFIGURED_CIRCUITS } from './locations';
+import type { RouteStop, DestinationSuggestion, ContextualCityItem } from '../types/trip';
+import { PRECONFIGURED_CIRCUITS, INDIAN_ORIGIN_AIRPORTS } from './locations';
 import generatedCountries from './generated_countries.json';
 import indianStatesUts from './indian_states_uts.json';
 import indiaPlacesData from './india_places.json';
@@ -1402,8 +1402,213 @@ export function resolveDestinationData(destinationInput: string): DestinationIte
   return ALL_CURATED_DESTINATIONS[0];
 }
 
+function getThematicImageUrl(stateOrCountry: string): string {
+  const s = stateOrCountry.toLowerCase();
+  if (s.includes('rajasthan')) return 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('kerala')) return 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('goa')) return 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('himachal') || s.includes('uttarakhand') || s.includes('ladakh') || s.includes('kashmir')) {
+    return 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80';
+  }
+  if (s.includes('tamil') || s.includes('karnataka')) {
+    return 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&auto=format&fit=crop&q=80';
+  }
+  if (s.includes('norway')) return 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('japan')) return 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('italy')) return 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('switzerland')) return 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&auto=format&fit=crop&q=80';
+  if (s.includes('france')) return 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop&q=80';
+  return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80';
+}
+
+// Strictly retrieves the contextual cities and stops for the confirmed destination
+export function getContextualCitiesForDestination(destinationInput: string): ContextualCityItem[] {
+  if (!destinationInput || !destinationInput.trim()) {
+    return [];
+  }
+  const q = destinationInput.toLowerCase().trim();
+
+  // 1. Check if destination corresponds to an Indian state or UT
+  const stateRecord = (indiaPlacesData.states as Array<{
+    id: string;
+    name: string;
+    code: string;
+    type: string;
+    popular_cities: string[];
+    cities: string[];
+  }>).find(
+    (s) =>
+      s.name.toLowerCase() === q ||
+      q.includes(s.name.toLowerCase()) ||
+      s.name.toLowerCase().includes(q) ||
+      s.id === q ||
+      q.includes(s.id)
+  );
+
+  if (stateRecord) {
+    const popularSet = new Set(stateRecord.popular_cities.map((c) => c.toLowerCase()));
+    const stateCities = stateRecord.cities.map((cityName) => {
+      const isPop = popularSet.has(cityName.toLowerCase());
+      return {
+        id: `in-${cityName.toLowerCase().replace(/\s+/g, '-')}`,
+        name: cityName,
+        region: `${stateRecord.name}, India`,
+        country: 'India',
+        isPopular: isPop,
+        role: isPop ? 'Iconic Regional Hub & Heritage Quarter' : 'Scenic Gateway & Local Settlement',
+        imageUrl: getThematicImageUrl(stateRecord.name),
+        imageAlt: `${cityName} in ${stateRecord.name}, India`,
+      };
+    });
+
+    return stateCities.sort((a, b) => {
+      if (a.isPopular && !b.isPopular) return -1;
+      if (!a.isPopular && b.isPopular) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  // 2. Check if destination corresponds to an Indian City (e.g. Udaipur) -> return sibling cities in its parent state
+  const cityMatch = (indiaPlacesData.cities as Array<{
+    id: string;
+    name: string;
+    state_name: string;
+    state_code: string;
+    state_id: string;
+  }>).find(
+    (c) =>
+      c.name.toLowerCase() === q ||
+      c.id.toLowerCase() === q ||
+      q.includes(c.name.toLowerCase())
+  );
+
+  if (cityMatch) {
+    return getContextualCitiesForDestination(cityMatch.state_name);
+  }
+
+  // 3. Check if destination corresponds to a curated international circuit
+  const curatedMatch = ALL_CURATED_DESTINATIONS.find((d) => {
+    const dId = d.id.toLowerCase();
+    const dName = d.name.toLowerCase();
+    const dAlias = d.alias.toLowerCase();
+    return q === dId || q.includes(dId) || dId.includes(q) || q.includes(dAlias) || dName.includes(q);
+  });
+
+  if (curatedMatch && curatedMatch.scope === 'INTERNATIONAL') {
+    const items: ContextualCityItem[] = [];
+    const added = new Set<string>();
+
+    for (const stop of curatedMatch.defaultStops) {
+      if (!added.has(stop.name.toLowerCase())) {
+        added.add(stop.name.toLowerCase());
+        items.push({
+          id: stop.id,
+          name: stop.name,
+          region: stop.region || curatedMatch.name,
+          country: stop.country,
+          isPopular: true,
+          role: stop.role,
+          imageUrl: stop.imageUrl,
+          imageAlt: stop.imageAlt,
+        });
+      }
+    }
+
+    for (const sugg of curatedMatch.suggestions) {
+      if (!added.has(sugg.name.toLowerCase())) {
+        added.add(sugg.name.toLowerCase());
+        items.push({
+          id: sugg.id,
+          name: sugg.name,
+          region: sugg.region,
+          country: curatedMatch.name,
+          isPopular: true,
+          role: sugg.tag,
+          imageUrl: sugg.imageUrl,
+          imageAlt: sugg.imageAlt,
+        });
+      }
+    }
+
+    const countryData = (generatedCountries as Array<{
+      name: string;
+      top_cities: string[];
+      region: string;
+    }>).find(
+      (c) =>
+        c.name.toLowerCase() === curatedMatch.name.toLowerCase() ||
+        curatedMatch.name.toLowerCase().includes(c.name.toLowerCase())
+    );
+
+    if (countryData && countryData.top_cities) {
+      for (const cName of countryData.top_cities) {
+        if (!added.has(cName.toLowerCase())) {
+          added.add(cName.toLowerCase());
+          items.push({
+            id: `intl-${cName.toLowerCase().replace(/\s+/g, '-')}`,
+            name: cName,
+            region: `${countryData.name}, ${countryData.region}`,
+            country: countryData.name,
+            isPopular: false,
+            role: 'Regional Gateway & Cultural Quarter',
+            imageUrl: curatedMatch.defaultStops[0]?.imageUrl || getThematicImageUrl(countryData.name),
+            imageAlt: `${cName} in ${countryData.name}`,
+          });
+        }
+      }
+    }
+
+    return items;
+  }
+
+  // 4. Check in generatedCountries directly for international country
+  const sovereignMatch = (generatedCountries as Array<{
+    name: string;
+    capital: string;
+    region: string;
+    top_cities: string[];
+  }>).find(
+    (c) =>
+      c.name.toLowerCase() === q ||
+      q.includes(c.name.toLowerCase()) ||
+      c.name.toLowerCase().includes(q)
+  );
+
+  if (sovereignMatch) {
+    const items: ContextualCityItem[] = [];
+    const added = new Set<string>();
+
+    const candidateCities = [
+      sovereignMatch.capital,
+      ...(sovereignMatch.top_cities || []),
+    ].filter(Boolean);
+
+    for (const cName of candidateCities) {
+      if (!added.has(cName.toLowerCase())) {
+        added.add(cName.toLowerCase());
+        items.push({
+          id: `intl-${cName.toLowerCase().replace(/\s+/g, '-')}`,
+          name: cName,
+          region: `${sovereignMatch.name}, ${sovereignMatch.region}`,
+          country: sovereignMatch.name,
+          isPopular: cName === sovereignMatch.capital,
+          role: cName === sovereignMatch.capital ? 'Capital & Arrival Hub' : 'Scenic Gateway & Cultural Quarter',
+          imageUrl: getThematicImageUrl(sovereignMatch.name),
+          imageAlt: `${cName} in ${sovereignMatch.name}`,
+        });
+      }
+    }
+    return items;
+  }
+
+  return [];
+}
+
 // Autocomplete search across all 250 countries + all 36 Indian states & UTs + 4,200 Indian cities + curated circuits
-export function searchAllDestinations(query: string): Array<{
+export function searchAllDestinations(
+  query: string,
+  scopeFilter?: 'DOMESTIC' | 'INTERNATIONAL'
+): Array<{
   id: string;
   title: string;
   subtitle: string;
@@ -1447,10 +1652,17 @@ export function searchAllDestinations(query: string): Array<{
     }>;
   };
 
+  const allowDomestic = !scopeFilter || scopeFilter === 'DOMESTIC';
+  const allowInternational = !scopeFilter || scopeFilter === 'INTERNATIONAL';
+
   if (!q) {
-    // 1. Featured curated destinations (6 items)
-    for (const d of ALL_CURATED_DESTINATIONS.slice(0, 6)) {
-      if (!addedIds.has(d.id)) {
+    // 1. Featured curated destinations
+    for (const d of ALL_CURATED_DESTINATIONS) {
+      if (
+        ((allowDomestic && d.scope === 'DOMESTIC') ||
+          (allowInternational && d.scope === 'INTERNATIONAL')) &&
+        !addedIds.has(d.id)
+      ) {
         addedIds.add(d.id);
         results.push({
           id: d.id,
@@ -1462,62 +1674,68 @@ export function searchAllDestinations(query: string): Array<{
       }
     }
 
-    // 2. Featured Indian states / UTs (4 items)
-    for (const s of (indianStatesUts as Array<{ id: string; name: string; alias: string; top_cities: string[] }>).slice(0, 4)) {
-      if (!addedIds.has(s.id)) {
-        addedIds.add(s.id);
-        results.push({
-          id: s.id,
-          title: s.name,
-          subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
-          scope: 'DOMESTIC',
-          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
-        });
+    // 2. Featured Indian states / UTs (if domestic allowed)
+    if (allowDomestic) {
+      for (const s of (indianStatesUts as Array<{ id: string; name: string; alias: string; top_cities: string[] }>).slice(0, 6)) {
+        if (!addedIds.has(s.id)) {
+          addedIds.add(s.id);
+          results.push({
+            id: s.id,
+            title: s.name,
+            subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
+            scope: 'DOMESTIC',
+            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+          });
+        }
+      }
+
+      // 3. Iconic Indian tourist cities
+      for (const c of places.popular_destinations.slice(0, 4)) {
+        if (!addedIds.has(c.id)) {
+          addedIds.add(c.id);
+          results.push({
+            id: c.id,
+            title: c.name,
+            subtitle: `City in ${c.state_name}, India`,
+            scope: 'DOMESTIC',
+            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+          });
+        }
       }
     }
 
-    // 3. Iconic Indian tourist cities (4 items)
-    for (const c of places.popular_destinations.slice(0, 4)) {
-      if (!addedIds.has(c.id)) {
-        addedIds.add(c.id);
-        results.push({
-          id: c.id,
-          title: c.name,
-          subtitle: `City in ${c.state_name}, India`,
-          scope: 'DOMESTIC',
-          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
-        });
+    // 4. Featured International sovereign countries (if international allowed)
+    if (allowInternational) {
+      for (const c of (generatedCountries as Array<{ code: string; name: string; capital: string; region: string; is_schengen: boolean }>).slice(0, 6)) {
+        const cId = c.name.toLowerCase().replace(/\s+/g, '-');
+        if (!addedIds.has(cId)) {
+          addedIds.add(cId);
+          results.push({
+            id: cId,
+            title: c.name,
+            subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
+            scope: 'INTERNATIONAL',
+            visaStatus: c.is_schengen
+              ? 'Schengen Visa Required • ~15-30 Days Processing'
+              : 'International • Tourist Visa / eVisa Active',
+          });
+        }
       }
     }
 
-    // 4. Featured International sovereign countries (4 items)
-    for (const c of (generatedCountries as Array<{ code: string; name: string; capital: string; region: string; is_schengen: boolean }>).slice(0, 4)) {
-      const cId = c.name.toLowerCase().replace(/\s+/g, '-');
-      if (!addedIds.has(cId)) {
-        addedIds.add(cId);
-        results.push({
-          id: cId,
-          title: c.name,
-          subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
-          scope: 'INTERNATIONAL',
-          visaStatus: c.is_schengen
-            ? 'Schengen Visa Required • ~15-30 Days Processing'
-            : 'International • Tourist Visa / eVisa Active',
-        });
-      }
-    }
-
-    return results;
+    return results.slice(0, 16);
   }
 
   // Active query:
   // 1. Curated destinations match
   for (const d of ALL_CURATED_DESTINATIONS) {
     if (
-      d.name.toLowerCase().includes(q) ||
-      d.alias.toLowerCase().includes(q) ||
-      d.id.toLowerCase().includes(q) ||
-      d.defaultStops.some((s) => s.name.toLowerCase().includes(q))
+      ((allowDomestic && d.scope === 'DOMESTIC') ||
+        (allowInternational && d.scope === 'INTERNATIONAL')) &&
+      (d.name.toLowerCase().includes(q) ||
+        d.alias.toLowerCase().includes(q) ||
+        d.id.toLowerCase().includes(q) ||
+        d.defaultStops.some((s) => s.name.toLowerCase().includes(q)))
     ) {
       if (!addedIds.has(d.id)) {
         addedIds.add(d.id);
@@ -1532,69 +1750,275 @@ export function searchAllDestinations(query: string): Array<{
     }
   }
 
-  // 2. Indian States & UTs match
-  for (const s of indianStatesUts) {
-    if (
-      s.name.toLowerCase().includes(q) ||
-      s.alias.toLowerCase().includes(q) ||
-      s.top_cities.some((c: string) => c.toLowerCase().includes(q))
-    ) {
-      if (!addedIds.has(s.id)) {
-        addedIds.add(s.id);
-        results.push({
-          id: s.id,
-          title: s.name,
-          subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
-          scope: 'DOMESTIC',
-          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
-        });
+  // 2. Indian States & UTs match (if domestic allowed)
+  if (allowDomestic) {
+    for (const s of indianStatesUts) {
+      if (
+        s.name.toLowerCase().includes(q) ||
+        s.alias.toLowerCase().includes(q) ||
+        s.top_cities.some((c: string) => c.toLowerCase().includes(q))
+      ) {
+        if (!addedIds.has(s.id)) {
+          addedIds.add(s.id);
+          results.push({
+            id: s.id,
+            title: s.name,
+            subtitle: `${s.alias} • ${s.top_cities.slice(0, 3).join(', ')}`,
+            scope: 'DOMESTIC',
+            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+          });
+        }
+      }
+    }
+
+    // 3. Indian Cities match
+    for (const c of places.cities) {
+      if (results.length >= 25) break;
+      const nameLower = c.name.toLowerCase();
+      if (nameLower.startsWith(q) || nameLower.includes(q)) {
+        if (!addedIds.has(c.id)) {
+          addedIds.add(c.id);
+          results.push({
+            id: c.id,
+            title: c.name,
+            subtitle: `City in ${c.state_name}, India`,
+            scope: 'DOMESTIC',
+            visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+          });
+        }
       }
     }
   }
 
-  // 3. Indian Cities match (prioritize popular destinations first, then all 4,200 cities)
-  for (const c of places.cities) {
-    if (results.length >= 25) break;
-    const nameLower = c.name.toLowerCase();
-    if (nameLower.startsWith(q) || nameLower.includes(q)) {
-      if (!addedIds.has(c.id)) {
-        addedIds.add(c.id);
+  // 4. Sovereign Countries from static dataset (if international allowed)
+  if (allowInternational) {
+    for (const c of generatedCountries) {
+      if (results.length >= 25) break;
+      const cNameLower = c.name.toLowerCase();
+      if (
+        cNameLower.startsWith(q) ||
+        cNameLower.includes(q) ||
+        (c.capital && c.capital.toLowerCase().includes(q)) ||
+        c.top_cities.some((city: string) => city.toLowerCase().includes(q))
+      ) {
+        const cId = c.name.toLowerCase().replace(/\s+/g, '-');
+        if (!addedIds.has(cId)) {
+          addedIds.add(cId);
+          results.push({
+            id: cId,
+            title: c.name,
+            subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
+            scope: 'INTERNATIONAL',
+            visaStatus: c.is_schengen
+              ? 'Schengen Visa Required • ~15-30 Days Processing'
+              : 'International • Tourist Visa / eVisa Active',
+          });
+        }
+      }
+    }
+  }
+
+  return results.slice(0, 16);
+}
+
+export interface OriginLocationOption {
+  id: string;
+  name: string;
+  detail: string;
+  code?: string;
+  type: 'AIRPORT' | 'CITY';
+}
+
+// Searches origin locations based on active scope:
+// - INTERNATIONAL: Strictly restricted to Indian commercial departure airports with IATA codes
+// - DOMESTIC: Accepts any Indian city, town, or rail hub from 4,198 cities dataset + commercial airports
+export function searchOriginLocations(
+  query: string,
+  scope: 'DOMESTIC' | 'INTERNATIONAL' = 'INTERNATIONAL'
+): OriginLocationOption[] {
+  const q = query.toLowerCase().trim();
+  const results: OriginLocationOption[] = [];
+  const addedIds = new Set<string>();
+
+  if (scope === 'INTERNATIONAL') {
+    const matches = !q
+      ? INDIAN_ORIGIN_AIRPORTS
+      : INDIAN_ORIGIN_AIRPORTS.filter(
+          (a) =>
+            a.code.toLowerCase().includes(q) ||
+            a.city.toLowerCase().includes(q) ||
+            a.name.toLowerCase().includes(q) ||
+            a.label.toLowerCase().includes(q)
+        );
+
+    for (const a of matches) {
+      results.push({
+        id: a.code,
+        name: `${a.city} (${a.code})`,
+        detail: a.name,
+        code: a.code,
+        type: 'AIRPORT',
+      });
+    }
+    return results;
+  }
+
+  // DOMESTIC: Airports + 4,198 Cities & Rail Hubs
+  const airportMatches = !q
+    ? INDIAN_ORIGIN_AIRPORTS.slice(0, 8)
+    : INDIAN_ORIGIN_AIRPORTS.filter(
+        (a) =>
+          a.code.toLowerCase().includes(q) ||
+          a.city.toLowerCase().includes(q) ||
+          a.name.toLowerCase().includes(q)
+      );
+
+  for (const a of airportMatches) {
+    addedIds.add(a.city.toLowerCase());
+    results.push({
+      id: a.code,
+      name: `${a.city} (${a.code})`,
+      detail: `${a.name} • Departure Airport`,
+      code: a.code,
+      type: 'AIRPORT',
+    });
+  }
+
+  if (q) {
+    const places = indiaPlacesData as {
+      cities: Array<{
+        id: string;
+        name: string;
+        state_name: string;
+        state_code: string;
+        is_popular: boolean;
+      }>;
+    };
+
+    for (const c of places.cities) {
+      if (results.length >= 25) break;
+      const cNameLower = c.name.toLowerCase();
+      if (!addedIds.has(cNameLower) && (cNameLower.startsWith(q) || cNameLower.includes(q))) {
+        addedIds.add(cNameLower);
         results.push({
           id: c.id,
-          title: c.name,
-          subtitle: `City in ${c.state_name}, India`,
-          scope: 'DOMESTIC',
-          visaStatus: 'Domestic Trip • ₹0 Visa (No Passport Needed)',
+          name: c.name,
+          detail: `City & Rail Hub in ${c.state_name}, India`,
+          type: 'CITY',
         });
       }
     }
-  }
-
-  // 4. Sovereign Countries from static dataset
-  for (const c of generatedCountries) {
-    if (results.length >= 25) break;
-    const cNameLower = c.name.toLowerCase();
-    if (
-      cNameLower.startsWith(q) ||
-      cNameLower.includes(q) ||
-      (c.capital && c.capital.toLowerCase().includes(q)) ||
-      c.top_cities.some((city: string) => city.toLowerCase().includes(q))
-    ) {
-      const cId = c.name.toLowerCase().replace(/\s+/g, '-');
-      if (!addedIds.has(cId)) {
-        addedIds.add(cId);
+  } else {
+    const topDomesticHubs = [
+      { name: 'New Delhi', detail: 'National Capital Region & Northern Hub' },
+      { name: 'Mumbai', detail: 'Financial Capital & Western Hub' },
+      { name: 'Bengaluru', detail: 'Karnataka Tech Capital & Southern Hub' },
+      { name: 'Kolkata', detail: 'West Bengal & Eastern Hub' },
+      { name: 'Chennai', detail: 'Tamil Nadu Capital & Southern Hub' },
+      { name: 'Hyderabad', detail: 'Telangana Capital & Deccan Hub' },
+      { name: 'Ahmedabad', detail: 'Gujarat Hub & Western Corridor' },
+      { name: 'Pune', detail: 'Maharashtra Cultural & Tech Hub' },
+    ];
+    for (const h of topDomesticHubs) {
+      if (!addedIds.has(h.name.toLowerCase())) {
+        addedIds.add(h.name.toLowerCase());
         results.push({
-          id: cId,
-          title: c.name,
-          subtitle: `${c.capital ? c.capital + ', ' : ''}${c.region}`,
-          scope: 'INTERNATIONAL',
-          visaStatus: c.is_schengen
-            ? 'Schengen Visa Required • ~15-30 Days Processing'
-            : 'International • Tourist Visa / eVisa Active',
+          id: `hub-${h.name.toLowerCase()}`,
+          name: h.name,
+          detail: h.detail,
+          type: 'CITY',
         });
       }
     }
   }
 
   return results.slice(0, 16);
+}
+
+// Generates dynamic, realistic transit connectors between stops
+export function generateScenicTransitConnector(
+  toCity: string,
+  destinationInput: string,
+  scope: 'DOMESTIC' | 'INTERNATIONAL' = 'INTERNATIONAL'
+): { mode: string; icon: string; duration: string; title: string } {
+  const destLower = (destinationInput || '').toLowerCase();
+
+  if (destLower.includes('norway') || destLower.includes('fjord')) {
+    return {
+      mode: 'ferry',
+      icon: 'directions_boat',
+      title: `Scenic Fjord Ferry to ${toCity}`,
+      duration: '~2 hrs 30 mins scenic voyage',
+    };
+  }
+
+  if (destLower.includes('japan')) {
+    return {
+      mode: 'train',
+      icon: 'train',
+      title: `Shinkansen Bullet Train to ${toCity}`,
+      duration: '~1 hr 45 mins',
+    };
+  }
+
+  if (destLower.includes('swiss') || destLower.includes('switzerland')) {
+    return {
+      mode: 'train',
+      icon: 'train',
+      title: `Glacier / Panoramic Alpine Express to ${toCity}`,
+      duration: '~2 hrs 15 mins',
+    };
+  }
+
+  if (destLower.includes('kerala')) {
+    return {
+      mode: 'boat',
+      icon: 'directions_boat',
+      title: `Backwater Houseboat / Drive to ${toCity}`,
+      duration: '~3 hrs scenic transit',
+    };
+  }
+
+  if (destLower.includes('rajasthan')) {
+    return {
+      mode: 'train',
+      icon: 'train',
+      title: `Intercity Heritage Express to ${toCity}`,
+      duration: '~3 hrs 45 mins',
+    };
+  }
+
+  if (destLower.includes('ladakh') || destLower.includes('leh')) {
+    return {
+      mode: 'car',
+      icon: 'directions_car',
+      title: `High-Altitude Mountain Pass Drive to ${toCity}`,
+      duration: '~4 hrs 30 mins',
+    };
+  }
+
+  if (destLower.includes('goa')) {
+    return {
+      mode: 'car',
+      icon: 'directions_car',
+      title: `Coastal Highway Drive to ${toCity}`,
+      duration: '~1 hr 30 mins',
+    };
+  }
+
+  if (scope === 'DOMESTIC' || destLower.includes('india')) {
+    return {
+      mode: 'train',
+      icon: 'train',
+      title: `Scenic Express Train to ${toCity}`,
+      duration: '~3 hrs 30 mins',
+    };
+  }
+
+  return {
+    mode: 'train',
+    icon: 'train',
+    title: `Scenic Regional Rail to ${toCity}`,
+    duration: '~2 hrs 30 mins',
+  };
 }
