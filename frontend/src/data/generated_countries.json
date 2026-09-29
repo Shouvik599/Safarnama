@@ -1,0 +1,3189 @@
+[
+  {
+    "code": "AF",
+    "name": "Afghanistan",
+    "capital": "Kabul",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Kabul",
+      "Guzara",
+      "Kandahar",
+      "Khost"
+    ]
+  },
+  {
+    "code": "AL",
+    "name": "Albania",
+    "capital": "Tirana",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Tirana",
+      "Rinas"
+    ]
+  },
+  {
+    "code": "DZ",
+    "name": "Algeria",
+    "capital": "Algiers",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Algiers",
+      "Adrar",
+      "Annaba",
+      "Batna"
+    ]
+  },
+  {
+    "code": "AS",
+    "name": "American Samoa",
+    "capital": "Pago Pago",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Pago Pago"
+    ]
+  },
+  {
+    "code": "AD",
+    "name": "Andorra",
+    "capital": "Andorra la Vella",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Andorra la Vella"
+    ]
+  },
+  {
+    "code": "AO",
+    "name": "Angola",
+    "capital": "Luanda",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Luanda",
+      "Cabinda",
+      "Catumbela",
+      "Chitato"
+    ]
+  },
+  {
+    "code": "AI",
+    "name": "Anguilla",
+    "capital": "The Valley",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "The Valley"
+    ]
+  },
+  {
+    "code": "AQ",
+    "name": "Antarctica",
+    "capital": null,
+    "region": "Antarctic",
+    "subregion": "",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "AG",
+    "name": "Antigua and Barbuda",
+    "capital": "Saint John's",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Saint John's",
+      "Codrington",
+      "Osbourn"
+    ]
+  },
+  {
+    "code": "AR",
+    "name": "Argentina",
+    "capital": "Buenos Aires",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Buenos Aires",
+      "Catamarca",
+      "Chapelco",
+      "Comodoro Rivadavia"
+    ]
+  },
+  {
+    "code": "AM",
+    "name": "Armenia",
+    "capital": "Yerevan",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Yerevan",
+      "Gyumri"
+    ]
+  },
+  {
+    "code": "AW",
+    "name": "Aruba",
+    "capital": "Oranjestad",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Oranjestad"
+    ]
+  },
+  {
+    "code": "AU",
+    "name": "Australia",
+    "capital": "Canberra",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "is_schengen": false,
+    "top_cities": [
+      "Canberra",
+      "Adelaide",
+      "Albany",
+      "Alice Springs"
+    ]
+  },
+  {
+    "code": "AT",
+    "name": "Austria",
+    "capital": "Vienna",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Vienna",
+      "Feldkirchen bei Graz",
+      "Innsbruck",
+      "Linz"
+    ]
+  },
+  {
+    "code": "AZ",
+    "name": "Azerbaijan",
+    "capital": "Baku",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Baku",
+      "Gabala",
+      "Ganja",
+      "Lachin"
+    ]
+  },
+  {
+    "code": "BS",
+    "name": "Bahamas",
+    "capital": "Nassau",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Nassau",
+      "Abraham Bay Settlement",
+      "Andros",
+      "Andros Island"
+    ]
+  },
+  {
+    "code": "BH",
+    "name": "Bahrain",
+    "capital": "Manama",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Manama"
+    ]
+  },
+  {
+    "code": "BD",
+    "name": "Bangladesh",
+    "capital": "Dhaka",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Dhaka",
+      "Barisal",
+      "Chattogram",
+      "Cox's Bazar"
+    ]
+  },
+  {
+    "code": "BB",
+    "name": "Barbados",
+    "capital": "Bridgetown",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Bridgetown"
+    ]
+  },
+  {
+    "code": "BY",
+    "name": "Belarus",
+    "capital": "Minsk",
+    "region": "Europe",
+    "subregion": "Eastern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Minsk",
+      "Brest",
+      "Gomel",
+      "Mogilev"
+    ]
+  },
+  {
+    "code": "BE",
+    "name": "Belgium",
+    "capital": "Brussels",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Brussels",
+      "Antwerp",
+      "Charleroi",
+      "Oostende"
+    ]
+  },
+  {
+    "code": "BZ",
+    "name": "Belize",
+    "capital": "Belmopan",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "Belmopan",
+      "Belize City",
+      "Caye Caulker",
+      "Caye Chapel"
+    ]
+  },
+  {
+    "code": "BJ",
+    "name": "Benin",
+    "capital": "Porto-Novo",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Porto-Novo",
+      "Cotonou"
+    ]
+  },
+  {
+    "code": "BM",
+    "name": "Bermuda",
+    "capital": "Hamilton",
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Hamilton"
+    ]
+  },
+  {
+    "code": "BT",
+    "name": "Bhutan",
+    "capital": "Thimphu",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Thimphu",
+      "Paro"
+    ]
+  },
+  {
+    "code": "BO",
+    "name": "Bolivia",
+    "capital": "Sucre",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Sucre",
+      "Cobija",
+      "Cochabamba",
+      "La Paz"
+    ]
+  },
+  {
+    "code": "BA",
+    "name": "Bosnia and Herzegovina",
+    "capital": "Sarajevo",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Sarajevo",
+      "Dubrave Gornje",
+      "Mahovljani",
+      "Mostar"
+    ]
+  },
+  {
+    "code": "BW",
+    "name": "Botswana",
+    "capital": "Gaborone",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Gaborone",
+      "Francistown",
+      "Kasane",
+      "Maun"
+    ]
+  },
+  {
+    "code": "BV",
+    "name": "Bouvet Island",
+    "capital": null,
+    "region": "Antarctic",
+    "subregion": "",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "BR",
+    "name": "Brazil",
+    "capital": "Bras\u00edlia",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Alta Floresta",
+      "Altamira",
+      "Aracaju",
+      "Araraquara"
+    ]
+  },
+  {
+    "code": "IO",
+    "name": "British Indian Ocean Territory",
+    "capital": "Diego Garcia",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Diego Garcia"
+    ]
+  },
+  {
+    "code": "VG",
+    "name": "British Virgin Islands",
+    "capital": "Road Town",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Road Town",
+      "Beef Island",
+      "Spanish Town"
+    ]
+  },
+  {
+    "code": "BN",
+    "name": "Brunei",
+    "capital": "Bandar Seri Begawan",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Bandar Seri Begawan"
+    ]
+  },
+  {
+    "code": "BG",
+    "name": "Bulgaria",
+    "capital": "Sofia",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Sofia",
+      "Burgas",
+      "Plovdiv",
+      "Varna"
+    ]
+  },
+  {
+    "code": "BF",
+    "name": "Burkina Faso",
+    "capital": "Ouagadougou",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Ouagadougou",
+      "Bobo Dioulasso"
+    ]
+  },
+  {
+    "code": "BI",
+    "name": "Burundi",
+    "capital": "Gitega",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Gitega",
+      "Bujumbura"
+    ]
+  },
+  {
+    "code": "CV",
+    "name": "Cabo Verde",
+    "capital": "Praia",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Praia",
+      "Espargos",
+      "Rabil",
+      "Vila do Maio"
+    ]
+  },
+  {
+    "code": "KH",
+    "name": "Cambodia",
+    "capital": "Phnom Penh",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Phnom Penh",
+      "Battambang",
+      "Preah Sihanouk",
+      "Siem Reap"
+    ]
+  },
+  {
+    "code": "CM",
+    "name": "Cameroon",
+    "capital": "Yaound\u00e9",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Douala",
+      "Garoua",
+      "Maroua"
+    ]
+  },
+  {
+    "code": "CA",
+    "name": "Canada",
+    "capital": "Ottawa",
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Ottawa",
+      "Abbotsford",
+      "Anahim Lake",
+      "Baie-Comeau"
+    ]
+  },
+  {
+    "code": "BQ",
+    "name": "Caribbean Netherlands",
+    "capital": "Kralendijk",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Kralendijk",
+      "Oranjestad",
+      "Zion's Hill"
+    ]
+  },
+  {
+    "code": "KY",
+    "name": "Cayman Islands",
+    "capital": "George Town",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "George Town",
+      "West End"
+    ]
+  },
+  {
+    "code": "CF",
+    "name": "Central African Republic",
+    "capital": "Bangui",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Bangui"
+    ]
+  },
+  {
+    "code": "TD",
+    "name": "Chad",
+    "capital": "N'Djamena",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "N'Djamena"
+    ]
+  },
+  {
+    "code": "CL",
+    "name": "Chile",
+    "capital": "Santiago",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Santiago",
+      "Antofagasta",
+      "Arica",
+      "Balmaceda"
+    ]
+  },
+  {
+    "code": "CN",
+    "name": "China",
+    "capital": "Beijing",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Beijing",
+      "Aksu",
+      "Altay",
+      "Anqing"
+    ]
+  },
+  {
+    "code": "CX",
+    "name": "Christmas Island",
+    "capital": "Flying Fish Cove",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "is_schengen": false,
+    "top_cities": [
+      "Flying Fish Cove"
+    ]
+  },
+  {
+    "code": "CC",
+    "name": "Cocos (Keeling) Islands",
+    "capital": "West Island",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "is_schengen": false,
+    "top_cities": [
+      "West Island"
+    ]
+  },
+  {
+    "code": "CO",
+    "name": "Colombia",
+    "capital": "Bogot\u00e1",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Arauca",
+      "Armenia",
+      "Barrancabermeja",
+      "Barranquilla"
+    ]
+  },
+  {
+    "code": "KM",
+    "name": "Comoros",
+    "capital": "Moroni",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Moroni",
+      "Ouani"
+    ]
+  },
+  {
+    "code": "CG",
+    "name": "Congo",
+    "capital": "Brazzaville",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Brazzaville",
+      "Pointe Noire"
+    ]
+  },
+  {
+    "code": "CK",
+    "name": "Cook Islands",
+    "capital": "Avarua",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Avarua"
+    ]
+  },
+  {
+    "code": "CR",
+    "name": "Costa Rica",
+    "capital": "San Jos\u00e9",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "Golfito",
+      "La Fortuna",
+      "Liberia",
+      "Nicoya"
+    ]
+  },
+  {
+    "code": "HR",
+    "name": "Croatia",
+    "capital": "Zagreb",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Zagreb",
+      "Dubrovnik",
+      "Gornji Humac",
+      "Osijek"
+    ]
+  },
+  {
+    "code": "CU",
+    "name": "Cuba",
+    "capital": "Havana",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Havana",
+      "Baracoa",
+      "Bayamo",
+      "Camaguey"
+    ]
+  },
+  {
+    "code": "CW",
+    "name": "Cura\u00e7ao",
+    "capital": "Willemstad",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Willemstad"
+    ]
+  },
+  {
+    "code": "CY",
+    "name": "Cyprus",
+    "capital": "Nicosia",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Nicosia",
+      "Larnaca",
+      "Paphos",
+      "Tymbou"
+    ]
+  },
+  {
+    "code": "CZ",
+    "name": "Czechia",
+    "capital": "Prague",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Prague",
+      "Brno",
+      "Karlovy Vary",
+      "Pardubice"
+    ]
+  },
+  {
+    "code": "DK",
+    "name": "Denmark",
+    "capital": "Copenhagen",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Copenhagen",
+      "Aalborg",
+      "Aarhus",
+      "Billund"
+    ]
+  },
+  {
+    "code": "DJ",
+    "name": "Djibouti",
+    "capital": "Djibouti",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Djibouti",
+      "Djibouti City"
+    ]
+  },
+  {
+    "code": "DM",
+    "name": "Dominica",
+    "capital": "Roseau",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Roseau",
+      "Canefield",
+      "Marigot"
+    ]
+  },
+  {
+    "code": "DO",
+    "name": "Dominican Republic",
+    "capital": "Santo Domingo",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Santo Domingo",
+      "Barahona",
+      "La Isabela",
+      "La Romana"
+    ]
+  },
+  {
+    "code": "CD",
+    "name": "DRC",
+    "capital": "Kinshasa",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Kinshasa",
+      "Bandundu",
+      "Bunia",
+      "Gbadolite"
+    ]
+  },
+  {
+    "code": "EC",
+    "name": "Ecuador",
+    "capital": "Quito",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Quito",
+      "Coca",
+      "Cuenca",
+      "Guayaquil"
+    ]
+  },
+  {
+    "code": "EG",
+    "name": "Egypt",
+    "capital": "Cairo",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Cairo",
+      "Abu Simbel",
+      "Al Jiza",
+      "Alexandria"
+    ]
+  },
+  {
+    "code": "SV",
+    "name": "El Salvador",
+    "capital": "San Salvador",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "San Salvador"
+    ]
+  },
+  {
+    "code": "GQ",
+    "name": "Equatorial Guinea",
+    "capital": "Malabo",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Malabo",
+      "Bata",
+      "Corisco Island"
+    ]
+  },
+  {
+    "code": "ER",
+    "name": "Eritrea",
+    "capital": "Asmara",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Asmara"
+    ]
+  },
+  {
+    "code": "EE",
+    "name": "Estonia",
+    "capital": "Tallinn",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Tallinn",
+      "Kuressaare",
+      "Tartu"
+    ]
+  },
+  {
+    "code": "SZ",
+    "name": "Eswatini",
+    "capital": "Mbabane",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Mbabane",
+      "Mpaka"
+    ]
+  },
+  {
+    "code": "ET",
+    "name": "Ethiopia",
+    "capital": "Addis Ababa",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Addis Ababa",
+      "Arba Minch",
+      "Asosa",
+      "Axum"
+    ]
+  },
+  {
+    "code": "FK",
+    "name": "Falkland Islands",
+    "capital": "Stanley",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Stanley",
+      "Mount Pleasant"
+    ]
+  },
+  {
+    "code": "FO",
+    "name": "Faroe Islands",
+    "capital": "T\u00f3rshavn",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "FJ",
+    "name": "Fiji",
+    "capital": "Suva",
+    "region": "Oceania",
+    "subregion": "Melanesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Suva",
+      "Labasa",
+      "Nadi",
+      "Nausori"
+    ]
+  },
+  {
+    "code": "FI",
+    "name": "Finland",
+    "capital": "Helsinki",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Helsinki",
+      "Enontekio",
+      "Ivalo",
+      "Joensuu"
+    ]
+  },
+  {
+    "code": "FR",
+    "name": "France",
+    "capital": "Paris",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Paris",
+      "Ajaccio",
+      "Annecy",
+      "Aurillac"
+    ]
+  },
+  {
+    "code": "GF",
+    "name": "French Guiana",
+    "capital": "Cayenne",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": true,
+    "top_cities": [
+      "Cayenne",
+      "Maripasoula",
+      "Matoury",
+      "Saint-Laurent-du-Maroni"
+    ]
+  },
+  {
+    "code": "PF",
+    "name": "French Polynesia",
+    "capital": "Papeet\u0113",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Ahe Atoll",
+      "Anaa",
+      "Fangatau",
+      "Fare"
+    ]
+  },
+  {
+    "code": "TF",
+    "name": "French Southern and Antarctic Lands",
+    "capital": "Port-aux-Fran\u00e7ais",
+    "region": "Antarctic",
+    "subregion": "",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "GA",
+    "name": "Gabon",
+    "capital": "Libreville",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Libreville",
+      "Franceville",
+      "Makokou",
+      "Oyem"
+    ]
+  },
+  {
+    "code": "GM",
+    "name": "Gambia",
+    "capital": "Banjul",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Banjul"
+    ]
+  },
+  {
+    "code": "GE",
+    "name": "Georgia",
+    "capital": "Tbilisi",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Tbilisi",
+      "Batumi",
+      "Kopitnari",
+      "Sukhumi"
+    ]
+  },
+  {
+    "code": "DE",
+    "name": "Germany",
+    "capital": "Berlin",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Berlin",
+      "Bremen",
+      "Calden",
+      "Dortmund"
+    ]
+  },
+  {
+    "code": "GH",
+    "name": "Ghana",
+    "capital": "Accra",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Accra",
+      "Kumasi",
+      "Sekondi-Takoradi",
+      "Sunyani"
+    ]
+  },
+  {
+    "code": "GI",
+    "name": "Gibraltar",
+    "capital": "Gibraltar",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Gibraltar"
+    ]
+  },
+  {
+    "code": "GR",
+    "name": "Greece",
+    "capital": "Athens",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Athens",
+      "Alexandroupolis",
+      "Chios Island",
+      "Crete Island"
+    ]
+  },
+  {
+    "code": "GL",
+    "name": "Greenland",
+    "capital": "Nuuk",
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Nuuk",
+      "Aasiaat",
+      "Ilulissat",
+      "Kangerlussuaq"
+    ]
+  },
+  {
+    "code": "GD",
+    "name": "Grenada",
+    "capital": "St. George's",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "St. George's",
+      "Saint George's"
+    ]
+  },
+  {
+    "code": "GP",
+    "name": "Guadeloupe",
+    "capital": "Basse-Terre",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": true,
+    "top_cities": [
+      "Basse-Terre",
+      "Grand-Bourg"
+    ]
+  },
+  {
+    "code": "GU",
+    "name": "Guam",
+    "capital": "Hag\u00e5t\u00f1a",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "GT",
+    "name": "Guatemala",
+    "capital": "Guatemala City",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "Guatemala City",
+      "Puerto Barrios",
+      "Retalhuleu",
+      "San Benito"
+    ]
+  },
+  {
+    "code": "GG",
+    "name": "Guernsey",
+    "capital": "St. Peter Port",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "St. Peter Port",
+      "Saint Anne",
+      "Saint Peter Port"
+    ]
+  },
+  {
+    "code": "GN",
+    "name": "Guinea",
+    "capital": "Conakry",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Conakry"
+    ]
+  },
+  {
+    "code": "GW",
+    "name": "Guinea-Bissau",
+    "capital": "Bissau",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Bissau"
+    ]
+  },
+  {
+    "code": "GY",
+    "name": "Guyana",
+    "capital": "Georgetown",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Georgetown",
+      "Kaieteur Falls",
+      "Lethem",
+      "Ogle"
+    ]
+  },
+  {
+    "code": "HT",
+    "name": "Haiti",
+    "capital": "Port-au-Prince",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Port-au-Prince",
+      "Cap Haitien",
+      "Carrefour Sanon",
+      "Les Cayes"
+    ]
+  },
+  {
+    "code": "HM",
+    "name": "Heard Island and McDonald Islands",
+    "capital": null,
+    "region": "Antarctic",
+    "subregion": "",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "HN",
+    "name": "Honduras",
+    "capital": "Tegucigalpa",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "Tegucigalpa",
+      "Coxen Hole",
+      "Guanaja",
+      "La Ceiba"
+    ]
+  },
+  {
+    "code": "HK",
+    "name": "Hong Kong",
+    "capital": "City of Victoria",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "City of Victoria",
+      "Hong Kong"
+    ]
+  },
+  {
+    "code": "HU",
+    "name": "Hungary",
+    "capital": "Budapest",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Budapest",
+      "Debrecen"
+    ]
+  },
+  {
+    "code": "IS",
+    "name": "Iceland",
+    "capital": "Reykjavik",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Reykjavik",
+      "Akureyri"
+    ]
+  },
+  {
+    "code": "IN",
+    "name": "India",
+    "capital": "New Delhi",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "New Delhi",
+      "Agartala",
+      "Agatti",
+      "Agra"
+    ]
+  },
+  {
+    "code": "ID",
+    "name": "Indonesia",
+    "capital": "Jakarta",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Jakarta",
+      "Ambon",
+      "Balikpapan",
+      "Banda Aceh"
+    ]
+  },
+  {
+    "code": "IR",
+    "name": "Iran",
+    "capital": "Tehran",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Tehran",
+      "Abadan",
+      "Abu Musa",
+      "Ahvaz"
+    ]
+  },
+  {
+    "code": "IQ",
+    "name": "Iraq",
+    "capital": "Baghdad",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Baghdad",
+      "Arbil",
+      "Basra",
+      "Kirkuk"
+    ]
+  },
+  {
+    "code": "IE",
+    "name": "Ireland",
+    "capital": "Dublin",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Dublin",
+      "Charlestown",
+      "Cork",
+      "Donegal"
+    ]
+  },
+  {
+    "code": "IM",
+    "name": "Isle of Man",
+    "capital": "Douglas",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Douglas",
+      "Castletown"
+    ]
+  },
+  {
+    "code": "IL",
+    "name": "Israel",
+    "capital": "Jerusalem",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Jerusalem",
+      "Eilat",
+      "Haifa",
+      "Tel Aviv"
+    ]
+  },
+  {
+    "code": "IT",
+    "name": "Italy",
+    "capital": "Rome",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Rome",
+      "Alghero",
+      "Bari",
+      "Bologna"
+    ]
+  },
+  {
+    "code": "CI",
+    "name": "Ivory Coast",
+    "capital": "Yamoussoukro",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Yamoussoukro",
+      "Abidjan",
+      "Korhogo"
+    ]
+  },
+  {
+    "code": "JM",
+    "name": "Jamaica",
+    "capital": "Kingston",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Kingston",
+      "Boscobel",
+      "Montego Bay",
+      "Tinson Pen"
+    ]
+  },
+  {
+    "code": "JP",
+    "name": "Japan",
+    "capital": "Tokyo",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Tokyo",
+      "Akita",
+      "Amagi",
+      "Amakusa"
+    ]
+  },
+  {
+    "code": "JE",
+    "name": "Jersey",
+    "capital": "Saint Helier",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Saint Helier",
+      "St. Peter"
+    ]
+  },
+  {
+    "code": "JO",
+    "name": "Jordan",
+    "capital": "Amman",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Amman",
+      "Aqaba"
+    ]
+  },
+  {
+    "code": "KZ",
+    "name": "Kazakhstan",
+    "capital": "Astana",
+    "region": "Asia",
+    "subregion": "Central Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Astana",
+      "Aktau",
+      "Aktobe",
+      "Almaty"
+    ]
+  },
+  {
+    "code": "KE",
+    "name": "Kenya",
+    "capital": "Nairobi",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Nairobi",
+      "Eldoret",
+      "Gathiuru",
+      "Kisumu"
+    ]
+  },
+  {
+    "code": "KI",
+    "name": "Kiribati",
+    "capital": "South Tarawa",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": [
+      "South Tarawa",
+      "Kiritimati"
+    ]
+  },
+  {
+    "code": "XK",
+    "name": "Kosovo",
+    "capital": "Pristina",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Pristina",
+      "Prishtina"
+    ]
+  },
+  {
+    "code": "KW",
+    "name": "Kuwait",
+    "capital": "Kuwait City",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Kuwait City"
+    ]
+  },
+  {
+    "code": "KG",
+    "name": "Kyrgyzstan",
+    "capital": "Bishkek",
+    "region": "Asia",
+    "subregion": "Central Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Bishkek",
+      "Karakol",
+      "Osh",
+      "Tamchy"
+    ]
+  },
+  {
+    "code": "LA",
+    "name": "Laos",
+    "capital": "Vientiane",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Vientiane",
+      "Luang Phabang",
+      "Pakse",
+      "Ton Phueng"
+    ]
+  },
+  {
+    "code": "LV",
+    "name": "Latvia",
+    "capital": "Riga",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Riga"
+    ]
+  },
+  {
+    "code": "LB",
+    "name": "Lebanon",
+    "capital": "Beirut",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Beirut"
+    ]
+  },
+  {
+    "code": "LS",
+    "name": "Lesotho",
+    "capital": "Maseru",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Maseru"
+    ]
+  },
+  {
+    "code": "LR",
+    "name": "Liberia",
+    "capital": "Monrovia",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Monrovia"
+    ]
+  },
+  {
+    "code": "LY",
+    "name": "Libya",
+    "capital": "Tripoli",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Tripoli",
+      "Al Albraq",
+      "Benina",
+      "Ghadames"
+    ]
+  },
+  {
+    "code": "LI",
+    "name": "Liechtenstein",
+    "capital": "Vaduz",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Vaduz"
+    ]
+  },
+  {
+    "code": "LT",
+    "name": "Lithuania",
+    "capital": "Vilnius",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Vilnius",
+      "Kaunas",
+      "Palanga"
+    ]
+  },
+  {
+    "code": "LU",
+    "name": "Luxembourg",
+    "capital": "Luxembourg",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Luxembourg"
+    ]
+  },
+  {
+    "code": "MO",
+    "name": "Macau",
+    "capital": null,
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Nossa Senhora do Carmo"
+    ]
+  },
+  {
+    "code": "MG",
+    "name": "Madagascar",
+    "capital": "Antananarivo",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Antananarivo",
+      "Antisiranana",
+      "Besalampy",
+      "Mahajanga"
+    ]
+  },
+  {
+    "code": "MW",
+    "name": "Malawi",
+    "capital": "Lilongwe",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Lilongwe",
+      "Blantyre",
+      "Lumbadzi"
+    ]
+  },
+  {
+    "code": "MY",
+    "name": "Malaysia",
+    "capital": "Kuala Lumpur",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Kuala Lumpur",
+      "Alor Satar",
+      "Bario",
+      "Bintulu"
+    ]
+  },
+  {
+    "code": "MV",
+    "name": "Maldives",
+    "capital": "Mal\u00e9",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Gan",
+      "Haa Dhaalu Atoll",
+      "Huvadhu Atoll",
+      "Kadhdhoo"
+    ]
+  },
+  {
+    "code": "ML",
+    "name": "Mali",
+    "capital": "Bamako",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Bamako",
+      "Gao",
+      "Kayes",
+      "Timbuktu"
+    ]
+  },
+  {
+    "code": "MT",
+    "name": "Malta",
+    "capital": "Valletta",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Valletta"
+    ]
+  },
+  {
+    "code": "MH",
+    "name": "Marshall Islands",
+    "capital": "Majuro",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Majuro",
+      "Kwajalein",
+      "Majuro Atoll"
+    ]
+  },
+  {
+    "code": "MQ",
+    "name": "Martinique",
+    "capital": "Fort-de-France",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": true,
+    "top_cities": [
+      "Fort-de-France"
+    ]
+  },
+  {
+    "code": "MR",
+    "name": "Mauritania",
+    "capital": "Nouakchott",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Nouakchott",
+      "Nouadhibou"
+    ]
+  },
+  {
+    "code": "MU",
+    "name": "Mauritius",
+    "capital": "Port Louis",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Port Louis",
+      "Plaine Magnien",
+      "Port Mathurin"
+    ]
+  },
+  {
+    "code": "YT",
+    "name": "Mayotte",
+    "capital": "Mamoudzou",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": true,
+    "top_cities": [
+      "Mamoudzou",
+      "Dzaoudzi"
+    ]
+  },
+  {
+    "code": "MX",
+    "name": "Mexico",
+    "capital": "Mexico City",
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Mexico City",
+      "Acapulco",
+      "Aguascalientes",
+      "Cabo San Lucas"
+    ]
+  },
+  {
+    "code": "FM",
+    "name": "Micronesia",
+    "capital": "Palikir",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Palikir",
+      "Okat",
+      "Pohnpei Island",
+      "Weno Island"
+    ]
+  },
+  {
+    "code": "MD",
+    "name": "Moldova",
+    "capital": "Chi\u0219in\u0103u",
+    "region": "Europe",
+    "subregion": "Eastern Europe",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "MC",
+    "name": "Monaco",
+    "capital": "Monaco",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Monaco"
+    ]
+  },
+  {
+    "code": "MN",
+    "name": "Mongolia",
+    "capital": "Ulan Bator",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Ulan Bator",
+      "Altai",
+      "Arvaikheer",
+      "Bayankhongor"
+    ]
+  },
+  {
+    "code": "ME",
+    "name": "Montenegro",
+    "capital": "Podgorica",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Podgorica",
+      "Tivat"
+    ]
+  },
+  {
+    "code": "MS",
+    "name": "Montserrat",
+    "capital": "Plymouth",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Plymouth",
+      "Gerald's Park"
+    ]
+  },
+  {
+    "code": "MA",
+    "name": "Morocco",
+    "capital": "Rabat",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Rabat",
+      "Agadir",
+      "Ahl Angad",
+      "Al Aaroui"
+    ]
+  },
+  {
+    "code": "MZ",
+    "name": "Mozambique",
+    "capital": "Maputo",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Maputo",
+      "Beira",
+      "Chimoio",
+      "Inhambane"
+    ]
+  },
+  {
+    "code": "MM",
+    "name": "Myanmar",
+    "capital": "Naypyidaw",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Naypyidaw",
+      "Dawei",
+      "Heho",
+      "Kawthoung"
+    ]
+  },
+  {
+    "code": "NA",
+    "name": "Namibia",
+    "capital": "Windhoek",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Windhoek",
+      "Luderitz",
+      "Mpacha",
+      "Ondangwa"
+    ]
+  },
+  {
+    "code": "NR",
+    "name": "Nauru",
+    "capital": "Yaren",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Yaren"
+    ]
+  },
+  {
+    "code": "NP",
+    "name": "Nepal",
+    "capital": "Kathmandu",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Kathmandu",
+      "Biratnagar",
+      "Janakpur",
+      "Lukla"
+    ]
+  },
+  {
+    "code": "NL",
+    "name": "Netherlands",
+    "capital": "Amsterdam",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Amsterdam",
+      "Eindhoven",
+      "Groningen",
+      "Maastricht"
+    ]
+  },
+  {
+    "code": "NC",
+    "name": "New Caledonia",
+    "capital": "Noum\u00e9a",
+    "region": "Oceania",
+    "subregion": "Melanesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Lifou",
+      "Tiga",
+      "Touho"
+    ]
+  },
+  {
+    "code": "NZ",
+    "name": "New Zealand",
+    "capital": "Wellington",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "is_schengen": false,
+    "top_cities": [
+      "Wellington",
+      "Auckland",
+      "Awanui",
+      "Blenheim"
+    ]
+  },
+  {
+    "code": "NI",
+    "name": "Nicaragua",
+    "capital": "Managua",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "Managua",
+      "Bluefields",
+      "Puerto Cabezas"
+    ]
+  },
+  {
+    "code": "NE",
+    "name": "Niger",
+    "capital": "Niamey",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Niamey",
+      "Zinder"
+    ]
+  },
+  {
+    "code": "NG",
+    "name": "Nigeria",
+    "capital": "Abuja",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Abuja",
+      "Akure",
+      "Asaba",
+      "Bauchi"
+    ]
+  },
+  {
+    "code": "NU",
+    "name": "Niue",
+    "capital": "Alofi",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Alofi"
+    ]
+  },
+  {
+    "code": "NF",
+    "name": "Norfolk Island",
+    "capital": "Kingston",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "is_schengen": false,
+    "top_cities": [
+      "Kingston",
+      "Burnt Pine"
+    ]
+  },
+  {
+    "code": "KP",
+    "name": "North Korea",
+    "capital": "Pyongyang",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Pyongyang",
+      "Hoemun-ri",
+      "Wonsan"
+    ]
+  },
+  {
+    "code": "MK",
+    "name": "North Macedonia",
+    "capital": "Skopje",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Skopje",
+      "Ilinden",
+      "Ohrid"
+    ]
+  },
+  {
+    "code": "MP",
+    "name": "Northern Mariana Islands",
+    "capital": "Saipan",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Saipan",
+      "I Fadang, Saipan",
+      "Rota Island",
+      "Tinian Island"
+    ]
+  },
+  {
+    "code": "NO",
+    "name": "Norway",
+    "capital": "Oslo",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Oslo",
+      "Alstahaug",
+      "Alta",
+      "Andenes"
+    ]
+  },
+  {
+    "code": "OM",
+    "name": "Oman",
+    "capital": "Muscat",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Muscat",
+      "Duqm",
+      "Khasab",
+      "Salalah"
+    ]
+  },
+  {
+    "code": "PK",
+    "name": "Pakistan",
+    "capital": "Islamabad",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Islamabad",
+      "Attock",
+      "Bahawalpur",
+      "Chitral"
+    ]
+  },
+  {
+    "code": "PW",
+    "name": "Palau",
+    "capital": "Ngerulmud",
+    "region": "Oceania",
+    "subregion": "Micronesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Ngerulmud",
+      "Babelthuap Island"
+    ]
+  },
+  {
+    "code": "PS",
+    "name": "Palestine",
+    "capital": "Ramallah",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Ramallah"
+    ]
+  },
+  {
+    "code": "PA",
+    "name": "Panama",
+    "capital": "Panama City",
+    "region": "Americas",
+    "subregion": "Central America",
+    "is_schengen": false,
+    "top_cities": [
+      "Panama City",
+      "Albrook",
+      "Changuinola",
+      "David"
+    ]
+  },
+  {
+    "code": "PG",
+    "name": "Papua New Guinea",
+    "capital": "Port Moresby",
+    "region": "Oceania",
+    "subregion": "Melanesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Port Moresby",
+      "Baimuru",
+      "Balimo",
+      "Buka Island"
+    ]
+  },
+  {
+    "code": "PY",
+    "name": "Paraguay",
+    "capital": "Asunci\u00f3n",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Ciudad del Este"
+    ]
+  },
+  {
+    "code": "PE",
+    "name": "Peru",
+    "capital": "Lima",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Lima",
+      "Arequipa",
+      "Ayacucho",
+      "Cajamarca"
+    ]
+  },
+  {
+    "code": "PH",
+    "name": "Philippines",
+    "capital": "Manila",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Manila",
+      "Bacolod City",
+      "Basco",
+      "Bongao"
+    ]
+  },
+  {
+    "code": "PN",
+    "name": "Pitcairn Islands",
+    "capital": "Adamstown",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Adamstown"
+    ]
+  },
+  {
+    "code": "PL",
+    "name": "Poland",
+    "capital": "Warsaw",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Warsaw",
+      "Balice",
+      "Bydgoszcz",
+      "Jasionka"
+    ]
+  },
+  {
+    "code": "PT",
+    "name": "Portugal",
+    "capital": "Lisbon",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Lisbon",
+      "Cascais",
+      "Faro",
+      "Funchal"
+    ]
+  },
+  {
+    "code": "PR",
+    "name": "Puerto Rico",
+    "capital": "San Juan",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "San Juan",
+      "Aguadilla",
+      "Ceiba",
+      "Culebra"
+    ]
+  },
+  {
+    "code": "QA",
+    "name": "Qatar",
+    "capital": "Doha",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Doha"
+    ]
+  },
+  {
+    "code": "RO",
+    "name": "Romania",
+    "capital": "Bucharest",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Bucharest",
+      "Arad",
+      "Cluj-Napoca",
+      "Craiova"
+    ]
+  },
+  {
+    "code": "RU",
+    "name": "Russia",
+    "capital": "Moscow",
+    "region": "Europe",
+    "subregion": "Eastern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Moscow",
+      "Abakan",
+      "Amderma",
+      "Anadyr"
+    ]
+  },
+  {
+    "code": "RW",
+    "name": "Rwanda",
+    "capital": "Kigali",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Kigali",
+      "Kamembe"
+    ]
+  },
+  {
+    "code": "RE",
+    "name": "R\u00e9union",
+    "capital": "Saint-Denis",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": true,
+    "top_cities": [
+      "Saint-Denis",
+      "Saint-Pierre",
+      "Sainte-Marie"
+    ]
+  },
+  {
+    "code": "BL",
+    "name": "Saint Barth\u00e9lemy",
+    "capital": "Gustavia",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Gustavia"
+    ]
+  },
+  {
+    "code": "SH",
+    "name": "Saint Helena, Ascension and Tristan da Cunha",
+    "capital": "Jamestown",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Jamestown",
+      "Cat Hill"
+    ]
+  },
+  {
+    "code": "KN",
+    "name": "Saint Kitts and Nevis",
+    "capital": "Basseterre",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Basseterre",
+      "Charlestown"
+    ]
+  },
+  {
+    "code": "LC",
+    "name": "Saint Lucia",
+    "capital": "Castries",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Castries",
+      "Vieux Fort"
+    ]
+  },
+  {
+    "code": "MF",
+    "name": "Saint Martin",
+    "capital": "Marigot",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Marigot",
+      "Grand Case"
+    ]
+  },
+  {
+    "code": "PM",
+    "name": "Saint Pierre and Miquelon",
+    "capital": "Saint-Pierre",
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Saint-Pierre"
+    ]
+  },
+  {
+    "code": "VC",
+    "name": "Saint Vincent and the Grenadines",
+    "capital": "Kingstown",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Kingstown",
+      "Bequia",
+      "Canouan",
+      "Lovell"
+    ]
+  },
+  {
+    "code": "WS",
+    "name": "Samoa",
+    "capital": "Apia",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Apia"
+    ]
+  },
+  {
+    "code": "SM",
+    "name": "San Marino",
+    "capital": "City of San Marino",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "City of San Marino"
+    ]
+  },
+  {
+    "code": "SA",
+    "name": "Saudi Arabia",
+    "capital": "Riyadh",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Riyadh",
+      "Abha",
+      "Ad Dammam",
+      "Al Wajh"
+    ]
+  },
+  {
+    "code": "SN",
+    "name": "Senegal",
+    "capital": "Dakar",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Dakar",
+      "Cap Skirring",
+      "Ziguinchor"
+    ]
+  },
+  {
+    "code": "RS",
+    "name": "Serbia",
+    "capital": "Belgrade",
+    "region": "Europe",
+    "subregion": "Southeast Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Belgrade",
+      "Kraljevo"
+    ]
+  },
+  {
+    "code": "SC",
+    "name": "Seychelles",
+    "capital": "Victoria",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Victoria",
+      "Praslin Island"
+    ]
+  },
+  {
+    "code": "SL",
+    "name": "Sierra Leone",
+    "capital": "Freetown",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Freetown"
+    ]
+  },
+  {
+    "code": "SG",
+    "name": "Singapore",
+    "capital": "Singapore",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Singapore",
+      "Seletar"
+    ]
+  },
+  {
+    "code": "SX",
+    "name": "Sint Maarten",
+    "capital": "Philipsburg",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Philipsburg",
+      "Sint Maarten"
+    ]
+  },
+  {
+    "code": "SK",
+    "name": "Slovakia",
+    "capital": "Bratislava",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Bratislava",
+      "Poprad"
+    ]
+  },
+  {
+    "code": "SI",
+    "name": "Slovenia",
+    "capital": "Ljubljana",
+    "region": "Europe",
+    "subregion": "Central Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Ljubljana",
+      "Maribor",
+      "Zgornji Brnik"
+    ]
+  },
+  {
+    "code": "SB",
+    "name": "Solomon Islands",
+    "capital": "Honiara",
+    "region": "Oceania",
+    "subregion": "Melanesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Honiara",
+      "Munda"
+    ]
+  },
+  {
+    "code": "SO",
+    "name": "Somalia",
+    "capital": "Mogadishu",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Mogadishu",
+      "Berbera",
+      "Bosaso",
+      "Hargeisa"
+    ]
+  },
+  {
+    "code": "ZA",
+    "name": "South Africa",
+    "capital": "Pretoria",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Pretoria",
+      "Bloemfontein",
+      "Cape Town",
+      "Durban"
+    ]
+  },
+  {
+    "code": "GS",
+    "name": "South Georgia",
+    "capital": "King Edward Point",
+    "region": "Antarctic",
+    "subregion": "",
+    "is_schengen": false,
+    "top_cities": [
+      "King Edward Point"
+    ]
+  },
+  {
+    "code": "KR",
+    "name": "South Korea",
+    "capital": "Seoul",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Seoul",
+      "Busan",
+      "Cheongju",
+      "Daegu"
+    ]
+  },
+  {
+    "code": "SS",
+    "name": "South Sudan",
+    "capital": "Juba",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Juba",
+      "Malakal",
+      "Wau"
+    ]
+  },
+  {
+    "code": "ES",
+    "name": "Spain",
+    "capital": "Madrid",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Madrid",
+      "Alava",
+      "Alicante",
+      "Badajoz"
+    ]
+  },
+  {
+    "code": "LK",
+    "name": "Sri Lanka",
+    "capital": "Sri Jayawardenepura Kotte",
+    "region": "Asia",
+    "subregion": "Southern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Sri Jayawardenepura Kotte",
+      "Batticaloa",
+      "Colombo",
+      "Galle"
+    ]
+  },
+  {
+    "code": "SD",
+    "name": "Sudan",
+    "capital": "Khartoum",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Khartoum",
+      "Dongola",
+      "El Fasher",
+      "El-Obeid"
+    ]
+  },
+  {
+    "code": "SR",
+    "name": "Suriname",
+    "capital": "Paramaribo",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Paramaribo"
+    ]
+  },
+  {
+    "code": "SJ",
+    "name": "Svalbard and Jan Mayen",
+    "capital": "Longyearbyen",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Longyearbyen"
+    ]
+  },
+  {
+    "code": "SE",
+    "name": "Sweden",
+    "capital": "Stockholm",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Stockholm",
+      "Arvidsjaur",
+      "Borlange",
+      "Halmstad"
+    ]
+  },
+  {
+    "code": "CH",
+    "name": "Switzerland",
+    "capital": "Bern",
+    "region": "Europe",
+    "subregion": "Western Europe",
+    "is_schengen": true,
+    "top_cities": [
+      "Bern",
+      "Agno",
+      "Geneva",
+      "St. Gallen"
+    ]
+  },
+  {
+    "code": "SY",
+    "name": "Syria",
+    "capital": "Damascus",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Damascus",
+      "Aleppo",
+      "Latakia",
+      "Qamishli"
+    ]
+  },
+  {
+    "code": "ST",
+    "name": "S\u00e3o Tom\u00e9 and Pr\u00edncipe",
+    "capital": "S\u00e3o Tom\u00e9",
+    "region": "Africa",
+    "subregion": "Middle Africa",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "TW",
+    "name": "Taiwan",
+    "capital": "Taipei",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Taipei",
+      "Hualien City",
+      "Huxi",
+      "Kaohsiung"
+    ]
+  },
+  {
+    "code": "TJ",
+    "name": "Tajikistan",
+    "capital": "Dushanbe",
+    "region": "Asia",
+    "subregion": "Central Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Dushanbe",
+      "Bokhtar",
+      "Khujand",
+      "Kulob"
+    ]
+  },
+  {
+    "code": "TZ",
+    "name": "Tanzania",
+    "capital": "Dodoma",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Dodoma",
+      "Arusha",
+      "Dar es Salaam",
+      "Mbeya"
+    ]
+  },
+  {
+    "code": "TH",
+    "name": "Thailand",
+    "capital": "Bangkok",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Bangkok",
+      "Buriram",
+      "Chiang Mai",
+      "Chiang Rai"
+    ]
+  },
+  {
+    "code": "TL",
+    "name": "Timor-Leste",
+    "capital": "Dili",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Dili",
+      "Baucau",
+      "Oecussi-Ambeno",
+      "Suai"
+    ]
+  },
+  {
+    "code": "TG",
+    "name": "Togo",
+    "capital": "Lom\u00e9",
+    "region": "Africa",
+    "subregion": "Western Africa",
+    "is_schengen": false,
+    "top_cities": []
+  },
+  {
+    "code": "TK",
+    "name": "Tokelau",
+    "capital": "Fakaofo",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Fakaofo"
+    ]
+  },
+  {
+    "code": "TO",
+    "name": "Tonga",
+    "capital": "Nuku'alofa",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Nuku'alofa",
+      "Lifuka",
+      "Vava'u Island"
+    ]
+  },
+  {
+    "code": "TT",
+    "name": "Trinidad and Tobago",
+    "capital": "Port of Spain",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Port of Spain",
+      "Scarborough"
+    ]
+  },
+  {
+    "code": "TN",
+    "name": "Tunisia",
+    "capital": "Tunis",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Tunis",
+      "Enfidha",
+      "Mellita",
+      "Monastir"
+    ]
+  },
+  {
+    "code": "TR",
+    "name": "Turkey",
+    "capital": "Ankara",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Ankara",
+      "Amasya",
+      "Antakya",
+      "Antalya"
+    ]
+  },
+  {
+    "code": "TM",
+    "name": "Turkmenistan",
+    "capital": "Ashgabat",
+    "region": "Asia",
+    "subregion": "Central Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Ashgabat",
+      "Balkanabat",
+      "Mary"
+    ]
+  },
+  {
+    "code": "TC",
+    "name": "Turks and Caicos Islands",
+    "capital": "Cockburn Town",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Cockburn Town",
+      "North Caicos",
+      "Providenciales",
+      "South Caicos"
+    ]
+  },
+  {
+    "code": "TV",
+    "name": "Tuvalu",
+    "capital": "Funafuti",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Funafuti"
+    ]
+  },
+  {
+    "code": "UG",
+    "name": "Uganda",
+    "capital": "Kampala",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Kampala",
+      "Arua",
+      "Entebbe",
+      "Gulu"
+    ]
+  },
+  {
+    "code": "UA",
+    "name": "Ukraine",
+    "capital": "Kyiv",
+    "region": "Europe",
+    "subregion": "Eastern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Kyiv"
+    ]
+  },
+  {
+    "code": "AE",
+    "name": "United Arab Emirates",
+    "capital": "Abu Dhabi",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Abu Dhabi",
+      "Al Ain",
+      "Dubai",
+      "Fujairah"
+    ]
+  },
+  {
+    "code": "GB",
+    "name": "United Kingdom",
+    "capital": "London",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "London",
+      "Aberdeen",
+      "Balemartine, Argyll and Bute",
+      "Balivanich"
+    ]
+  },
+  {
+    "code": "US",
+    "name": "United States",
+    "capital": "Washington, D.C.",
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Washington, D.C.",
+      "Aberdeen",
+      "Abilene",
+      "Adak"
+    ]
+  },
+  {
+    "code": "UM",
+    "name": "United States Minor Outlying Islands",
+    "capital": null,
+    "region": "Americas",
+    "subregion": "North America",
+    "is_schengen": false,
+    "top_cities": [
+      "Wake Island"
+    ]
+  },
+  {
+    "code": "VI",
+    "name": "United States Virgin Islands",
+    "capital": "Charlotte Amalie",
+    "region": "Americas",
+    "subregion": "Caribbean",
+    "is_schengen": false,
+    "top_cities": [
+      "Charlotte Amalie",
+      "Christiansted"
+    ]
+  },
+  {
+    "code": "UY",
+    "name": "Uruguay",
+    "capital": "Montevideo",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Montevideo",
+      "Ciudad de la Costa",
+      "Punta del Este",
+      "Rivera"
+    ]
+  },
+  {
+    "code": "UZ",
+    "name": "Uzbekistan",
+    "capital": "Tashkent",
+    "region": "Asia",
+    "subregion": "Central Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Tashkent",
+      "Andijan",
+      "Bukhara",
+      "Fergana"
+    ]
+  },
+  {
+    "code": "VU",
+    "name": "Vanuatu",
+    "capital": "Port Vila",
+    "region": "Oceania",
+    "subregion": "Melanesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Port Vila",
+      "Luganville",
+      "Tanna Island"
+    ]
+  },
+  {
+    "code": "VA",
+    "name": "Vatican City",
+    "capital": "Vatican City",
+    "region": "Europe",
+    "subregion": "Southern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Vatican City"
+    ]
+  },
+  {
+    "code": "VE",
+    "name": "Venezuela",
+    "capital": "Caracas",
+    "region": "Americas",
+    "subregion": "South America",
+    "is_schengen": false,
+    "top_cities": [
+      "Caracas",
+      "Barcelona",
+      "Barinas",
+      "Barquisimeto"
+    ]
+  },
+  {
+    "code": "VN",
+    "name": "Vietnam",
+    "capital": "Hanoi",
+    "region": "Asia",
+    "subregion": "South-Eastern Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Hanoi",
+      "Buon Ma Thuot",
+      "Ca Mau City",
+      "Can Tho"
+    ]
+  },
+  {
+    "code": "WF",
+    "name": "Wallis and Futuna",
+    "capital": "Mata-Utu",
+    "region": "Oceania",
+    "subregion": "Polynesia",
+    "is_schengen": false,
+    "top_cities": [
+      "Mata-Utu",
+      "Wallis Island"
+    ]
+  },
+  {
+    "code": "EH",
+    "name": "Western Sahara",
+    "capital": "El Aai\u00fan",
+    "region": "Africa",
+    "subregion": "Northern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Dakhla",
+      "Smara"
+    ]
+  },
+  {
+    "code": "YE",
+    "name": "Yemen",
+    "capital": "Sana'a",
+    "region": "Asia",
+    "subregion": "Western Asia",
+    "is_schengen": false,
+    "top_cities": [
+      "Sana'a",
+      "Aden",
+      "Al Ghaydah",
+      "Mori"
+    ]
+  },
+  {
+    "code": "ZM",
+    "name": "Zambia",
+    "capital": "Lusaka",
+    "region": "Africa",
+    "subregion": "Eastern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Lusaka",
+      "Livingstone",
+      "Mfuwe",
+      "Ndola"
+    ]
+  },
+  {
+    "code": "ZW",
+    "name": "Zimbabwe",
+    "capital": "Harare",
+    "region": "Africa",
+    "subregion": "Southern Africa",
+    "is_schengen": false,
+    "top_cities": [
+      "Harare",
+      "Bulawayo",
+      "Kariba",
+      "Victoria Falls"
+    ]
+  },
+  {
+    "code": "AX",
+    "name": "\u00c5land Islands",
+    "capital": "Mariehamn",
+    "region": "Europe",
+    "subregion": "Northern Europe",
+    "is_schengen": false,
+    "top_cities": [
+      "Mariehamn"
+    ]
+  }
+]

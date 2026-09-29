@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 280" width="960" height="280">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&amp;family=Noto+Sans+Devanagari:wght@600&amp;display=swap');
+      .brand-name {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-weight: 800;
+        font-size: 82px;
+        letter-spacing: -0.025em;
+        fill: #221511;
+      }
+      .brand-saffron {
+        fill: #E87524;
+      }
+      .brand-devanagari {
+        font-family: 'Noto Sans Devanagari', sans-serif;
+        font-weight: 600;
+        font-size: 24px;
+        letter-spacing: 0.16em;
+        fill: #7A2E2E;
+        opacity: 0.92;
+      }
+      .brand-origin-badge {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        fill: #99877E;
+      }
+    </style>
+  </defs>
+
+  <!-- Clean Ivory Canvas -->
+  <rect width="960" height="280" rx="24" fill="#FFFDF8"/>
+  <rect x="1" y="1" width="958" height="278" rx="23" fill="none" stroke="#F0E8DC" stroke-width="1.5"/>
+
+  <!-- Logo Group -->
+  <g transform="translate(64, 48)">
+    <!-- Standalone Continuous Journey Path & Waypoint Symbol -->
+    <g id="JourneySymbol" transform="translate(0, 10)">
+      <!-- Primary Outer Arch (Safarnama Saffron) - represents path, horizon, outward journey -->
+      <path d="M 28 140 C 28 84, 56 22, 95 22 C 134 22, 162 84, 162 140" 
+            fill="none" stroke="#E87524" stroke-width="18" stroke-linecap="round"/>
+      
+      <!-- Secondary Inner Loop (Deep Maroon) - represents exploration, route, connection -->
+      <path d="M 162 140 C 162 176, 132 194, 95 194 C 58 194, 44 166, 44 134 C 44 94, 72 74, 95 74 C 116 74, 132 90, 132 112 C 132 130, 116 140, 95 140" 
+            fill="none" stroke="#7A2E2E" stroke-width="14" stroke-linecap="round"/>
+
+      <!-- Waypoint Pin Beacons: Center origin/destination + apex north star -->
+      <circle cx="95" cy="112" r="10" fill="#E87524"/>
+      <circle cx="95" cy="22" r="7.5" fill="#FFFDF8" stroke="#E87524" stroke-width="5"/>
+    </g>
+
+    <!-- Wordmark & Supporting Devanagari Lockup -->
+    <g transform="translate(230, 42)">
+      <!-- Primary English Wordmark -->
+      <text x="0" y="58" class="brand-name">
+        Safar<tspan class="brand-saffron">nama</tspan>
+      </text>
+
+      <!-- Polished Supporting Devanagari Script -->
+      <g transform="translate(4, 94)">
+        <text x="0" y="0" class="brand-devanagari">सफ़रनामा</text>
+      </g>
+    </g>
+  </g>
+</svg>

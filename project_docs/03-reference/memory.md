@@ -4,23 +4,33 @@
 
 ## Current Status
 
-**Phase 17 — API Streaming complete.** `src/graph/streaming.py` (LangGraph SSE streaming engine & `PlanningEvent`), `src/api/models.py` (`PlanningEvent` export), `src/api/routes.py` (`POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), and `tests/unit/test_api_streaming.py` implemented and verified. Implements real-time milestone streaming for travel planning and re-planning workflows:
-1. Milestone Lifecycle Streaming:
-   - Emits structured SSE events: `planning_started`, `intake_completed`, `date_optimization_started`, `date_optimization_completed`, `visa_started`, `visa_completed`, `logistics_started`, `logistics_completed`, `experience_started`, `experience_completed`, `budget_calculated`, `optimization_started`, `optimization_completed`, `planning_completed`, `warning`, `error`.
-   - Streaming payloads deliver clean, high-level summaries for UI consumption without internal LangGraph/LangChain execution metadata or stack traces.
-2. Browser & Client Friendly Endpoints:
-   - `POST /api/v1/plan/stream`: Full planning stream taking JSON `PlanRequest`.
-   - `GET /api/v1/plan/stream`: Browser-native `EventSource` compatible endpoint taking URL query parameters.
-   - `POST /api/v1/plan/replan/stream` (and alias `POST /api/v1/plan/decision/stream`): Streams re-planning workflows with maximum artifact reuse.
-3. Hermetic Verification:
-   - 12 comprehensive unit tests in `tests/unit/test_api_streaming.py`.
-   - Entire test suite passes (572 passing unit tests across repository), 100% clean formatting and linting.
+**Safarnama Frontend — Batch 2 complete (Travel Preferences, Budget, Review & Confirm).** Batch 1's existing trip and destination screens now connect to URL-addressable `/planner/preferences`, `/planner/budget`, and `/planner/review` routes. The single `TripPlanningProvider` draft owns preferences and INR budget alongside existing trip/ordered-stop state; versioned browser-local storage restores it across direct loads, refreshes, and navigation. This is device-local persistence, not account/cloud autosave.
 
-Do not start subsequent phases until explicitly requested.
+1. **Batch 2 implementation**:
+  - Preferences: supported backend travel style/pace values, unique supported experience interests, and must-visits chosen from the active route or curated options for selected destinations. Arbitrary free-text additions are blocked; saved values that no longer match after trip edits are flagged and block continuation/confirmation until corrected. Request handoff remains a string array matching backend `must_visits`.
+  - Budget: INR target with `TOTAL`/`PER_PERSON` mode and ₹1,000 minimum. No live pricing, personalized allocations, tier benchmarks, or invented provider API.
+  - Review: ordered stops/nights, origin/destination, travelers/dates, preferences, budget, section edit routes, full-draft validation, and a backend-shaped `PlanRequestDraft` mapper. Infant counts are surfaced as unsupported by the current request contract instead of dropped.
+  - Confirmation validates and presents an explicit Batch 3 boundary; it does not call a planning API or implement Progress/SSE/results.
+2. **Routing and persistence**: Implemented History API routes for Welcome, Trip Details, Destinations, Preferences, Budget, and Review with back/forward synchronization. Destinations Continue now advances after existing night reconciliation; previous-step/edit routes preserve the same shared draft. Local storage failures do not block editing.
+3. **Visual/accessibility decisions**: Reused the existing Safarnama header, footer, and stepper; matched the Stitch screen hierarchy and warm theme. Omitted unsupported priorities and nonbinding budget allocation graphics. Added semantic fieldsets, named controls, Space/Enter and arrow-key radio behavior, visible focus, alert/status announcements, and narrow-screen wrapping. Constrained the Stepper icon fallback after responsive checks found a 21 px mobile overflow.
+4. **Verification**: Frontend suite 24/24 passing; `pnpm build` succeeds and `pnpm lint` is clean (build retains the existing >500 kB bundle-size warning). Browser-verified that unmatched must-visit text yields no options and is rejected, while selecting a route stop persists and appears in Review. Earlier Batch 2 browser checks covered navigation, refresh restoration, keyboard radio behavior, no page errors, and no horizontal overflow at 390 px or 768 px.
+5. **Next batch**: Batch 3 owns the Progress route, `/api/v1/plan/stream` lifecycle, progress/warnings/errors, and completed itinerary/overview. No Batch 3 user-facing functionality was added here.
+
+**Batch 1 history:** Phase 22.6 multi-destination input, cross-border scoping, and contextual city selection were complete before Batch 2. Contextual-city matching resolves international countries/circuits before domestic city fallback and requires a full normalized domestic city name or ID match, preventing `Italy` from colliding with the Indian city `Tal`. Each selected destination array entry is normalized atomically so comma-containing labels do not duplicate. Mobile route cards now shrink/wrap within the viewport.
+1. **Multi-Destination Input Support**:
+   - Destination model backward compatibility: `tripDetails.destination` maintains comma-separated string representation while `tripDetails.destinations` maintains an array of individual destination strings.
+   - Parenthesis-safe destination parser: Implemented `splitDestinationsString()` which prevents internal commas (e.g. `South Korea (Seoul, Busan, Daegu)`) from accidentally splitting single destinations into fragments.
+   - Screen 1 Interactive Destination Chips: Each chosen country or state is displayed as an individual dismissible chip with `✕` button. Users can add multiple destinations via the "+ Add Another Country" or "+ Add Another State/UT/City" button without overwriting existing selections.
+2. **Multi-Destination Route Seeding & Cross-Region Scoping**:
+  - `resolveDestinationData(destinationInput, scopeHint)` handles arrays or comma-delimited strings, taking top stops from each chosen destination and generating cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`). The context normalizes each array item with the single-destination resolver to preserve comma-rich names such as Japan's `Kyoto, Japan` display name.
+  - Contextual stop selector on Screen 2 (`getContextualCitiesForDestination`): Returns the deduplicated union of cities across all selected states or countries without cross-region pollution. Regression coverage confirms Japan + Italy returns cities from both countries without Madhya Pradesh cities, while a direct Indian city still resolves domestically.
+3. **Aggregated Multi-Destination Visa & Permit Engine**:
+   - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen countries into a single verdict (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (`ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
+4. **Verification**: 19/19 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files. Playwright verified Japan + Italy chips and route seeding, and confirmed no page-level horizontal overflow at 390 px.
 
 ## Current implementation phase
 
-Phase 17 — API Streaming (Completed)
+Frontend Batch 2 — Preferences, Budget, Review, routes, and device-local draft persistence (Completed)
 
 ## Completed functionality
 
@@ -541,10 +551,139 @@ Phase 17 — API Streaming is **100% complete, verified via 12 dedicated unit te
 - `README.md`
 - `project_docs/memory.md`
 
-## Next recommended phase
+## Frontend Batch 1 Completion Status
 
-**Phase 18 — Frontend**:
-Build responsive modern web interface with Vite, React, TypeScript, and modern styling, featuring interactive trip intake forms, live SSE milestone streaming indicators, rich day-by-day itinerary views, budget breakdown visualizers, and interactive budget conflict resolution cards.
+Frontend Batch 1 (Screens 1–3) is **100% complete, verified via 10 Vitest/React Testing Library tests, clean production build, zero-warning Oxlint static analysis, and synchronized documentation**.
+
+### Completed Screens & Capabilities:
+- **Screen 1**: Welcome / Landing Screen (editorial hero, bento feature grid, curated circuits, closing CTA banner, 5-column footer)
+- **Screen 2**: Trip Planner — Trip Details
+  - 5-step stepper, Indian origin airport autocomplete (14 airports with IATA designations).
+  - **Static Data Destination Auto-Population**: Real-time autocomplete search (`searchAllDestinations`) across all 250 sovereign countries (`generated_countries.json`), all 36 Indian States and Union Territories (`indian_states_uts.json`), and curated circuits.
+  - Interactive Date Picker with editorial typography (`Sat, Oct 18` / `Tue, Oct 28`), native accessible calendar picker (`showPicker()`), and zero digit clipping.
+  - Departure and return leg cycling preference selectors (Morning, Afternoon, Evening) with immediate year synchronization to the selected date (e.g. selecting January 2027 immediately updates leg text to `2027 • Evening leg`).
+  - Real-time Seasonal Weather Badge adapting to destination and chosen month (`getSeasonDescription`).
+  - Real-time Visa Verdict Badge adapting to destination (`getVisaVerdict`, e.g. Schengen Visa required for Norway, ₹0 domestic visa for Rajasthan/Ladakh).
+  - Party dynamic buttons and traveler counter steppers.
+- **Screen 3**: Trip Planner — Destinations
+  - **Dynamic Route Seeding & Resolver**: `resolveDestinationData()` dynamically generates/resolves route stops matching any entered domestic state/UT or international country. Entering "Norway" on Screen 2 seeds real Norway cities (Oslo, Flåm & Sognefjord, Bergen & Bryggen, Tromsø & Arctic Fjords) with scenic rail/fjord catamaran transit connectors instead of falling back to Japan cities.
+  - Stop night counter steppers (`[ - ] X nights [ + ]`).
+  - Duration Reconciliation Engine comparing total allocated stop nights against target trip duration, alerting to gaps/surpluses, with one-click date synchronization.
+  - Route sequence timeline with reorder controls, stop removal, and custom destination insertion with automatic transit connector recalculation.
+  - Curated suggestions dynamically filtered by active destination.
+
+### Reusable Components & Design Architecture:
+- Framework: Vite + React 19 + TypeScript + Tailwind CSS
+- Stitch Reference: Directly inspected project `Safarnama` (`projects/12901504223215830628`)
+- Centralized Design Tokens: Tailored palette (Saffron `#E87524`, Deep Maroon `#7A2E2E`, Ivory canvas `#FFFDF8`), typography (`Plus Jakarta Sans` headings, `Inter` body, Google Material Symbols), modular spacing
+- Reusable Components:
+  - Layout: `Header`, `PlannerHeader`, `Footer`, `PlannerFooter`
+  - Planner: `ProgressStepper`, `CounterStepper`, `RouteSequenceItem`, `SuggestionCard`
+- Structured State Management: `TripPlanningContext` and `useTripPlanning` persisting trip details and route sequence seamlessly across forward and back navigation.
+
+### Verification:
+- Tests: 11 unit & integration tests passing in `frontend/src/test/flow.test.tsx` (`vitest`).
+- Build: `tsc -b && vite build` bundled with zero errors or warnings.
+- Lint: `oxlint` passed with 0 errors and 0 warnings across 24 files.
+- Python Suite: 577 tests passing across root repository (including 5 hermetic tests in `test_fetch_india_places.py`).
+
+## Indian Geographic Ingestion & Destination Search Auto-Population
+
+### Implementation Summary:
+1. **Ingestion Script (`scripts/fetch_india_places.py`)**:
+   - Authenticated against `api.countrystatecity.in` with API key `53a77eb3c476d68bf975a21b6cbb802007f139a216e31548df3d1ed70baa9b36`.
+   - Ingested all 36 Indian administrative divisions (28 States + 8 Union Territories) with coordinates (`latitude`, `longitude`), ISO codes, and administrative types.
+   - Ingested all 4,198 Indian cities and settlements categorized by parent state.
+   - Built resilient HTTP fetching with exponential backoff (up to 4 attempts) to recover gracefully from transient network or SSL timeouts.
+   - Tagged 99 prominent Indian destinations (`is_popular: true`) spanning Rajasthan palaces, Himachal/Uttarakhand hill stations, Kerala backwaters, Goa beaches, Himalayan monasteries, and spiritual circuits.
+   - Generated static datasets:
+     - `data/static/india_places.json` (backend static store)
+     - `frontend/src/data/india_places.json` (frontend client dataset)
+     - Refreshed `frontend/src/data/indian_states_uts.json` with enriched city arrays.
+
+2. **Frontend Destination Autocomplete & Resolution Engine (`frontend/src/data/destinationsRegistry.ts`)**:
+   - **`searchAllDestinations(query)`**: High-performance real-time search auto-populating:
+     - Curated featured circuits (Norway, Japan, Switzerland, Ladakh, Rajasthan, etc.).
+     - All 36 Indian States and Union Territories with state aliases and top cities.
+     - 4,198 Indian Cities with priority ranking for iconic tourist hubs, marked with `DOMESTIC` badges and `City in {State}, India` subtitles.
+     - All 250 Sovereign Nations from `generated_countries.json` with capital, region, and Schengen/international visa tags.
+     - Clean, balanced empty-query dropdown displaying popular domestic states, iconic Indian cities, curated escapes, and international destinations.
+   - **`generateDomesticCityFallback(cityInput)`**: Dynamically builds route stops when an Indian city is selected, establishing the selected city as Stop #1 with regional connections, scenic transit, and ₹0 domestic visa status.
+   - **`resolveDestinationData(destinationInput)`**: Master resolver routing seamlessly between curated circuits, specific Indian cities, domestic states, and international sovereign countries.
+
+### Verification Status:
+- Frontend Tests: 14 tests passing in `frontend/src/test/flow.test.tsx` (`vitest`).
+- Frontend Build: `tsc -b && vite build` succeeded (0 errors).
+- Frontend Linter: `oxlint` passed (0 errors, 0 warnings across 24 files).
+- Backend Tests: 577 tests passing across root repository (`pytest tests/unit`).
+- Documentation Synchronized: `prd.md`, `phases.md`, `architecture.md`, `README.md`, `memory.md`.
+
+## Smart Reconciliation Dialog on Continue (Phase 22.4)
+
+### Implementation Summary:
+1. **`TripPlanningContext` Atomic Batching**:
+   - Added `batchUpdateStopNights: (updates: { id: string; nights: number }[]) => void` to `TripPlanningContextDef.ts` and `TripPlanningContext.tsx`.
+   - Rebalances multiple route stop nights in a single atomic React state dispatch to avoid unnecessary intermediate re-renders.
+2. **`DestinationsScreen.tsx` Modal & Handlers**:
+   - Intercepts `Continue to Preferences` whenever `totalAllocatedNights !== durationDays`.
+   - If `durationDiff === 0`, proceeds immediately without interruption.
+   - If over-allocated (`durationDiff > 0`): provides `Extend Trip to {X} Nights` (primary), `Fit Stops to {Y} Days` (secondary), and `Review & Edit Stops Manually` (dismiss).
+   - If under-allocated (`durationDiff < 0`): provides `Shorten Trip to {X} Nights` (primary), `Distribute Remaining {Z} Nights` (secondary), and `Review & Edit Stops Manually` (dismiss).
+   - `handleFitStopsAndContinue`: proportionally scales stop nights down while honoring a minimum 1 night per stop constraint. Clamps to total stops if stops exceed planned days.
+   - `handleDistributeRemainingAndContinue`: distributes unallocated nights evenly across existing stops.
+   - Accessible modal UI (`#modal-smart-reconciliation`) with clear visual comparison cards, clean typography, and intuitive button hierarchies.
+3. **Verification**:
+   - Unit & flow tests in `flow.test.tsx` expanded with full reconciliation dialog scenarios (14/14 tests passing).
+   - Clean production build and zero linter warnings.
+
+## Route Template Decoupling & Domestic Permit Guidance Refinement (Phase 22.5)
+
+### Implementation Summary:
+1. **Decoupled Route Templates from Screen 2**:
+   - Removed the global circuit switcher bar from `DestinationsScreen.tsx`.
+   - Prevents cross-destination pollution where selecting an unrelated template (e.g. Japan or Rajasthan) would overwrite the user's chosen destination (e.g. Norway).
+2. **Refined Domestic Entry Requirements**:
+   - Standard Indian domestic travel (Rajasthan, Kerala, Goa, Himachal, Uttarakhand, Karnataka, Andaman, etc.): Visa and passport badges are completely hidden.
+   - Special border permit regions (Ladakh/Leh, Sikkim, Arunachal Pradesh, Lakshadweep, Nagaland, Mizoram, Manipur): Replaced the redundant "₹0 Visa" tag with `ℹ️ Inner Line Permit (ILP) / PAP Required`.
+   - International destinations: High-value visa guidance (Schengen, eVisa, Visa on Arrival, Visa Free) remains prominent.
+3. **Verification**:
+   - 14/14 Vitest tests passing (`flow.test.tsx`).
+   - Clean production build with Vite (`tsc -b && vite build`) and 0 oxlint warnings/errors.
+
+## Multi-Destination Input Support & Cross-Region Scoping (Phase 22.6)
+
+### Implementation Summary:
+1. **Multi-Destination State Model**:
+   - Extended `TripDetailsState` in `src/types/trip.ts` with optional `destinations?: string[]`.
+   - `TripPlanningContext.tsx` synchronizes `destination` (comma-separated string) and `destinations` (string array) bidirectionally on every state update, providing backward compatibility with single-string consumers while supporting granular multi-selection.
+2. **Parenthesis-Safe Parsing & Entity Sanitization**:
+   - Created `splitDestinationsString(str)` in `destinationsRegistry.ts` respecting nesting parentheses depth (`parenDepth`). This ensures descriptions like `"South Korea (Seoul, Busan, Daegu)"` or `"Rajasthan (Jaipur, Jodhpur, Udaipur & Jaisalmer)"` are not mistakenly fragmented.
+3. **Screen 1 Interactive Destination Chips & Add Flow (`TripDetailsScreen.tsx`)**:
+   - Displayed each chosen country/state as an individual badge with dismiss button (`✕`) labeled with `aria-label="Remove destination"`.
+   - Provided toggle button `+ Add Another Country` / `+ Add Another State/UT/City` with contextual placeholder.
+   - Protected ongoing search typing during `isAddingDestination` from prematurely clobbering existing selections.
+   - Enhanced `handleToggleScope` to strictly resolve existing scope without forced fallback cross-pollution.
+4. **Screen 2 Multi-Destination Contextual Cities & Route Seeding (`DestinationsScreen.tsx` & `destinationsRegistry.ts`)**:
+   - Consumes effective multi-destination input (`tripDetails.destinations || tripDetails.destination`).
+   - `resolveDestinationData(destinationInput, scopeHint)` handles arrays or comma-delimited strings, stitching top stops from each destination and auto-generating cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
+   - `getContextualCitiesForDestination` returns the deduplicated union of contextual cities across all chosen destinations without cross-scope leak.
+5. **Aggregated Multi-Destination Visa & Permit Guidance (`locations.ts`)**:
+   - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Groups multiple Schengen countries into a single unified verdict (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (e.g. `ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
+6. **Verification**:
+   - 17/17 Vitest tests passing in `flow.test.tsx` (100% green).
+   - Production bundle built cleanly with `tsc -b && vite build`.
+   - Zero linter warnings or errors (`oxlint`).
+
+### Next Recommended Batch:
+
+**Batch 2 — Completing the Wizard & Progress**
+Screens 4–8:
+- Screen 4: Trip Planner — Travelers & Style
+- Screen 5: Trip Planner — Budget & Pacing
+- Screen 6: Trip Planner — Review & Confirm
+- Screen 7: Planning Engine Progress & Streaming Visualizer
+- Screen 8: Itinerary Generated / Overview Reveal
+
 
 
 

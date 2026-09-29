@@ -699,6 +699,8 @@ Budget
 Supporting details
 ```
 
+Route stop cards and their text must shrink or wrap within the mobile viewport. Horizontally scrollable category filters must remain contained by their parent and must not create page-level horizontal overflow.
+
 Exact responsive breakpoints remain a frontend implementation decision.
 
 ---

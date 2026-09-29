@@ -253,7 +253,33 @@ Extract and normalize:
 - Schengen Area & EU membership status
 - Border countries
 
-## 5.4 Ingestion behavior
+## 5.4 Indian States, UTs, and Cities Ingestion
+
+Implement:
+
+```text
+scripts/fetch_india_places.py
+```
+
+Source:
+
+`api.countrystatecity.in` (CountryStateCity API)
+
+Outputs:
+
+```text
+data/static/india_places.json
+frontend/src/data/india_places.json
+frontend/src/data/indian_states_uts.json (enriched with top cities)
+```
+
+Extract and normalize:
+- All 28 States and 8 Union Territories with standard ISO 3166-2 codes, coordinates, and types
+- All ~4,200 Indian cities categorized by parent state
+- Curated prominence tagging (`is_popular: true`) for top ~100 iconic tourist destinations (e.g. Udaipur, Manali, Rishikesh, Varanasi, Ooty, Munnar, Goa)
+- Automatic retry with exponential backoff for network resilience
+
+## 5.5 Ingestion behavior
 
 The scripts are **on-demand** in V1.
 
@@ -263,6 +289,7 @@ Run with:
 uv run python scripts/fetch_airports.py
 uv run python scripts/fetch_visa_rules.py
 uv run python scripts/fetch_country_profiles.py
+uv run python scripts/fetch_india_places.py
 ```
 
 Do not depend on a scheduled runtime ingestion process.
@@ -291,6 +318,7 @@ data/static/airports.json
 data/static/visa_rules.json
 data/static/visa_rules_enriched.json
 data/static/countries.json
+data/static/india_places.json
 ```
 
 and tests confirm that expected records resolve.
@@ -1247,6 +1275,107 @@ pnpm
 ```
 
 not npm.
+
+## 22.1 Batch 1: Core Journey Onboarding & Route Sequencing (Completed)
+
+Implemented the first 3 screens aligned with the approved Stitch project `Safarnama`:
+- **Screen 1 (Welcome / Landing Screen)**: Editorial hero, flat-lay aesthetics, 6-card bento architecture, popular preview routes, and primary navigation.
+- **Screen 2 (Trip Details)**:
+  - Location Search & Autocomplete for 14 major Indian origin airports with IATA designations.
+  - **Static Data Destination Auto-Population**: Real-time autocomplete search (`searchAllDestinations`) across all 250 sovereign countries (`generated_countries.json`), all 36 Indian States and Union Territories (`indian_states_uts.json`), and curated circuits.
+  - Interactive Date Picker with editorial typography (`Sat, Oct 18` / `Tue, Oct 28`), native accessible calendar picker (`showPicker()`), zero browser indicator digit clipping, and automatic duration calculation (`durationDays = return - departure`).
+  - Departure and return leg cycling selectors (Morning, Afternoon, Evening) with immediate year synchronization to the chosen calendar dates (e.g. choosing 2027 immediately reflects `2027 • Evening leg`).
+  - Real-time Seasonal Weather Badge adapting to destination and chosen month (`getSeasonDescription`).
+  - Real-time Visa Verdict Badge adapting to destination (`getVisaVerdict`, e.g. Schengen Visa required for Norway, ₹0 domestic visa for Rajasthan/Ladakh).
+  - Traveler group counters and party dynamic selectors.
+- **Screen 3 (Destinations & Route Sequence)**:
+  - **Dynamic Route Seeding & Resolver**: `resolveDestinationData()` dynamically generates/resolves route stops matching any entered domestic state/UT or international country. Entering "Norway" on Screen 2 seeds real Norway cities (Oslo, Flåm & Sognefjord, Bergen & Bryggen, Tromsø & Arctic Fjords) with scenic rail/fjord catamaran transit connectors instead of falling back to Japan cities.
+  - Stop Night Counters with interactive `[ - ] X nights [ + ]` steppers.
+  - Duration Reconciliation Engine comparing total allocated stop nights against target trip duration, alerting to gaps/surpluses, with one-click date synchronization.
+  - Stop reordering, deletion, and custom destination insertion with automatic transit connector recalculation.
+  - Curated suggestions dynamically filtered by active destination.
+- **Verification**: 12 automated flow and regression tests passing in Vitest (`flow.test.tsx`), production bundle verified with Vite/tsc (`pnpm build`), and zero linter warnings/errors (`oxlint`).
+
+## 22.2 Scope Partitioning & Contextual City Scoping (Screen 1 & 2 Upgrade) (Completed)
+
+Implemented strict scope partitioning and contextual scoping across Screen 1 (`TripDetailsScreen.tsx`) and Screen 2 (`DestinationsScreen.tsx`):
+- **Screen 1: Domestic vs. International Toggle & Origin Routing**:
+  - **Scope Toggle**: Added interactive Scope Toggle at the top of Step 1 (`[ 🇮🇳 Domestic (Within India) ]` vs `[ ✈️ International ]`).
+  - **Dynamic Origin Field**:
+    - **Domestic**: Searches and auto-populates from the full 4,198 Indian cities, towns, and rail hubs dataset (`india_places.json`) alongside commercial airports, supporting multi-modal domestic travel (train, cab, drive, flight).
+    - **International**: Strictly restricted to Indian commercial departure airports with valid IATA codes (`INDIAN_ORIGIN_AIRPORTS`, e.g. DEL, BOM, BLR, CCU, MAA, HYD) for immigration and flight legs.
+  - **Partitioned Destination Search**:
+    - If Domestic: Searches only across Indian States, UTs, and major regions.
+    - If International: Searches only across 250 Sovereign Countries and global circuits.
+    - Dynamic featured destination inspiration chips strictly aligned with the chosen scope.
+- **Screen 2: Strict Contextual City Auto-Population & Scenic Transit Connectors**:
+  - **Strict Contextual Scoping**: Detects confirmed state/country from Screen 1; `getContextualCitiesForDestination` strictly populates stops belonging to that destination (e.g. Rajasthan → Jaipur, Udaipur, Jodhpur, Jaisalmer, Pushkar...; Kerala → Munnar, Kochi, Alleppey...; Norway → Oslo, Bergen, Flåm, Tromsø...). Prevents adding cross-country or cross-state noise with validation alerts.
+  - **Real-Time Autocomplete Dropdown**: Rich dropdown rendering City Name, Region/District tag, Prominence indicator (`★ Popular Stop` vs `Scenic Gateway`), and image thumbnail.
+  - **Smart Stop Seeding & Scenic Transit Connectors**: Newly added cities receive realistic night allocation (default 2 nights), tailored roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferry in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan, Mountain Pass Drive in Ladakh).
+  - **Replaced Hardcoded Tokyo Fallback**: The `+ Add another destination to route` quick button dynamically selects the next unadded popular city from the active destination's contextual list, rather than defaulting to Tokyo.
+- **Verification**: 12 automated Vitest tests passing, 0 TypeScript build errors, 0 oxlint warnings, and 100% backend unit tests passing (580+ passed).
+
+## 22.3 Destination Resolution & Scope-Aware Visa Consistency (Completed)
+
+Fixed destination resolution, greedy substring matching, and visa consistency across `destinationsRegistry.ts`, `locations.ts`, and `TripDetailsScreen.tsx`:
+- **Scope-Aware Destination Resolution**:
+  - `resolveDestinationData(destinationInput, scopeHint?)` now accepts an active scope hint. When in `INTERNATIONAL` scope, sovereign country lookups and international curated circuits are prioritized over domestic cities/states.
+  - Primary entity isolation: `query.replace(/\s*\([^)]*\).*/, '').trim()` extracts the core state/country before parentheses (e.g. `Pakistan (Islamabad, ...)` isolates to `Pakistan`), preventing sub-city names from triggering false matches.
+  - Eliminated greedy substring collisions: Removed `cleanQ.includes(c.name)` in `generateDomesticCityFallback`, stopping short 2–3 letter Indian cities (`Bah`, `South`, `Anta`, `Tral`, `Un`, `Gua`) from capturing international country searches (such as Pakistan matching `Bah, UP` due to Bahawalpur, or South Korea matching `South, Sikkim`).
+  - Strict word-boundary checks on short curated circuit IDs (`\buk\b`), ensuring strings containing sub-cities like `Lukla` (Nepal) or `Nuuk` (Greenland) never falsely resolve to the United Kingdom circuit.
+- **Unified Visa Status Engine**:
+  - Created `getCountryVisaStatus()` ensuring identical verdicts across autocomplete dropdowns, dynamic typing previews, and finalized destination badges.
+  - Added dedicated support for Freedom of Movement for Indian citizens traveling to Nepal and Bhutan (`Visa Free • Freedom of Movement for Indian Citizens (No Visa Needed)`).
+- **Verification**: 13 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors.
+
+## 22.4 Smart Reconciliation Dialog on Continue (Completed)
+
+Implemented an intelligent, accessible modal dialog intercepting navigation from Screen 2 (Destinations & Route Sequence) to Screen 3 (Preferences / Travelers) when total allocated stop nights differ from the planned trip calendar duration:
+- **Interception Logic**:
+  - Clicking "Continue to Preferences" checks `durationDiff = totalAllocatedNights - durationDays`.
+  - When `durationDiff === 0`: Directly transitions to the next planner step (`onContinue()`).
+  - When `durationDiff !== 0`: Intercepts navigation and presents a tailored reconciliation dialog with side-by-side metric comparison (`Allocated across stops` vs `Planned trip duration`).
+- **Over-Allocated Handling (`durationDiff > 0`)**:
+  - **Primary Action**: `[ Extend Trip to {X} Nights ]` (`handleReconcileAndContinue`) — synchronizes the calendar return date and trip duration to match total stop nights and advances seamlessly.
+  - **Secondary Action**: `[ Fit Stops to {Y} Days ]` (`handleFitStopsAndContinue`) — uses atomic batch update (`batchUpdateStopNights`) to scale down stop nights to fit planned duration (preserving minimum 1 night per stop, clamping if stops > planned days) and advances.
+  - **Dismiss Action**: `[ Review & Edit Stops Manually ]` — dismisses the modal so the user can fine-tune stops and steppers manually.
+- **Under-Allocated Handling (`durationDiff < 0`)**:
+  - **Primary Action**: `[ Shorten Trip to {X} Nights ]` (`handleReconcileAndContinue`) — adjusts the calendar return date to match allocated stop nights and advances.
+  - **Secondary Action**: `[ Distribute Remaining {Z} Nights ]` (`handleDistributeRemainingAndContinue`) — evenly spreads unallocated nights across existing stops and advances.
+  - **Dismiss Action**: `[ Review & Edit Stops Manually ]`.
+- **Atomic State Updates**:
+  - Added `batchUpdateStopNights: (updates: { id: string; nights: number }[]) => void` to `TripPlanningContextDef.ts` and `TripPlanningContext.tsx` ensuring multi-stop rebalancing applies in a single React render cycle.
+## 22.5 Route Template Decoupling & Domestic Permit Guidance Refinement (Completed)
+
+Refined route customization and entry requirements across `DestinationsScreen.tsx`, `TripDetailsScreen.tsx`, `locations.ts`, and `destinationsRegistry.ts`:
+- **Removed Global Circuit Template Switcher on Screen 2**:
+  - Completely removed the cross-destination template bar (`Curated Route Templates: [ Norway Fjords ] [ Japan ] [ Rajasthan ] ...`) from Screen 2 (`DestinationsScreen.tsx`).
+  - Ensures a user who chose Norway on Screen 1 is not presented with other countries' routes that could accidentally override their active itinerary.
+- **Regular Domestic Travel (Zero Visa/Passport Mention)**:
+  - For standard Indian domestic destinations (e.g. Rajasthan, Kerala, Goa, Himachal, Uttarakhand, Karnataka, Andaman), visa badges are completely hidden. Domestic Indian travel requires no visa or passport.
+- **Special Border Permit Regions (ILP / PAP)**:
+  - For special border states and union territories (Ladakh/Leh, Sikkim, Arunachal Pradesh, Lakshadweep, Nagaland, Mizoram, Manipur), replaced the redundant "₹0 Visa" label with a dedicated permit badge: `ℹ️ Inner Line Permit (ILP) / PAP Required`.
+- **International Destinations (Prominent Visa Guidance Retained)**:
+  - All international destinations continue to display high-value, passport-specific visa guidance (Schengen Visa, eVisa Active, Visa on Arrival, Visa Free, etc.).
+- **Verification**: 14 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors.
+
+## 22.6 Multi-Destination Input Support & Cross-Region Scoping (Completed)
+
+Implemented multi-state/UT/city (Domestic) and multi-country (International) input support and stop discovery across Screen 1 (`TripDetailsScreen.tsx`) and Screen 2 (`DestinationsScreen.tsx`):
+- **Screen 1 Interactive Destination Chips & Add Flow**:
+  - Each selected destination is displayed as an individual pill chip with a clear dismiss button (`✕`) with `aria-label="Remove destination"`.
+  - Added an interactive `+ Add Another Country` (International) or `+ Add Another State/UT/City` (Domestic) action button allowing users to incrementally add destinations to their journey.
+  - Active search typing during destination addition is isolated so it does not overwrite previously added destination chips.
+  - `splitDestinationsString(str)`: Parenthesis-safe delimiter parser ensuring commas inside region descriptions (e.g. `South Korea (Seoul, Busan, Daegu)` or `Rajasthan (Jaipur, Jodhpur, Udaipur & Jaisalmer)`) are never broken into invalid fragments.
+      - Multi-destination array entries are normalized individually rather than split again as a combined string, keeping comma-containing destination names (e.g. `Kyoto, Japan`) singular in their chips.
+- **Screen 2 Multi-Destination Contextual Cities & Transit Connectors**:
+  - Consumes the effective multi-destination selection (`tripDetails.destinations || tripDetails.destination`).
+  - Top stops from each chosen destination are seeded into the route, interconnected by cross-region scenic transit connectors (e.g. `Cross-Region Scenic Connection to Rome`).
+      - The stop selector dropdown (`getContextualCitiesForDestination`) returns the deduplicated union of cities across all selected states or countries without cross-scope leak. International circuits and countries resolve before domestic city fallback; domestic city fallback requires a full normalized name or ID match, preventing incidental substring collisions such as `Italy` matching the Indian city `Tal`.
+      - Route cards shrink and wrap within narrow viewports; category filters remain horizontally scrollable without widening the page.
+- **Aggregated Visa & Permit Verdicts**:
+  - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen destinations under a single badge (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (e.g. `ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
+- **Verification**: 19 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files. Playwright confirms canonical Japan + Italy chips and no horizontal overflow at a 390 px viewport.
 
 ---
 
