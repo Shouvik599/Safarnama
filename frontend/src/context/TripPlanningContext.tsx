@@ -8,11 +8,24 @@ import type {
 import { TripPlanningContext } from './TripPlanningContextDef';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
 import {
+  ALL_CURATED_DESTINATIONS,
   resolveDestinationData,
   resolveSingleDestinationData,
   generateScenicTransitConnector,
   splitDestinationsString,
 } from '../data/destinationsRegistry';
+
+const latestCuratedStopById = new Map(
+  ALL_CURATED_DESTINATIONS.flatMap((destination) => destination.defaultStops).map((stop) => [stop.id, stop])
+);
+
+const refreshStoredStopImages = (stops: RouteStop[]): RouteStop[] =>
+  stops.map((stop) => {
+    const current = latestCuratedStopById.get(stop.id);
+    return current && current.name === stop.name
+      ? { ...stop, imageUrl: current.imageUrl, imageAlt: current.imageAlt ?? stop.imageAlt }
+      : stop;
+  });
 
 const DRAFT_STORAGE_KEY = 'safarnama.trip-draft.v1';
 
@@ -76,7 +89,9 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
     () => storedDraft?.tripDetails ?? createInitialTripDetails()
   );
   const [destinations, setDestinations] = useState<RouteStop[]>(
-    () => storedDraft?.destinations ?? JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
+    () => storedDraft?.destinations
+      ? refreshStoredStopImages(storedDraft.destinations)
+      : JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
   );
   const [preferences, setPreferences] = useState<PlannerPreferences>(
     () => storedDraft?.preferences ?? {

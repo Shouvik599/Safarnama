@@ -444,8 +444,25 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                           : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
                       }`}
                     >
-                      <span className="text-[16px]">🇮🇳</span>
-                      <span>Domestic (Within India)</span>
+                      <svg
+                        aria-label="Indian flag"
+                        role="img"
+                        viewBox="0 0 24 16"
+                        className="h-4 w-6 shrink-0 rounded-[2px] shadow-sm"
+                      >
+                        <rect width="24" height="5.34" fill="#FF9933" />
+                        <rect y="5.33" width="24" height="5.34" fill="#FFFFFF" />
+                        <rect y="10.66" width="24" height="5.34" fill="#138808" />
+                        <circle cx="12" cy="8" r="2.35" fill="none" stroke="#000080" strokeWidth="0.55" />
+                        <circle cx="12" cy="8" r="0.38" fill="#000080" />
+                        <path
+                          d="M12 5.65v4.7m-2.35-2.35h4.7m-4.01-1.66 3.32 3.32m0-3.32-3.32 3.32"
+                          fill="none"
+                          stroke="#000080"
+                          strokeWidth="0.34"
+                        />
+                      </svg>
+                      <span>Domestic</span>
                     </button>
                     <button
                       type="button"
