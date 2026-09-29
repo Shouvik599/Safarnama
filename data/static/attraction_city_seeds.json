@@ -1,0 +1,16 @@
+{
+    "seeds": [
+        { "city": "Osaka", "country": "Japan", "country_code": "JP", "region": "Kansai" },
+        { "city": "Kyoto", "country": "Japan", "country_code": "JP", "region": "Kansai" },
+        { "city": "Kanazawa", "country": "Japan", "country_code": "JP", "region": "Ishikawa" },
+        { "city": "Nara", "country": "Japan", "country_code": "JP", "region": "Nara" },
+        { "city": "Hakone", "country": "Japan", "country_code": "JP", "region": "Kanagawa" },
+        { "city": "Hiroshima", "country": "Japan", "country_code": "JP", "region": "Hiroshima" },
+        { "city": "Rome", "country": "Italy", "country_code": "IT", "region": "Lazio" },
+        { "city": "Florence", "country": "Italy", "country_code": "IT", "region": "Tuscany" },
+        { "city": "Positano", "country": "Italy", "country_code": "IT", "region": "Campania" },
+        { "city": "Capri", "country": "Italy", "country_code": "IT", "region": "Campania" },
+        { "city": "Siena", "country": "Italy", "country_code": "IT", "region": "Tuscany" },
+        { "city": "Venice", "country": "Italy", "country_code": "IT", "region": "Veneto" }
+    ]
+}

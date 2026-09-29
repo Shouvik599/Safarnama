@@ -2,7 +2,7 @@ import { beforeEach, describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../App';
 import { getContextualCitiesForDestination } from '../data/destinationsRegistry';
-import { getMustVisitOptions } from '../data/mustVisitOptions';
+import { getMustVisitOptions, type AttractionCatalogEntry } from '../data/mustVisitOptions';
 import { buildPlanRequestDraft, validateTripDraft } from '../data/planRequest';
 
 beforeEach(() => {
@@ -601,9 +601,9 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     fireEvent.click(screen.getByRole('radio', { name: /full days/i }));
     fireEvent.click(screen.getByRole('checkbox', { name: /scenic viewpoints/i }));
     fireEvent.change(screen.getByRole('combobox', { name: /search must-visit places/i }), {
-      target: { value: 'Kyoto' },
+      target: { value: 'Fushimi Inari' },
     });
-    fireEvent.click(screen.getByRole('option', { name: /Kyoto.*Route stop/i }));
+    fireEvent.click(screen.getByRole('option', { name: /Fushimi Inari Shrine.*Kyoto.*Attraction/i }));
     fireEvent.click(screen.getByRole('button', { name: /continue to budget/i }));
 
     expect(screen.getByRole('heading', { name: /what is your trip budget/i })).toBeInTheDocument();
@@ -613,14 +613,14 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
 
     expect(screen.getByRole('heading', { name: /your journey, at a glance/i })).toBeInTheDocument();
     expect(screen.getByText('Osaka')).toBeInTheDocument();
-    expect(screen.getAllByText('Kyoto').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('Fushimi Inari Shrine')).toBeInTheDocument();
     expect(screen.getByText(/₹1,25,000/)).toBeInTheDocument();
     expect(screen.getByText(/Per person · INR/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /edit preferences/i }));
     expect((screen.getByRole('radio', { name: /premium/i }) as HTMLInputElement).checked).toBe(true);
     expect((screen.getByRole('radio', { name: /full days/i }) as HTMLInputElement).checked).toBe(true);
-    expect(screen.getByText('Kyoto')).toBeInTheDocument();
+    expect(screen.getByText('Fushimi Inari Shrine')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /continue to budget/i }));
     fireEvent.click(screen.getByRole('button', { name: /review trip/i }));
 
@@ -631,7 +631,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
 
     app.unmount();
     render(<App />);
-    expect(screen.getAllByText('Kyoto').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('Fushimi Inari Shrine')).toBeInTheDocument();
     expect(screen.getByText(/₹1,25,000/)).toBeInTheDocument();
     expect(screen.getByText(/Osaka/)).toBeInTheDocument();
 
@@ -685,10 +685,47 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(screen.getByRole('alert')).toHaveTextContent(/choose a place from the suggestions/i);
     expect(screen.queryByRole('list', { name: /must-visit places/i })).not.toBeInTheDocument();
 
-    fireEvent.change(search, { target: { value: 'Osaka' } });
-    const routeStop = screen.getByRole('option', { name: /Osaka.*Route stop/i });
-    fireEvent.click(routeStop);
-    expect(screen.getByRole('list', { name: /must-visit places/i })).toHaveTextContent('Osaka');
+    fireEvent.change(search, { target: { value: 'Kinkaku-ji' } });
+    const attraction = screen.getByRole('option', { name: /Kinkaku-ji Temple.*Kyoto.*Attraction/i });
+    fireEvent.click(attraction);
+    expect(screen.getByRole('list', { name: /must-visit places/i })).toHaveTextContent('Kinkaku-ji Temple');
+  });
+
+  it('offers only attractions in route cities across selected countries', () => {
+    const details = {
+      scope: 'INTERNATIONAL' as const,
+      origin: 'Delhi',
+      destination: 'Japan, Italy',
+      destinations: ['Japan', 'Italy'],
+      departureDate: '',
+      returnDate: '',
+      departureDateIso: '',
+      returnDateIso: '',
+      departureLegInfo: '',
+      returnLegInfo: '',
+      durationDays: 5,
+      flexibleDates: false,
+      partyType: 'couple' as const,
+      adults: 2,
+      children: 0,
+      infants: 0,
+    };
+    const routeStops = [
+      { id: 'kyoto', name: 'Kyoto', country: 'Japan', nights: 3, role: 'City', imageUrl: '' },
+      { id: 'rome', name: 'Rome', country: 'Italy', nights: 2, role: 'City', imageUrl: '' },
+    ];
+    const catalog: AttractionCatalogEntry[] = [
+      { attraction_id: 'jp-kyoto-kiyomizu', name: 'Kiyomizu-dera', city: 'Kyoto', country: 'Japan', country_code: 'JP', category: 'ATTRACTION', description: 'A historic Kyoto temple.' },
+      { attraction_id: 'it-rome-colosseum', name: 'Colosseum', city: 'Rome', country: 'Italy', country_code: 'IT', category: 'ATTRACTION', description: 'An ancient Roman amphitheatre.' },
+      { attraction_id: 'jp-kyoto-city', name: 'Kyoto', city: 'Kyoto', country: 'Japan', country_code: 'JP', category: 'ATTRACTION', description: 'A city record must not be offered.' },
+      { attraction_id: 'jp-kyoto-restaurant', name: 'Kyoto Noodle House', city: 'Kyoto', country: 'Japan', country_code: 'JP', category: 'RESTAURANT', description: 'A restaurant is not a must-visit attraction.' },
+      { attraction_id: 'kr-seoul-palace', name: 'Gyeongbokgung Palace', city: 'Seoul', country: 'South Korea', country_code: 'KR', category: 'ATTRACTION', description: 'A palace outside the selected route.' },
+    ];
+
+    expect(getMustVisitOptions(details, routeStops, catalog).map((option) => option.name)).toEqual([
+      'Kiyomizu-dera',
+      'Colosseum',
+    ]);
   });
 
   it('validates a reconciled shared draft and maps the supported backend request fields', () => {
@@ -717,7 +754,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
       travelStyle: 'PREMIUM' as const,
       pace: 'PACKED' as const,
       activityPreferences: ['NATURE', 'FOOD_EXPERIENCE'] as ('NATURE' | 'FOOD_EXPERIENCE')[],
-      mustVisits: ['Kyoto'],
+      mustVisits: ['Kinkaku-ji Temple'],
     };
     const budget = { budgetMode: 'PER_PERSON' as const, budgetInr: 125000 };
 
@@ -732,7 +769,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
       travel_style: 'PREMIUM',
       pace: 'PACKED',
       activity_preferences: ['NATURE', 'FOOD_EXPERIENCE'],
-      must_visits: ['Kyoto'],
+      must_visits: ['Kinkaku-ji Temple'],
     });
     expect(validateTripDraft({ ...details, infants: 1 }, stops, preferences, budget)[0].message)
       .toMatch(/not infants/i);

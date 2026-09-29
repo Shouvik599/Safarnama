@@ -198,7 +198,9 @@ export const PreferencesScreen: React.FC<PreferencesScreenProps> = ({
         <section className="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-5 sm:p-7">
           <div>
             <h2 className="font-headline-md text-headline-md font-bold">Must-visit places</h2>
-            <p className="mt-1 mb-5 text-on-surface-variant">Add landmarks or experiences you do not want to miss.</p>
+            <p className="mt-1 mb-5 text-on-surface-variant">
+              Choose a source-backed attraction in one of your route cities. City names and restaurants are not Must-visits.
+            </p>
           </div>
           <div className="relative">
             <label htmlFor="must-visit-input" className="sr-only">Search must-visit places in your destinations</label>
@@ -284,7 +286,7 @@ export const PreferencesScreen: React.FC<PreferencesScreenProps> = ({
                   <span>
                     {place}
                     {!mustVisitOptions.some((option) => option.name.toLocaleLowerCase() === place.trim().toLocaleLowerCase()) && (
-                      <span className="ml-1 text-error">(not in selected destinations)</span>
+                      <span className="ml-1 text-error">(not in the current attraction catalog)</span>
                     )}
                   </span>
                   <button
