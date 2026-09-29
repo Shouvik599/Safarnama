@@ -4,7 +4,19 @@
 
 ## Current Status
 
-**Safarnama Frontend — Phase 22.6 Multi-Destination Input Support, Cross-Border Scoping & Contextual City Selection Complete.** Contextual-city matching resolves international countries/circuits before domestic city fallback and requires a full normalized domestic city name or ID match, preventing `Italy` from colliding with the Indian city `Tal`. Each selected destination array entry is normalized atomically so comma-containing labels do not duplicate. Mobile route cards now shrink/wrap within the viewport.
+**Safarnama Frontend — Batch 2 complete (Travel Preferences, Budget, Review & Confirm).** Batch 1's existing trip and destination screens now connect to URL-addressable `/planner/preferences`, `/planner/budget`, and `/planner/review` routes. The single `TripPlanningProvider` draft owns preferences and INR budget alongside existing trip/ordered-stop state; versioned browser-local storage restores it across direct loads, refreshes, and navigation. This is device-local persistence, not account/cloud autosave.
+
+1. **Batch 2 implementation**:
+  - Preferences: supported backend travel style/pace values, unique supported experience interests, and must-visits chosen from the active route or curated options for selected destinations. Arbitrary free-text additions are blocked; saved values that no longer match after trip edits are flagged and block continuation/confirmation until corrected. Request handoff remains a string array matching backend `must_visits`.
+  - Budget: INR target with `TOTAL`/`PER_PERSON` mode and ₹1,000 minimum. No live pricing, personalized allocations, tier benchmarks, or invented provider API.
+  - Review: ordered stops/nights, origin/destination, travelers/dates, preferences, budget, section edit routes, full-draft validation, and a backend-shaped `PlanRequestDraft` mapper. Infant counts are surfaced as unsupported by the current request contract instead of dropped.
+  - Confirmation validates and presents an explicit Batch 3 boundary; it does not call a planning API or implement Progress/SSE/results.
+2. **Routing and persistence**: Implemented History API routes for Welcome, Trip Details, Destinations, Preferences, Budget, and Review with back/forward synchronization. Destinations Continue now advances after existing night reconciliation; previous-step/edit routes preserve the same shared draft. Local storage failures do not block editing.
+3. **Visual/accessibility decisions**: Reused the existing Safarnama header, footer, and stepper; matched the Stitch screen hierarchy and warm theme. Omitted unsupported priorities and nonbinding budget allocation graphics. Added semantic fieldsets, named controls, Space/Enter and arrow-key radio behavior, visible focus, alert/status announcements, and narrow-screen wrapping. Constrained the Stepper icon fallback after responsive checks found a 21 px mobile overflow.
+4. **Verification**: Frontend suite 24/24 passing; `pnpm build` succeeds and `pnpm lint` is clean (build retains the existing >500 kB bundle-size warning). Browser-verified that unmatched must-visit text yields no options and is rejected, while selecting a route stop persists and appears in Review. Earlier Batch 2 browser checks covered navigation, refresh restoration, keyboard radio behavior, no page errors, and no horizontal overflow at 390 px or 768 px.
+5. **Next batch**: Batch 3 owns the Progress route, `/api/v1/plan/stream` lifecycle, progress/warnings/errors, and completed itinerary/overview. No Batch 3 user-facing functionality was added here.
+
+**Batch 1 history:** Phase 22.6 multi-destination input, cross-border scoping, and contextual city selection were complete before Batch 2. Contextual-city matching resolves international countries/circuits before domestic city fallback and requires a full normalized domestic city name or ID match, preventing `Italy` from colliding with the Indian city `Tal`. Each selected destination array entry is normalized atomically so comma-containing labels do not duplicate. Mobile route cards now shrink/wrap within the viewport.
 1. **Multi-Destination Input Support**:
    - Destination model backward compatibility: `tripDetails.destination` maintains comma-separated string representation while `tripDetails.destinations` maintains an array of individual destination strings.
    - Parenthesis-safe destination parser: Implemented `splitDestinationsString()` which prevents internal commas (e.g. `South Korea (Seoul, Busan, Daegu)`) from accidentally splitting single destinations into fragments.
@@ -18,7 +30,7 @@
 
 ## Current implementation phase
 
-Frontend Batch 1 — Phase 22.6 Multi-Destination Input & Stop Resolution (Completed)
+Frontend Batch 2 — Preferences, Budget, Review, routes, and device-local draft persistence (Completed)
 
 ## Completed functionality
 

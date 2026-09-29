@@ -1,9 +1,18 @@
 import { createContext } from 'react';
-import type { TripDetailsState, RouteStop } from '../types/trip';
+import type {
+  TripDetailsState,
+  RouteStop,
+  PlannerPreferences,
+  TripBudgetDraft,
+} from '../types/trip';
 
 export interface TripPlanningContextType {
   tripDetails: TripDetailsState;
   updateTripDetails: (details: Partial<TripDetailsState>) => void;
+  preferences: PlannerPreferences;
+  updatePreferences: (preferences: Partial<PlannerPreferences>) => void;
+  budget: TripBudgetDraft;
+  updateBudget: (budget: Partial<TripBudgetDraft>) => void;
   destinations: RouteStop[];
   addDestination: (stop: RouteStop) => void;
   removeDestination: (id: string) => void;

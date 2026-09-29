@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import type { TripDetailsState, RouteStop } from '../types/trip';
+import React, { useEffect, useState } from 'react';
+import type {
+  TripDetailsState,
+  RouteStop,
+  PlannerPreferences,
+  TripBudgetDraft,
+} from '../types/trip';
 import { TripPlanningContext } from './TripPlanningContextDef';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
 import {
@@ -8,6 +13,24 @@ import {
   generateScenicTransitConnector,
   splitDestinationsString,
 } from '../data/destinationsRegistry';
+
+const DRAFT_STORAGE_KEY = 'safarnama.trip-draft.v1';
+
+interface StoredTripDraft {
+  tripDetails?: TripDetailsState;
+  destinations?: RouteStop[];
+  preferences?: PlannerPreferences;
+  budget?: TripBudgetDraft;
+}
+
+const readStoredDraft = (): StoredTripDraft | null => {
+  try {
+    const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as StoredTripDraft) : null;
+  } catch {
+    return null;
+  }
+};
 
 const formatLocalIso = (d: Date) => {
   const y = d.getFullYear();
@@ -48,10 +71,35 @@ const createInitialTripDetails = (): TripDetailsState => {
 };
 
 export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [tripDetails, setTripDetails] = useState<TripDetailsState>(() => createInitialTripDetails());
-  const [destinations, setDestinations] = useState<RouteStop[]>(() =>
-    JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
+  const [storedDraft] = useState(readStoredDraft);
+  const [tripDetails, setTripDetails] = useState<TripDetailsState>(
+    () => storedDraft?.tripDetails ?? createInitialTripDetails()
   );
+  const [destinations, setDestinations] = useState<RouteStop[]>(
+    () => storedDraft?.destinations ?? JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
+  );
+  const [preferences, setPreferences] = useState<PlannerPreferences>(
+    () => storedDraft?.preferences ?? {
+      travelStyle: 'COMFORTABLE',
+      pace: 'BALANCED',
+      activityPreferences: ['HISTORY_HERITAGE', 'NATURE', 'FOOD_EXPERIENCE'],
+      mustVisits: [],
+    }
+  );
+  const [budget, setBudget] = useState<TripBudgetDraft>(
+    () => storedDraft?.budget ?? { budgetMode: 'TOTAL', budgetInr: 60000 }
+  );
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({ tripDetails, destinations, preferences, budget })
+      );
+    } catch {
+      return;
+    }
+  }, [tripDetails, destinations, preferences, budget]);
 
   const updateTripDetails = (partial: Partial<TripDetailsState>) => {
     setTripDetails((prev) => {
@@ -63,6 +111,14 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
       return next;
     });
+  };
+
+  const updatePreferences = (partial: Partial<PlannerPreferences>) => {
+    setPreferences((previous) => ({ ...previous, ...partial }));
+  };
+
+  const updateBudget = (partial: Partial<TripBudgetDraft>) => {
+    setBudget((previous) => ({ ...previous, ...partial }));
   };
 
   const addDestination = (stop: RouteStop) => {
@@ -205,6 +261,13 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const resetAll = () => {
     setTripDetails(createInitialTripDetails());
     setDestinations(JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops)));
+    setPreferences({
+      travelStyle: 'COMFORTABLE',
+      pace: 'BALANCED',
+      activityPreferences: ['HISTORY_HERITAGE', 'NATURE', 'FOOD_EXPERIENCE'],
+      mustVisits: [],
+    });
+    setBudget({ budgetMode: 'TOTAL', budgetInr: 60000 });
   };
 
   return (
@@ -212,6 +275,10 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       value={{
         tripDetails,
         updateTripDetails,
+        preferences,
+        updatePreferences,
+        budget,
+        updateBudget,
         destinations,
         addDestination,
         removeDestination,

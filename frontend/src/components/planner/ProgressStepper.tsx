@@ -19,7 +19,7 @@ export const ProgressStepper: React.FC<ProgressStepperProps> = ({
 
   // Calculate route fill percentage
   // Step 1: 0% / dashed line, Step 2: ~28% filled, etc.
-  const fillWidth = currentStep === 1 ? '0%' : currentStep === 2 ? '28%' : '50%';
+  const fillWidth = `${((currentStep - 1) / (steps.length - 1)) * 100}%`;
 
   return (
     <section className="w-full pt-space-lg pb-space-md">
@@ -40,15 +40,19 @@ export const ProgressStepper: React.FC<ProgressStepperProps> = ({
             const isUpcoming = step.num > currentStep;
 
             return (
-              <div
+              <button
+                type="button"
                 key={step.num}
+                aria-current={isActive ? 'step' : undefined}
+                aria-label={`${step.label}, ${isCompleted ? 'completed' : isActive ? 'current step' : 'upcoming'}`}
+                disabled={!isCompleted || !onSelectStep}
                 onClick={() => {
                   if (isCompleted && onSelectStep) {
                     onSelectStep(step.num);
                   }
                 }}
-                className={`relative z-10 flex flex-col items-center select-none ${
-                  isCompleted ? 'cursor-pointer group' : ''
+                className={`relative z-10 flex flex-col items-center select-none bg-transparent ${
+                  isCompleted ? 'cursor-pointer group' : 'cursor-default'
                 } ${isUpcoming ? 'opacity-65' : ''}`}
               >
                 {/* Node icon circle */}
@@ -76,7 +80,7 @@ export const ProgressStepper: React.FC<ProgressStepperProps> = ({
                       {step.num === 1 ? 'trip_origin' : 'alt_route'}
                     </span>
                   ) : (
-                    <span className="material-symbols-outlined text-[18px]">
+                    <span aria-hidden="true" className="material-symbols-outlined h-5 w-5 shrink-0 overflow-hidden text-[18px]">
                       {step.icon}
                     </span>
                   )}
@@ -106,7 +110,7 @@ export const ProgressStepper: React.FC<ProgressStepperProps> = ({
                 >
                   {isCompleted ? 'Completed' : isActive ? 'Active Step' : step.sub}
                 </span>
-              </div>
+              </button>
             );
           })}
         </div>

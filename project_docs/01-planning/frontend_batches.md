@@ -4,9 +4,10 @@
 * [x] 1. Safarnama Logo / Wordmark
 * [x] 2. Welcome / Landing Screen
 * [x] 3. Trip Planner — Trip Details
+* [x] 4. Trip Planner — Destinations
 
 ## Batch 2: Wizard Setup & Preferences
-* [ ] 4. Trip Planner — Destinations
+
 * [ ] 5. Trip Planner — Travel Style & Pace
 * [ ] 6. Trip Planner — Budget
 * [ ] 7. Trip Planner — Review & Confirm

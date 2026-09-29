@@ -798,7 +798,7 @@ export const DestinationsScreen: React.FC<DestinationsScreenProps> = ({
                   cloud_done
                 </span>
                 <span>
-                  Auto-saved to your draft ({destinations.length} destination
+                  Saved on this device ({destinations.length} destination
                   {destinations.length !== 1 ? 's' : ''}, {totalAllocatedNights} nights queued)
                 </span>
               </div>

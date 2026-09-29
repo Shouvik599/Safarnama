@@ -11,6 +11,14 @@ export const PlannerHeader: React.FC<PlannerHeaderProps> = ({
   onNavigateHome,
   onNavigateStep,
 }) => {
+  const steps = [
+    { num: 1, label: 'Trip Details' },
+    { num: 2, label: 'Destinations' },
+    { num: 3, label: 'Preferences' },
+    { num: 4, label: 'Budget' },
+    { num: 5, label: 'Review' },
+  ];
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(41,37,33,0.04)]">
       <div className="h-20 max-w-[1280px] mx-auto px-margin flex items-center justify-between gap-space-lg">
@@ -33,38 +41,25 @@ export const PlannerHeader: React.FC<PlannerHeaderProps> = ({
         </div>
 
         {/* Central Planning Progress Nav Pills */}
-        <nav className="hidden md:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container-low rounded-full">
-          <button
-            onClick={() => onNavigateStep && onNavigateStep(1)}
-            className={`px-space-md py-space-xs rounded-full font-label-md transition-all cursor-pointer ${
-              currentStep === 1
-                ? 'bg-surface-container-high text-primary font-bold shadow-[0_1px_4px_rgba(41,37,33,0.04)]'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`}
-          >
-            1. Trip Details
-          </button>
-
-          <button
-            onClick={() => onNavigateStep && onNavigateStep(2)}
-            className={`px-space-md py-space-xs rounded-full font-label-md transition-all cursor-pointer ${
-              currentStep === 2
-                ? 'bg-surface-container-high text-primary font-bold shadow-[0_1px_4px_rgba(41,37,33,0.04)]'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`}
-          >
-            2. Destinations
-          </button>
-
-          <span className="px-space-md py-space-xs rounded-full font-label-md text-label-md text-outline/60 cursor-not-allowed select-none">
-            3. Preferences
-          </span>
-          <span className="px-space-md py-space-xs rounded-full font-label-md text-label-md text-outline/60 cursor-not-allowed select-none">
-            4. Budget
-          </span>
-          <span className="px-space-md py-space-xs rounded-full font-label-md text-label-md text-outline/60 cursor-not-allowed select-none">
-            5. Review
-          </span>
+        <nav aria-label="Trip planning steps" className="hidden md:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container-low rounded-full">
+          {steps.map((step) => (
+            <button
+              key={step.num}
+              type="button"
+              onClick={() => onNavigateStep?.(step.num)}
+              disabled={step.num > currentStep || !onNavigateStep}
+              aria-current={step.num === currentStep ? 'step' : undefined}
+              className={`px-space-md py-space-xs rounded-full font-label-md transition-all ${
+                currentStep === step.num
+                  ? 'bg-surface-container-high text-primary font-bold shadow-[0_1px_4px_rgba(41,37,33,0.04)]'
+                  : step.num < currentStep
+                    ? 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface cursor-pointer'
+                    : 'text-outline/60 cursor-not-allowed'
+              }`}
+            >
+              {step.num}. {step.label}
+            </button>
+          ))}
         </nav>
 
         {/* Save & Exit + User Avatar */}

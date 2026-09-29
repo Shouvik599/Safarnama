@@ -1,4 +1,32 @@
 export type PartyType = 'solo' | 'couple' | 'family' | 'friends';
+export type TravelStyle = 'BUDGET' | 'COMFORTABLE' | 'PREMIUM' | 'LUXURY';
+export type TravelPace = 'RELAXED' | 'BALANCED' | 'PACKED';
+export type BudgetMode = 'TOTAL' | 'PER_PERSON';
+export type ActivityPreference =
+  | 'HISTORY_HERITAGE'
+  | 'NATURE'
+  | 'FOOD_EXPERIENCE'
+  | 'ADVENTURE'
+  | 'RELAXATION'
+  | 'ART_CULTURE'
+  | 'SHOPPING'
+  | 'LOCAL_EXPERIENCE'
+  | 'PHOTOGRAPHY'
+  | 'NIGHTLIFE'
+  | 'FAMILY_KIDS'
+  | 'SPIRITUAL';
+
+export interface PlannerPreferences {
+  travelStyle: TravelStyle;
+  pace: TravelPace;
+  activityPreferences: ActivityPreference[];
+  mustVisits: string[];
+}
+
+export interface TripBudgetDraft {
+  budgetMode: BudgetMode;
+  budgetInr: number;
+}
 
 export interface RouteStop {
   id: string;

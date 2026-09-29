@@ -1,7 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { beforeEach, describe, it, expect } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../App';
 import { getContextualCitiesForDestination } from '../data/destinationsRegistry';
+import { getMustVisitOptions } from '../data/mustVisitOptions';
+import { buildPlanRequestDraft, validateTripDraft } from '../data/planRequest';
+
+beforeEach(() => {
+  window.history.replaceState(null, '', '/');
+  window.localStorage.clear();
+});
 
 describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features', () => {
   it('keeps multi-country contextual city results within each selected country', () => {
@@ -221,7 +228,7 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(screen.getAllByText('Nara').length).toBeGreaterThan(1);
   });
 
-  it('stops at Batch 1 boundary when clicking Continue to Preferences', () => {
+  it('continues from Destinations into Preferences', () => {
     render(<App />);
 
     // Navigate to Destinations
@@ -232,10 +239,8 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     const continuePrefBtn = screen.getByRole('button', { name: /continue to preferences/i });
     fireEvent.click(continuePrefBtn);
 
-    // Notice alert indicating Batch 1 scope boundary
-    expect(
-      screen.getByText(/Batch 1 scope complete: Step 3 \(Preferences\) will be unlocked in Batch 2!/i)
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /how do you want to travel/i })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/planner/preferences');
   });
 
   it('auto-populates destination and seeds matching cities when user enters Norway', () => {
@@ -453,11 +458,9 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     const extendBtn = screen.getByRole('button', { name: /extend trip to 11 nights/i });
     fireEvent.click(extendBtn);
 
-    // Dialog closes and proceeds to preferences (Batch 1 scope complete notice)
+    // Dialog closes and proceeds to Preferences.
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/Batch 1 scope complete: Step 3 \(Preferences\) will be unlocked in Batch 2!/i)
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /how do you want to travel/i })).toBeInTheDocument();
   });
 
   it('supports multi-country destination chips, unified Schengen visa guidance, and seeds stops from both countries with cross-border transit', () => {
@@ -584,5 +587,164 @@ describe('Safarnama Frontend — Batch 1 Connected Flow & Interactive Features',
     expect(
       screen.getByText(/Inner Line Permit \(ILP\) \/ PAP Required for.*Ladakh.*Sikkim/i)
     ).toBeInTheDocument();
+  });
+
+  it('completes Batch 1 to Batch 2, preserves choices through back/forward and a remount', async () => {
+    const app = render(<App />);
+    fireEvent.click(screen.getAllByRole('button', { name: /plan my trip/i })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /continue to destinations/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue to preferences/i }));
+
+    expect(screen.getByRole('heading', { name: /how do you want to travel/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: /premium/i }));
+    fireEvent.click(screen.getByRole('radio', { name: /full days/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /scenic viewpoints/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /search must-visit places/i }), {
+      target: { value: 'Kyoto' },
+    });
+    fireEvent.click(screen.getByRole('option', { name: /Kyoto.*Route stop/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue to budget/i }));
+
+    expect(screen.getByRole('heading', { name: /what is your trip budget/i })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('spinbutton', { name: /target amount in inr/i }), { target: { value: '125000' } });
+    fireEvent.click(screen.getByRole('radio', { name: /per person/i }));
+    fireEvent.click(screen.getByRole('button', { name: /review trip/i }));
+
+    expect(screen.getByRole('heading', { name: /your journey, at a glance/i })).toBeInTheDocument();
+    expect(screen.getByText('Osaka')).toBeInTheDocument();
+    expect(screen.getAllByText('Kyoto').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText(/₹1,25,000/)).toBeInTheDocument();
+    expect(screen.getByText(/Per person · INR/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /edit preferences/i }));
+    expect((screen.getByRole('radio', { name: /premium/i }) as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByRole('radio', { name: /full days/i }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText('Kyoto')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /continue to budget/i }));
+    fireEvent.click(screen.getByRole('button', { name: /review trip/i }));
+
+    window.history.back();
+    await waitFor(() => expect(screen.getByRole('heading', { name: /what is your trip budget/i })).toBeInTheDocument());
+    window.history.forward();
+    await waitFor(() => expect(screen.getByRole('heading', { name: /your journey, at a glance/i })).toBeInTheDocument());
+
+    app.unmount();
+    render(<App />);
+    expect(screen.getAllByText('Kyoto').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText(/₹1,25,000/)).toBeInTheDocument();
+    expect(screen.getByText(/Osaka/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /confirm trip details/i }));
+    expect(screen.getByRole('status')).toHaveTextContent(/validated and saved on this device/i);
+    expect(screen.getByRole('status')).toHaveTextContent(/No plan has been submitted/i);
+  });
+
+  it('supports direct loading of implemented routes and rejects budgets below ₹1,000', () => {
+    window.history.replaceState(null, '', '/planner/preferences');
+    const app = render(<App />);
+    expect(screen.getByRole('heading', { name: /how do you want to travel/i })).toBeInTheDocument();
+    app.unmount();
+
+    window.history.replaceState(null, '', '/planner/budget');
+    render(<App />);
+    expect(screen.getByRole('heading', { name: /what is your trip budget/i })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('spinbutton', { name: /target amount in inr/i }), { target: { value: '999' } });
+    fireEvent.click(screen.getByRole('button', { name: /review trip/i }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/at least ₹1,000/i);
+    expect(window.location.pathname).toBe('/planner/budget');
+  });
+
+  it('supports keyboard activation and arrow navigation for radio-card controls', () => {
+    window.history.replaceState(null, '', '/planner/preferences');
+    const app = render(<App />);
+
+    const luxury = screen.getByRole('radio', { name: /luxury/i });
+    fireEvent.keyDown(luxury, { key: ' ' });
+    expect((luxury as HTMLInputElement).checked).toBe(true);
+
+    fireEvent.keyDown(luxury, { key: 'ArrowRight' });
+    expect((screen.getByRole('radio', { name: /thoughtful value/i }) as HTMLInputElement).checked).toBe(true);
+
+    app.unmount();
+    window.history.replaceState(null, '', '/planner/budget');
+    render(<App />);
+    const perPerson = screen.getByRole('radio', { name: /per person/i });
+    fireEvent.keyDown(perPerson, { key: ' ' });
+    expect((perPerson as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('only adds must-visits selected from current destination suggestions', () => {
+    window.history.replaceState(null, '', '/planner/preferences');
+    render(<App />);
+
+    const search = screen.getByRole('combobox', { name: /search must-visit places/i });
+    fireEvent.change(search, { target: { value: 'Atlantis' } });
+    expect(screen.getByText(/no matching places in the selected destinations/i)).toBeInTheDocument();
+    fireEvent.keyDown(search, { key: 'Enter' });
+    expect(screen.getByRole('alert')).toHaveTextContent(/choose a place from the suggestions/i);
+    expect(screen.queryByRole('list', { name: /must-visit places/i })).not.toBeInTheDocument();
+
+    fireEvent.change(search, { target: { value: 'Osaka' } });
+    const routeStop = screen.getByRole('option', { name: /Osaka.*Route stop/i });
+    fireEvent.click(routeStop);
+    expect(screen.getByRole('list', { name: /must-visit places/i })).toHaveTextContent('Osaka');
+  });
+
+  it('validates a reconciled shared draft and maps the supported backend request fields', () => {
+    const details = {
+      scope: 'INTERNATIONAL' as const,
+      origin: 'Delhi',
+      destination: 'Japan',
+      destinations: ['Japan'],
+      departureDate: 'Mon, Oct 5, 2026',
+      returnDate: 'Thu, Oct 15, 2026',
+      departureDateIso: '2026-10-05',
+      returnDateIso: '2026-10-15',
+      departureLegInfo: 'Morning leg',
+      returnLegInfo: 'Evening leg',
+      durationDays: 10,
+      flexibleDates: false,
+      partyType: 'couple' as const,
+      adults: 2,
+      children: 0,
+      infants: 0,
+    };
+    const stops = [{
+      id: 'kyoto', name: 'Kyoto', country: 'Japan', nights: 10, role: 'City', imageUrl: '',
+    }];
+    const preferences = {
+      travelStyle: 'PREMIUM' as const,
+      pace: 'PACKED' as const,
+      activityPreferences: ['NATURE', 'FOOD_EXPERIENCE'] as ('NATURE' | 'FOOD_EXPERIENCE')[],
+      mustVisits: ['Kyoto'],
+    };
+    const budget = { budgetMode: 'PER_PERSON' as const, budgetInr: 125000 };
+
+    expect(validateTripDraft(details, stops, preferences, budget)).toEqual([]);
+    expect(buildPlanRequestDraft(details, stops, preferences, budget)).toMatchObject({
+      origin: 'Delhi',
+      destinations: ['Kyoto'],
+      start_date: '2026-10-05',
+      end_date: '2026-10-15',
+      budget_mode: 'PER_PERSON',
+      budget_inr: 125000,
+      travel_style: 'PREMIUM',
+      pace: 'PACKED',
+      activity_preferences: ['NATURE', 'FOOD_EXPERIENCE'],
+      must_visits: ['Kyoto'],
+    });
+    expect(validateTripDraft({ ...details, infants: 1 }, stops, preferences, budget)[0].message)
+      .toMatch(/not infants/i);
+    expect(validateTripDraft(details, stops, preferences, { ...budget, budgetInr: 999 })[0].message)
+      .toMatch(/₹1,000/i);
+    expect(validateTripDraft(details, stops, preferences, budget, getMustVisitOptions(details, stops))).toEqual([]);
+    expect(validateTripDraft(
+      details,
+      stops,
+      { ...preferences, mustVisits: ['Atlantis'] },
+      budget,
+      getMustVisitOptions(details, stops)
+    ).some((issue) => /must-visit places that are not available/i.test(issue.message))).toBe(true);
   });
 });
