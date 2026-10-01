@@ -7,6 +7,7 @@ import type {
 } from '../types/trip';
 import { TripPlanningContext } from './TripPlanningContextDef';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
+import { getMustVisitOptions } from '../data/mustVisitOptions';
 import {
   ALL_CURATED_DESTINATIONS,
   resolveDestinationData,
@@ -26,6 +27,17 @@ const refreshStoredStopImages = (stops: RouteStop[]): RouteStop[] =>
       ? { ...stop, imageUrl: current.imageUrl, imageAlt: current.imageAlt ?? stop.imageAlt }
       : stop;
   });
+
+const retainMustVisitsForRoute = (
+  mustVisits: string[],
+  tripDetails: TripDetailsState,
+  stops: RouteStop[]
+): string[] => {
+  const availablePlaces = new Set(
+    getMustVisitOptions(tripDetails, stops).map((option) => option.name.toLocaleLowerCase())
+  );
+  return mustVisits.filter((place) => availablePlaces.has(place.trim().toLocaleLowerCase()));
+};
 
 const DRAFT_STORAGE_KEY = 'safarnama.trip-draft.v1';
 
@@ -94,11 +106,17 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       : JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
   );
   const [preferences, setPreferences] = useState<PlannerPreferences>(
-    () => storedDraft?.preferences ?? {
-      travelStyle: 'COMFORTABLE',
-      pace: 'BALANCED',
-      activityPreferences: ['HISTORY_HERITAGE', 'NATURE', 'FOOD_EXPERIENCE'],
-      mustVisits: [],
+    () => {
+      const initialPreferences = storedDraft?.preferences ?? {
+        travelStyle: 'COMFORTABLE' as const,
+        pace: 'BALANCED' as const,
+        activityPreferences: ['HISTORY_HERITAGE', 'NATURE', 'FOOD_EXPERIENCE'] as PlannerPreferences['activityPreferences'],
+        mustVisits: [],
+      };
+      return {
+        ...initialPreferences,
+        mustVisits: retainMustVisitsForRoute(initialPreferences.mustVisits, tripDetails, destinations),
+      };
     }
   );
   const [budget, setBudget] = useState<TripBudgetDraft>(
@@ -233,8 +251,8 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const depIso = formatLocalIso(departure);
     const retIso = formatLocalIso(returnD);
 
-    setTripDetails((prev) => ({
-      ...prev,
+    const nextTripDetails: TripDetailsState = {
+      ...tripDetails,
       scope: destItem.scope,
       destination: destItem.name,
       destinations: parts,
@@ -245,9 +263,20 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       returnDateIso: retIso,
       departureLegInfo: `${departure.getFullYear()} • Morning leg`,
       returnLegInfo: `${returnD.getFullYear()} • Evening leg`,
+    };
+
+    setTripDetails((prev) => ({
+      ...prev,
+      ...nextTripDetails,
     }));
 
     setDestinations(destItem.defaultStops);
+    setPreferences((previous) => {
+      const mustVisits = retainMustVisitsForRoute(previous.mustVisits, nextTripDetails, destItem.defaultStops);
+      return mustVisits.length === previous.mustVisits.length
+        ? previous
+        : { ...previous, mustVisits };
+    });
   };
 
   const seedCircuit = (circuitId: string) => {
