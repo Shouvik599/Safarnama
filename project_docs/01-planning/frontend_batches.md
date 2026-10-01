@@ -13,8 +13,8 @@
 * [x] 7. Trip Planner — Review & Confirm
 
 ## Batch 3: Planning Progress & Overview
-* [ ] 8. Trip Planning Progress
-* [ ] 9. Trip Overview
+* [x] 8. Trip Planning Progress
+* [x] 9. Trip Overview
 
 ## Batch 4: Itinerary & Timeline
 * [ ] 10. Day-by-Day Itinerary
@@ -40,4 +40,4 @@
 * [ ] 24. Profile / Preferences
 * [ ] 25. Settings
 * [ ] 26. Help / Information
-* [ ] 27. Error / Planning Problem
+* [ ] 27. Error / Planning Problem

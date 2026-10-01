@@ -23,6 +23,12 @@ export interface TripPlanningContextType {
   seedCircuit: (circuitId: string) => void;
   seedDestination: (destinationOrCircuit: string | string[], scopeHint?: 'DOMESTIC' | 'INTERNATIONAL') => void;
   resetAll: () => void;
+  itinerary: import('../types/itinerary').FinalItinerary | null;
+  setItinerary: (itinerary: import('../types/itinerary').FinalItinerary | null) => void;
+  planRunState: import('../types/itinerary').PlanRunState;
+  setPlanRunState: React.Dispatch<React.SetStateAction<import('../types/itinerary').PlanRunState>>;
+  clearPlan: () => void;
 }
 
 export const TripPlanningContext = createContext<TripPlanningContextType | undefined>(undefined);
+

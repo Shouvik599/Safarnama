@@ -7,8 +7,19 @@ import { DestinationsScreen } from './screens/DestinationsScreen';
 import { PreferencesScreen } from './screens/PreferencesScreen';
 import { BudgetScreen } from './screens/BudgetScreen';
 import { ReviewScreen } from './screens/ReviewScreen';
+import { TripPlanningProgressScreen } from './screens/TripPlanningProgressScreen';
+import { TripOverviewScreen } from './screens/TripOverviewScreen';
 
-type Route = 'welcome' | 'trip-details' | 'destinations' | 'preferences' | 'budget' | 'review';
+type Route =
+  | 'welcome'
+  | 'trip-details'
+  | 'destinations'
+  | 'preferences'
+  | 'budget'
+  | 'review'
+  | 'progress'
+  | 'overview'
+  | 'itinerary';
 
 const routePaths: Record<Route, string> = {
   welcome: '/',
@@ -17,6 +28,9 @@ const routePaths: Record<Route, string> = {
   preferences: '/planner/preferences',
   budget: '/planner/budget',
   review: '/planner/review',
+  progress: '/planner/progress',
+  overview: '/trip/overview',
+  itinerary: '/trip/itinerary',
 };
 
 const routeFromPath = (path: string): Route =>
@@ -103,7 +117,47 @@ const AppContent: React.FC = () => {
       )}
 
       {currentRoute === 'review' && (
-        <ReviewScreen onNavigateHome={() => navigate('welcome')} onNavigateStep={navigateToStep} />
+        <ReviewScreen
+          onNavigateHome={() => navigate('welcome')}
+          onNavigateStep={navigateToStep}
+          onConfirmPlan={() => navigate('progress')}
+        />
+      )}
+
+      {currentRoute === 'progress' && (
+        <TripPlanningProgressScreen
+          onNavigateReview={() => navigate('review')}
+          onNavigateOverview={() => navigate('overview')}
+        />
+      )}
+
+      {currentRoute === 'overview' && (
+        <TripOverviewScreen
+          onNavigateHome={() => navigate('welcome')}
+          onNavigateItinerary={() => navigate('itinerary')}
+          onNavigateEditTrip={() => navigate('trip-details')}
+        />
+      )}
+
+      {currentRoute === 'itinerary' && (
+        <div className="bg-surface min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <div className="max-w-md p-8 bg-surface-container-lowest rounded-2xl shadow-md border border-outline-variant/30 space-y-4">
+            <span className="material-symbols-outlined text-[48px] text-primary">calendar_month</span>
+            <h2 className="font-headline-md text-headline-md text-on-surface font-bold">
+              Day-by-Day Itinerary
+            </h2>
+            <p className="text-on-surface-variant font-body-md text-body-md">
+              The detailed day-by-day activity schedule and timeline will be implemented in Batch 4. Your synthesized dossier is safely saved.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('overview')}
+              className="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors shadow-sm"
+            >
+              Back to Trip Overview
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

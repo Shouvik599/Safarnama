@@ -437,6 +437,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                     <button
                       type="button"
                       id="btn-scope-domestic"
+                      aria-label="Domestic (Within India)"
                       onClick={() => handleToggleScope('DOMESTIC')}
                       className={`px-4 py-2 rounded-lg font-label-md text-label-md font-semibold flex items-center gap-2 transition-all cursor-pointer ${
                         activeScope === 'DOMESTIC'

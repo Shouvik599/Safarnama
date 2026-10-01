@@ -546,7 +546,7 @@ Planning complex domestic or international journeys across multiple agents and p
 
 ### 6.15 Interactive Journey Onboarding & Scope-Partitioned Route Planning
 
-The frontend provides an intuitive 6-step journey planner (Batch 1 & 2 complete) adhering to editorial aesthetics and strict logistical integrity:
+The frontend provides an intuitive journey planner (Batches 1–3 complete) adhering to editorial aesthetics and strict logistical integrity:
 
 1. **Step 1 (Trip Details) Scope Partitioning**:
    - **Scope Toggle**: Users toggle between `[ 🇮🇳 Domestic (Within India) ]` and `[ ✈️ International ]`.
@@ -578,9 +578,19 @@ The frontend provides an intuitive 6-step journey planner (Batch 1 & 2 complete)
 5. **Step 6 (Review & Confirm)** (`/planner/review`) — *Batch 2 Complete*:
    - **Draft Review**: Ordered stops/nights, origin/destination, travelers/dates, preferences, budget, and per-section edit routes.
    - **Validation**: Full-draft validation with a backend-shaped `PlanRequestDraft` mapper; infant counts surfaced as unsupported by the current request contract rather than dropped.
-   - **Batch 3 Boundary**: Confirmation validates and presents the explicit Batch 3 boundary; it does not call a planning API or implement Progress/SSE/results.
+   - **Planning Handoff**: Confirmation validates the complete draft and launches the Batch 3 live planning flow at `/planner/progress`.
 
-**Routing & Persistence (Batch 2)**: History API routes for all 6 screens with back/forward synchronization; a single `TripPlanningProvider` draft owns preferences and INR budget alongside trip/ordered-stop state, restored via versioned browser-local storage across direct loads, refreshes, and navigation (device-local persistence, not account/cloud autosave).
+6. **Step 8 (Trip Planning Progress)** (`/planner/progress`) — *Batch 3 Complete*:
+   - **Continuous Synthesis Timeline**: 7 sequential stages (*Understanding your trip* → *Checking travel logistics* → *Finding experiences* → *Checking weather* → *Calculating budget* → *Optimizing your journey* → *Your Safarnama is ready*) with live indicators, completed checks, elapsed run timer, and stage telemetry.
+   - **SSE Consumption**: Real-time client for `POST /api/v1/plan/stream` with simulation fallback (`simulatePlanningStream`) for offline, development, and hermetic testing environments; clean abort/cancel returns to review with draft inputs preserved.
+   - **Route & Telemetry Visualizer**: Blueprint banner (corridor progression, seasonal badge, party, duration, dossier run badge) plus waypoint stays, scenic transit connectors, and verified data tags.
+
+7. **Step 9 (Trip Overview Dossier)** (`/trip/overview`) — *Batch 3 Complete*:
+   - **Editorial Dossier**: Run tag, departure readiness pulse, hero showcase, Curator's Note, and Pacing & Rhythm Index gauges.
+   - **Trip Intelligence**: 3-column route corridor, 6-card snapshot matrix, budget leeway breakdown (Stays, Transit, Experiences, Dining, Contingency), highlights gallery, and regional microclimate & packing forecasts.
+   - **Actions & Persistence**: *View Full Itinerary* (`/trip/itinerary`, Batch 4 boundary), draft-preserving *Edit Route & Preferences*, clipboard *Export & Share Dossier*, and device-local `FinalItinerary` persistence under localStorage key `safarnama.itinerary.v1`.
+
+**Routing & Persistence**: History API routes for all 8 screens (6 wizard screens plus `/planner/progress` and `/trip/overview`) with back/forward synchronization; a single `TripPlanningProvider` draft owns preferences and INR budget alongside trip/ordered-stop state, restored via versioned browser-local storage across direct loads, refreshes, and navigation, while the generated itinerary is persisted separately under `safarnama.itinerary.v1` (device-local persistence, not account/cloud autosave).
 
 ---
 

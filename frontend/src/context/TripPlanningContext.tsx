@@ -6,6 +6,7 @@ import type {
   TripBudgetDraft,
 } from '../types/trip';
 import { TripPlanningContext } from './TripPlanningContextDef';
+import type { FinalItinerary, PlanRunState } from '../types/itinerary';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
 import { getMustVisitOptions } from '../data/mustVisitOptions';
 import {
@@ -40,6 +41,7 @@ const retainMustVisitsForRoute = (
 };
 
 const DRAFT_STORAGE_KEY = 'safarnama.trip-draft.v1';
+const ITINERARY_STORAGE_KEY = 'safarnama.itinerary.v1';
 
 interface StoredTripDraft {
   tripDetails?: TripDetailsState;
@@ -52,6 +54,15 @@ const readStoredDraft = (): StoredTripDraft | null => {
   try {
     const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY);
     return stored ? (JSON.parse(stored) as StoredTripDraft) : null;
+  } catch {
+    return null;
+  }
+};
+
+const readStoredItinerary = (): FinalItinerary | null => {
+  try {
+    const stored = window.localStorage.getItem(ITINERARY_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as FinalItinerary) : null;
   } catch {
     return null;
   }
@@ -122,6 +133,38 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [budget, setBudget] = useState<TripBudgetDraft>(
     () => storedDraft?.budget ?? { budgetMode: 'TOTAL', budgetInr: 60000 }
   );
+  const [itinerary, setItineraryState] = useState<FinalItinerary | null>(readStoredItinerary);
+  const [planRunState, setPlanRunState] = useState<PlanRunState>({
+    status: 'idle',
+    currentStage: 'intake',
+    progressPercent: 0,
+    elapsedSeconds: 0,
+    events: [],
+  });
+
+  const setItinerary = (itin: FinalItinerary | null) => {
+    setItineraryState(itin);
+    try {
+      if (itin) {
+        window.localStorage.setItem(ITINERARY_STORAGE_KEY, JSON.stringify(itin));
+      } else {
+        window.localStorage.removeItem(ITINERARY_STORAGE_KEY);
+      }
+    } catch {
+      // ignore storage error
+    }
+  };
+
+  const clearPlan = () => {
+    setItinerary(null);
+    setPlanRunState({
+      status: 'idle',
+      currentStage: 'intake',
+      progressPercent: 0,
+      elapsedSeconds: 0,
+      events: [],
+    });
+  };
 
   useEffect(() => {
     try {
@@ -312,6 +355,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       mustVisits: [],
     });
     setBudget({ budgetMode: 'TOTAL', budgetInr: 60000 });
+    clearPlan();
   };
 
   return (
@@ -333,6 +377,11 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
         seedCircuit,
         seedDestination,
         resetAll,
+        itinerary,
+        setItinerary,
+        planRunState,
+        setPlanRunState,
+        clearPlan,
       }}
     >
       {children}

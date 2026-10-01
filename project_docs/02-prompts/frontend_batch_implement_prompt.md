@@ -213,6 +213,181 @@ After successful verification, provide a concise report containing:
 8. Documentation/memory updated.
 9. Known limitations or follow-up items.
 
+# Project Documentation & Memory Update
+
+After implementation and **only after successful verification**, update the existing project documentation and memory.
+
+The documentation update is a required part of completing the batch. Do not merely mention documentation updates in the final report — **actually modify the relevant existing Markdown files in the repository.**
+
+## 1. Update `memory.md`
+
+Locate the project's existing `memory.md`.
+
+Update it to reflect the completed Batch [N] implementation.
+
+Preserve all existing project history and structure. Do not replace or recreate the memory file.
+
+Record:
+
+* Batch [N] completion status
+* Screens implemented
+* Routes added or changed
+* State/data structures introduced or extended
+* Important implementation decisions
+* Important reusable components
+* Integration with Batch [N-1]
+* State/data contract required by Batch [N+1]
+* Verification and testing performed
+* Known limitations
+* Important decisions or constraints that future batches must preserve
+
+If `memory.md` already contains a batch/status section, update that section rather than creating a duplicate section.
+
+Do not remove information from previous batches unless it is demonstrably obsolete.
+
+---
+
+## 2. Update Relevant Project Documentation
+
+Inspect the existing documentation structure before making changes.
+
+Update the relevant existing documentation under:
+
+```text
+project_docs/
+```
+
+Possible relevant documentation may include existing files covering:
+
+* Architecture
+* Frontend architecture
+* Routes
+* State management
+* Data models
+* Design decisions
+* Screen implementation status
+* Batch progress
+* Project phases
+* Frontend implementation notes
+* Data/state contracts
+
+Only update documentation that is genuinely relevant to the Batch [N] implementation.
+
+**Do not create unnecessary documentation files.**
+
+Prefer updating existing documents over creating new ones.
+
+---
+
+## 3. Update the Batch [N] Plan / Status
+
+Read:
+
+```text
+project_docs/01-planning/frontend_batch_plans/batch-[N]-plan.md
+```
+
+If the existing plan contains a completion/status section, update it to reflect the actual implementation status.
+
+Do not rewrite the original implementation plan unnecessarily.
+
+If implementation required a deviation from the plan because of the actual repository architecture, document the deviation clearly:
+
+* What was different
+* Why the adjustment was necessary
+* What implementation decision was made instead
+
+Do not silently overwrite the original plan.
+
+---
+
+## 4. Record Batch [N+1] Handoff Information
+
+Document only the information that Batch [N+1] genuinely needs from Batch [N].
+
+This may include:
+
+* Routes available to Batch [N+1]
+* State produced by Batch [N]
+* Data structures/types that Batch [N+1] can consume
+* Existing reusable components
+* Navigation entry points
+* Important assumptions
+* Known limitations
+* Dependencies that Batch [N+1] must be aware of
+
+Do **not** implement Batch [N+1] functionality.
+
+The documentation should make it possible for the next batch to understand the current state without relying on undocumented assumptions.
+
+---
+
+## 5. Preserve Project Memory Continuity
+
+When updating documentation:
+
+* Preserve terminology already established by the project.
+* Preserve existing architecture decisions.
+* Do not introduce a competing architecture description.
+* Do not create duplicate sources of truth.
+* Do not document speculative functionality as implemented.
+* Do not document future screens as completed.
+* Do not claim APIs, services, or integrations that do not actually exist.
+* Clearly distinguish implemented functionality from planned/future functionality.
+
+Use the following conceptual status where appropriate:
+
+```text
+Implemented
+Planned
+Known Limitation
+Future Dependency
+```
+
+---
+
+## 6. Verify Documentation Against the Repository
+
+Before finishing the batch, verify that the updated documentation matches the actual implementation.
+
+Check that:
+
+* Documented routes actually exist.
+* Documented state structures actually exist.
+* Documented components actually exist.
+* Documented services actually exist.
+* Documented Batch [N] screens are actually implemented.
+* Batch [N+1] handoff information reflects the real application state.
+* No future functionality is incorrectly described as complete.
+
+Do not claim a documentation update was completed unless the corresponding file was actually modified.
+
+---
+
+## 7. Final Documentation Record
+
+In the final implementation report, explicitly list the documentation files that were actually updated.
+
+For example:
+
+```text
+Documentation updated:
+- memory.md
+- project_docs/...
+- project_docs/01-planning/frontend_batch_plans/batch-[N]-plan.md
+```
+
+Only list files that were genuinely modified.
+
+The documentation update is part of the **Definition of Done** for the batch.
+
+Use these skills as required:
+design-taste-frontend ~\.agents\skills\design-taste-frontend
+huashu-design         ~\.agents\skills\huashu-design
+impeccable            ~\.agents\skills\impeccable
+ui-ux-pro-max         ~\.agents\skills\ui-ux-pro-max
+
+
 Then stop.
 
 Do not begin the next batch.

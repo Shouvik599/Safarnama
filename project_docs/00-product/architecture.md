@@ -1055,17 +1055,20 @@ This prevents divergence between local development and service execution.
 
 The frontend is a Vite + React 19 + TypeScript + Tailwind CSS + pnpm web client in `frontend/`.
 
-### Implemented Screens (Batch 1 & 2 Complete):
+### Implemented Screens (Batches 1–3 Complete):
 1. **Screen 1**: Welcome / Landing Screen (editorial hero, bento grid, curated circuits)
 2. **Screen 2**: Trip Details (origin/destination autocomplete, date picker, leg preferences, party dynamics, static data auto-population)
 3. **Screen 3**: Destinations & Route Sequence (dynamic route seeding, stop night steppers, duration reconciliation, route timeline)
 4. **Screen 4**: Travel Preferences (travel style, pace, experience interests, source-backed attractions)
 5. **Screen 5**: Budget (INR target, TOTAL/PER_PERSON mode, ₹1,000 minimum)
-6. **Screen 6**: Review & Confirm (full draft validation, PlanRequestDraft mapper, Batch 3 boundary)
+6. **Screen 6**: Review & Confirm (full draft validation, PlanRequestDraft mapper, handoff to `/planner/progress`)
+7. **Screen 8**: Trip Planning Progress (`/planner/progress`) — 7-stage continuous synthesis timeline, SSE consumer for `POST /api/v1/plan/stream` with simulation fallback, route/telemetry visualizer, cancel/retry controls
+8. **Screen 9**: Trip Overview Dossier (`/trip/overview`) — hero showcase, Curator's Note, Pacing & Rhythm Index, route corridor, snapshot matrix, budget leeway breakdown, microclimate/packing cards
 
 ### Routing & Persistence:
-- URL-addressable History API routes (`/planner/preferences`, `/planner/budget`, `/planner/review`)
+- URL-addressable History API routes (`/planner/trip-details`, `/planner/destinations`, `/planner/preferences`, `/planner/budget`, `/planner/review`, `/planner/progress`, `/trip/overview`), with `/trip/itinerary` reserved behind a Batch 4 boundary state
 - Versioned browser-local storage restoring draft across direct loads, refreshes, and navigation
+- Generated itineraries persisted under localStorage key `safarnama.itinerary.v1`
 - Back/forward synchronization
 
 ### State Management:
@@ -1099,8 +1102,8 @@ Safarnama/
 │   │   ├── components/       # Reusable UI components (Header, Footer, Stepper, etc.)
 │   │   ├── context/          # TripPlanningContext state management
 │   │   ├── data/             # Static datasets (countries, India places, attractions)
-│   │   ├── screens/          # 6 wizard screens (Welcome → Review)
-│   │   ├── test/             # Vitest component & flow tests (24 tests)
+│   │   ├── screens/          # 8 screens (Welcome → Planning Progress → Trip Overview)
+│   │   ├── test/             # Vitest component & flow tests (30 tests)
 │   │   └── types/            # TypeScript type definitions
 │   └── package.json          # pnpm-managed dependencies
 ├── scripts/                  # On-demand static data ingestion and enrichment scripts
@@ -1111,7 +1114,7 @@ Safarnama/
 │   ├── nodes/                # LangGraph agent planning nodes
 │   ├── prompts/              # Isolated system prompts and prompt templates
 │   └── tools/                # Deterministic utilities and external tool wrappers
-└── tests/                    # Automated test suite (572 passing offline unit tests)
+└── tests/                    # Automated test suite (587 passing offline unit tests)
 ```
 
 ---
@@ -1130,7 +1133,7 @@ Safarnama/
 | `src/nodes/` | Specialized planning workers |
 | `src/prompts/` | LLM prompt definitions |
 | `src/tools/` | External integrations and deterministic utilities |
-| `frontend/` | Vite + React 19 + TypeScript + Tailwind CSS web client (Batch 1 & 2 complete) |
+| `frontend/` | Vite + React 19 + TypeScript + Tailwind CSS web client (Batches 1–3 complete) |
 | `tests/unit/` | Component-level tests |
 | `tests/integration/` | Cross-component/workflow tests |
 | `pyproject.toml` | Dependencies and development tooling |
@@ -1196,8 +1199,8 @@ The exact production model/provider configuration should remain configurable rat
 
 - Vite 8 + React 19 + TypeScript + Tailwind CSS
 - Package manager: `pnpm` exclusively
-- 6 wizard screens (Welcome → Review) with URL-addressable routes
-- Device-local draft persistence via versioned browser-local storage
+- 8 screens (Welcome → Trip Overview) with URL-addressable routes
+- Device-local draft persistence via versioned browser-local storage and itinerary persistence under `safarnama.itinerary.v1`
 
 ---
 
@@ -1375,7 +1378,7 @@ Goal: Connect all planning nodes into a resilient, cyclical LangGraph execution 
 ## Stage 7 — API Streaming, Frontend & Hardening (Phases 17–20)
 
 - Phase 17: API Streaming (Completed — Real-time LangGraph event emission via SSE with dual POST/GET endpoints)
-- Phase 18: Frontend (Completed — Batch 1: Welcome, Trip Details, Destinations; Batch 2: Preferences, Budget, Review & Confirm)
+- Phase 18: Frontend (In progress — Batches 1–3 complete: Welcome, Trip Details, Destinations, Preferences, Budget, Review & Confirm, Trip Planning Progress, Trip Overview; Batch 4 next)
 - Phase 19: End-to-End Test Matrix (Full regression and integration test matrix)
 - Phase 20: Production Hardening (Security, rate limiting, observability, packaging)
 
