@@ -546,7 +546,7 @@ Planning complex domestic or international journeys across multiple agents and p
 
 ### 6.15 Interactive Journey Onboarding & Scope-Partitioned Route Planning
 
-The frontend provides an intuitive 5-step journey planner adhering to editorial aesthetics and strict logistical integrity:
+The frontend provides an intuitive 6-step journey planner (Batch 1 & 2 complete) adhering to editorial aesthetics and strict logistical integrity:
 
 1. **Step 1 (Trip Details) Scope Partitioning**:
    - **Scope Toggle**: Users toggle between `[ 🇮🇳 Domestic (Within India) ]` and `[ ✈️ International ]`.
@@ -564,6 +564,23 @@ The frontend provides an intuitive 5-step journey planner adhering to editorial 
    - **Real-Time Autocomplete Dropdown**: Rich dropdown displaying city name, region/district tag, prominence badge (`★ Popular Stop` vs `Scenic Gateway`), and imagery.
    - **Smart Stop Seeding**: Newly added stops receive realistic default night allocations (2 nights), tailored regional roles, and dynamic scenic transit connectors (`generateScenicTransitConnector`, e.g. Fjord Ferries in Norway, Shinkansen in Japan, Intercity Heritage Express in Rajasthan).
    - **Contextual Fallback**: The `+ Add another destination to route` quick button dynamically selects the next unadded popular stop from the active destination's contextual list, rather than defaulting to Tokyo.
+
+3. **Step 4 (Travel Preferences)** (`/planner/preferences`) — *Batch 2 Complete*:
+   - **Travel Style**: Backend-aligned selection (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`).
+   - **Pace**: `RELAXED`, `BALANCED`, or `PACKED`.
+   - **Experience Interests**: Unique supported interests plus source-backed named attractions for active route cities (Tavily + Gemini extraction catalog).
+   - **Stale-Value Guard**: Saved values that no longer match after trip edits are flagged and block continuation/confirmation until corrected.
+
+4. **Step 5 (Budget)** (`/planner/budget`) — *Batch 2 Complete*:
+   - **INR Target**: `TOTAL`/`PER_PERSON` mode with a ₹1,000 minimum.
+   - **No live pricing**, personalized allocations, tier benchmarks, or invented provider API.
+
+5. **Step 6 (Review & Confirm)** (`/planner/review`) — *Batch 2 Complete*:
+   - **Draft Review**: Ordered stops/nights, origin/destination, travelers/dates, preferences, budget, and per-section edit routes.
+   - **Validation**: Full-draft validation with a backend-shaped `PlanRequestDraft` mapper; infant counts surfaced as unsupported by the current request contract rather than dropped.
+   - **Batch 3 Boundary**: Confirmation validates and presents the explicit Batch 3 boundary; it does not call a planning API or implement Progress/SSE/results.
+
+**Routing & Persistence (Batch 2)**: History API routes for all 6 screens with back/forward synchronization; a single `TripPlanningProvider` draft owns preferences and INR budget alongside trip/ordered-stop state, restored via versioned browser-local storage across direct loads, refreshes, and navigation (device-local persistence, not account/cloud autosave).
 
 ---
 

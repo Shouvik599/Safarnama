@@ -8,9 +8,9 @@
 
 ## Batch 2: Wizard Setup & Preferences
 
-* [ ] 5. Trip Planner — Travel Style & Pace
-* [ ] 6. Trip Planner — Budget
-* [ ] 7. Trip Planner — Review & Confirm
+* [x] 5. Trip Planner — Travel Style & Pace
+* [x] 6. Trip Planner — Budget
+* [x] 7. Trip Planner — Review & Confirm
 
 ## Batch 3: Planning Progress & Overview
 * [ ] 8. Trip Planning Progress

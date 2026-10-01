@@ -1053,24 +1053,28 @@ This prevents divergence between local development and service execution.
 
 # 22. Frontend Architecture
 
-V1 contains:
+The frontend is a Vite + React 19 + TypeScript + Tailwind CSS + pnpm web client in `frontend/`.
 
-```text
-static/
-└── index.html
-```
+### Implemented Screens (Batch 1 & 2 Complete):
+1. **Screen 1**: Welcome / Landing Screen (editorial hero, bento grid, curated circuits)
+2. **Screen 2**: Trip Details (origin/destination autocomplete, date picker, leg preferences, party dynamics, static data auto-population)
+3. **Screen 3**: Destinations & Route Sequence (dynamic route seeding, stop night steppers, duration reconciliation, route timeline)
+4. **Screen 4**: Travel Preferences (travel style, pace, experience interests, source-backed attractions)
+5. **Screen 5**: Budget (INR target, TOTAL/PER_PERSON mode, ₹1,000 minimum)
+6. **Screen 6**: Review & Confirm (full draft validation, PlanRequestDraft mapper, Batch 3 boundary)
 
-The initial UI can provide:
+### Routing & Persistence:
+- URL-addressable History API routes (`/planner/preferences`, `/planner/budget`, `/planner/review`)
+- Versioned browser-local storage restoring draft across direct loads, refreshes, and navigation
+- Back/forward synchronization
 
-- Trip input
-- Planning execution
-- Progress/status visibility
-- Final itinerary
-- Budget summary
-- Warnings
-- Estimates
+### State Management:
+- Centralized `TripPlanningContext` with full bidirectional state retention across navigation steps
 
-The project structure currently allows a Three.js-based interactive globe/dashboard.
+### Design System:
+- Light-mode editorial canvas (`#FFFDF8`), elevated card surfaces (`#FFFFFF`)
+- Safarnama Saffron (`#E87524`), Deep Maroon accents (`#7A2E2E`)
+- Typography: `Plus Jakarta Sans` headings, `Inter` body, Google Material Symbols
 
 The frontend remains separate from the planning engine.
 
@@ -1078,83 +1082,37 @@ The frontend remains separate from the planning engine.
 
 # 23. Repository Structure
 
-The current intended repository structure is:
+The current repository structure is:
 
 ```text
-travel-planner/
-├── .github/
-│   └── workflows/
-│       └── ingest_static_data.yml
+Safarnama/
 ├── data/
-│   ├── fixtures/
-│   │   ├── mock_flights.json
-│   │   ├── mock_hotels.json
-│   │   ├── mock_tavily_search.json
-│   │   └── mock_weather.json
-│   └── static/
-│       ├── airports.json
-│       ├── culinary_signatures.json
-│       └── visa_rules.json
-├── scripts/
-│   ├── fetch_airports.py
-│   └── fetch_visa_rules.py
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── app.py
-│   │   └── routes.py
-│   ├── graph/
-│   │   ├── __init__.py
-│   │   ├── edges.py
-│   │   ├── state.py
-│   │   └── workflow.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── budget.py
-│   │   ├── itinerary.py
-│   │   ├── logistics.py
-│   │   ├── trip.py
-│   │   └── visa.py
-│   ├── nodes/
-│   │   ├── __init__.py
-│   │   ├── experience_node.py
-│   │   ├── intake_node.py
-│   │   ├── logistics_node.py
-│   │   ├── optimizer_node.py
-│   │   └── visa_node.py
-│   ├── prompts/
-│   │   ├── __init__.py
-│   │   ├── experience_prompts.py
-│   │   └── visa_prompts.py
-│   └── tools/
-│       ├── __init__.py
-│       ├── calculator.py
-│       ├── forex.py
-│       ├── static_data.py
-│       ├── weather.py
-│       └── web_search.py
-├── static/
-│   └── index.html
-├── tests/
-│   ├── conftest.py
-│   ├── integration/
-│   │   ├── test_api_streaming.py
-│   │   └── test_full_workflow.py
-│   └── unit/
-│       ├── test_calculator.py
-│       ├── test_edges.py
-│       ├── test_nodes.py
-│       ├── test_state_models.py
-│       └── test_static_data.py
-├── .env.example
-├── .gitignore
-├── pyproject.toml
-└── README.md
+│   ├── fixtures/             # Offline mock data for zero-network testing
+│   └── static/               # Production static JSON datasets
+│       ├── airports.json     # 3,244 commercial airports worldwide
+│       ├── countries.json    # 250 enriched country profiles
+│       ├── india_places.json # 36 Indian states/UTs & 4,198 cities
+│       ├── visa_rules.json   # 199 base visa rules for Indian passport holders
+│       └── visa_rules_enriched.json # 199 multi-option enriched visa records
+├── frontend/                 # Vite + React 19 + TypeScript + Tailwind CSS web client
+│   ├── src/
+│   │   ├── components/       # Reusable UI components (Header, Footer, Stepper, etc.)
+│   │   ├── context/          # TripPlanningContext state management
+│   │   ├── data/             # Static datasets (countries, India places, attractions)
+│   │   ├── screens/          # 6 wizard screens (Welcome → Review)
+│   │   ├── test/             # Vitest component & flow tests (24 tests)
+│   │   └── types/            # TypeScript type definitions
+│   └── package.json          # pnpm-managed dependencies
+├── scripts/                  # On-demand static data ingestion and enrichment scripts
+├── src/                      # Importable application source package
+│   ├── api/                  # FastAPI routers, app factory and endpoints
+│   ├── graph/                # LangGraph state graph definitions + streaming
+│   ├── models/               # Canonical Pydantic v2 domain models
+│   ├── nodes/                # LangGraph agent planning nodes
+│   ├── prompts/              # Isolated system prompts and prompt templates
+│   └── tools/                # Deterministic utilities and external tool wrappers
+└── tests/                    # Automated test suite (572 passing offline unit tests)
 ```
-
-The structure is a starting architecture, not a requirement to implement every file immediately.
 
 ---
 
@@ -1172,7 +1130,7 @@ The structure is a starting architecture, not a requirement to implement every f
 | `src/nodes/` | Specialized planning workers |
 | `src/prompts/` | LLM prompt definitions |
 | `src/tools/` | External integrations and deterministic utilities |
-| `static/` | Initial frontend |
+| `frontend/` | Vite + React 19 + TypeScript + Tailwind CSS web client (Batch 1 & 2 complete) |
 | `tests/unit/` | Component-level tests |
 | `tests/integration/` | Cross-component/workflow tests |
 | `pyproject.toml` | Dependencies and development tooling |
@@ -1236,8 +1194,10 @@ The exact production model/provider configuration should remain configurable rat
 
 ## Frontend
 
-- Initial static HTML interface
-- Three.js may be used for the planned interactive globe/dashboard
+- Vite 8 + React 19 + TypeScript + Tailwind CSS
+- Package manager: `pnpm` exclusively
+- 6 wizard screens (Welcome → Review) with URL-addressable routes
+- Device-local draft persistence via versioned browser-local storage
 
 ---
 
@@ -1415,7 +1375,7 @@ Goal: Connect all planning nodes into a resilient, cyclical LangGraph execution 
 ## Stage 7 — API Streaming, Frontend & Hardening (Phases 17–20)
 
 - Phase 17: API Streaming (Completed — Real-time LangGraph event emission via SSE with dual POST/GET endpoints)
-- Phase 18: Frontend (Interactive web UI in Vite / React / TypeScript / pnpm)
+- Phase 18: Frontend (Completed — Batch 1: Welcome, Trip Details, Destinations; Batch 2: Preferences, Budget, Review & Confirm)
 - Phase 19: End-to-End Test Matrix (Full regression and integration test matrix)
 - Phase 20: Production Hardening (Security, rate limiting, observability, packaging)
 
