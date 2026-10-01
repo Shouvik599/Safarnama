@@ -87,7 +87,7 @@ export const DOMESTIC_DESTINATIONS: DestinationItem[] = [
         country: 'India',
         nights: 2,
         role: 'Golden Fort & Thar Desert',
-        imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e42f9b20?w=800&auto=format&fit=crop&q=80',
+        imageUrl: 'https://images.unsplash.com/photo-1777816268043-e5de6fb2678f?auto=format&fit=crop&w=1200&q=85',
         imageAlt: 'Golden sandstone ramparts of Jaisalmer fort in Thar desert',
       },
     ],

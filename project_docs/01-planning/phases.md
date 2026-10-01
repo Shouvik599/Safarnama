@@ -1377,6 +1377,25 @@ Implemented multi-state/UT/city (Domestic) and multi-country (International) inp
   - `getMultiDestinationVisaVerdict(destinations, scopeHint)`: Intelligently unifies Schengen destinations under a single badge (`Schengen Visa Required • Single Visa covers all X countries`), aggregates domestic border permit regions (e.g. `ILP / PAP Required for Ladakh, Sikkim`), and suppresses badges for standard domestic states.
 - **Verification**: 19 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 24 files. Playwright confirms canonical Japan + Italy chips and no horizontal overflow at a 390 px viewport.
 
+## 22.7 Batch 2: Preferences, Budget, Review & Confirm (Completed)
+
+Implemented Screens 4–6 completing the wizard flow, with URL-addressable routes and device-local draft persistence:
+- **Screen 4 (Travel Preferences)** (`/planner/preferences`):
+  - Backend-aligned travel style (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`) and pace (`RELAXED`, `BALANCED`, `PACKED`) selection.
+  - Unique supported experience interests selection.
+  - Source-backed named attractions for active route cities (Tavily + Gemini structured extraction catalog).
+  - Saved values that no longer match after trip edits are flagged and block continuation until corrected.
+- **Screen 5 (Budget)** (`/planner/budget`):
+  - INR target with `TOTAL`/`PER_PERSON` mode and ₹1,000 minimum.
+  - No live pricing or invented provider API.
+- **Screen 6 (Review & Confirm)** (`/planner/review`):
+  - Ordered stops/nights, origin/destination, travelers/dates, preferences, budget, section edit routes, full-draft validation, and backend-shaped `PlanRequestDraft` mapper.
+  - Infant counts surfaced as unsupported by the current request contract instead of dropped.
+  - Explicit Batch 3 boundary presentation (no planning API call yet).
+- **Routing & Persistence**: History API routes for all 6 screens with back/forward synchronization; versioned browser-local storage restores draft across direct loads, refreshes, and navigation.
+- **Attraction Catalog**: Tavily source snippets plus Gemini structured extraction; canonical catalog preserves evidence and per-city status; compact frontend mirror feeds the picker.
+- **Verification**: 24 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors. Browser-verified navigation, refresh restoration, keyboard radio behavior, no page errors, and no horizontal overflow at 390 px or 768 px.
+
 ---
 
 # 23. Phase 19 — End-to-End Test Matrix

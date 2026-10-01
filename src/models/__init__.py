@@ -15,6 +15,14 @@ Planning domain models (Phase 5)
 # Phase 1–3 data-layer models
 # ---------------------------------------------------------------------------
 from src.models.airport import Airport
+from src.models.attractions import (
+    AttractionCandidate,
+    AttractionCandidateBatch,
+    AttractionCatalog,
+    AttractionCityCoverage,
+    AttractionSource,
+    CuratedAttraction,
+)
 
 # Budget
 from src.models.budget import (
@@ -95,8 +103,14 @@ from src.models.web_search import SearchResultItem, WebSearchResult
 __all__ = [
     # Phase 1–3 data-layer
     "Airport",
+    "AttractionCandidate",
+    "AttractionCandidateBatch",
+    "AttractionCatalog",
+    "AttractionCityCoverage",
+    "AttractionSource",
     "BaseVisaRule",
     "Coordinates",
+    "CuratedAttraction",
     "CostCategory",
     "CountryProfile",
     "CurrencyInfo",

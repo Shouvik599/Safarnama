@@ -400,17 +400,26 @@ Current datasets:
 
 ```text
 data/static/
-├── airports.json
-├── culinary_signatures.json
-└── visa_rules.json
+├── airports.json              # 3,244 commercial airports worldwide
+├── countries.json             # 250 sovereign country profiles
+├── india_places.json          # 36 Indian states/UTs & 4,198 cities
+├── visa_rules.json            # 199 baseline visa rules (Indian passport)
+├── visa_rules_enriched.json   # 199 enriched multi-pathway visa records
+├── attractions.json           # Source-backed named attractions catalog
+└── attraction_city_seeds.json # Per-city attraction seeds for frontend picker
 ```
 
 Ingestion scripts:
 
 ```text
 scripts/
-├── fetch_airports.py
-└── fetch_visa_rules.py
+├── fetch_airports.py          # OurAirports -> airports.json
+├── fetch_visa_rules.py        # Passport Index -> visa_rules.json
+├── fetch_country_profiles.py  # REST Countries v5 -> countries.json
+├── fetch_india_places.py      # CountryStateCity -> india_places.json
+├── enrich_visa_rules.py       # Tavily + Gemini -> visa_rules_enriched.json
+├── enrich_attractions.py      # Tavily + Gemini -> attractions.json
+└── verify_live_nodes.py       # Live network integration verification
 ```
 
 ## 14.1 Ingestion is on-demand

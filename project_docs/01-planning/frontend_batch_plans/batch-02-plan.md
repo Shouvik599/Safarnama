@@ -15,9 +15,9 @@ The updated three-screen list is authoritative. Stitch has corresponding Step 3 
 
 ### 5. Trip Planner — Travel Style & Pace
 - **Route:** `/planner/preferences` (new screen; existing wizard calls it Preferences).
-- **Purpose/UI:** Match Stitch Step 3 with one travel-style choice, one pace choice, selectable experience interests, and specific must-visit places selected from destination-scoped autocomplete. Planning priorities are included only where the existing contract supports them.
+- **Purpose/UI:** Match Stitch Step 3 with one travel-style choice, one pace choice, selectable experience interests, and named attractions selected from destination-scoped autocomplete. Route cities themselves are not Must-visits. Planning priorities are included only where the existing contract supports them.
 - **State:** Add and retain `travelStyle`, `pace`, `activityPreferences`, and `mustVisits` in the shared draft; map supported values to `PlanRequest.travel_style`, `pace`, `activity_preferences`, and `must_visits` when Batch 3 submits the plan.
-- **Validation:** Require one supported travel style (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`) and pace (`RELAXED`, `BALANCED`, `PACKED`); interests must be unique supported values; must-visits must match a route stop or curated place from the selected destinations. Do not accept arbitrary free-text places or claim specific activity-count guarantees until Stitch descriptions are aligned with backend pace behavior.
+- **Validation:** Require one supported travel style (`BUDGET`, `COMFORTABLE`, `PREMIUM`, `LUXURY`) and pace (`RELAXED`, `BALANCED`, `PACKED`); interests must be unique supported values; each must-visit must match a source-backed `ATTRACTION` in a current route city and selected country. Do not accept arbitrary free text, route-city duplicates, or claim specific activity-count guarantees until Stitch descriptions are aligned with backend pace behavior.
 - **Navigation:** Back to Destinations; forward to Budget with selections preserved.
 
 ### 6. Trip Planner — Budget
@@ -53,7 +53,7 @@ Forward flow: Welcome → Trip Details → existing Destinations → Travel Styl
 - **Reuse:** Existing `DestinationsScreen` as a prior-batch screen (no reimplementation), its route/duration helpers, `TripPlanningProvider`/`useTripPlanning`, `PlannerHeader`, `PlannerFooter`, and `ProgressStepper`.
 - **Adapt:** Pass the existing `onContinueToPreferences` callback from application navigation so the screen's current duration reconciliation leads into Preferences. Update header/stepper navigation to link implemented steps and allow back/edit navigation. Keep current route-night reconciliation as the authority.
 - **Create:** Preferences input controls/state, budget input/state, read-only Review & Confirm summary, URL route definitions, and focused tests. The new screens consume shared state; no API/SSE progress client is required until Batch 3.
-- **Must-visit source:** Reuse current ordered route stops and each selected destination's curated stops/suggestions. Keep the backend `must_visits` string list contract; reject unmatched values, and flag saved values that become out of-scope after editing trip destinations. Do not invent a places API or fabricate candidates.
+- **Must-visit source:** Use the generated source-backed catalog documented in `project_docs/03-reference/attraction_catalog.md`. Preserve the backend `must_visits` string-list contract; reject unmatched values and flag saved values that become out-of-scope after trip edits. Do not invent provider APIs or fabricate candidates.
 
 ## Backend and Data Dependencies
 
@@ -70,7 +70,7 @@ Destinations route editing, suggestions, contextual city validation, and stop-ni
 ## Verification Plan
 
 1. Test the connected flow Welcome → Trip Details → existing Destinations → Preferences → Budget → Review, including the existing duration reconciliation and the Continue callback transition; confirm route/night values survive navigation and back/edit actions.
-2. Test preferences selection/state mapping; destination-scoped must-visit suggestions, rejection of unmatched text, stale-value validation, and request mapping; budget total/per-person mode and minimum; review summaries, section edit links, invalid-section errors, and confirmation handoff. Use no live API call in frontend unit tests.
+2. Test preferences selection/state mapping; attraction-only suggestions across route cities/countries, rejection of cities/restaurants/unmatched text, stale-value validation, and request mapping; budget total/per-person mode and minimum; review summaries, section edit links, invalid-section errors, and confirmation handoff. Use no live API call in frontend unit tests.
 3. Verify direct URL loads and browser back/forward for existing and new routes; refresh behavior must not silently reset a draft or claim cloud autosave.
 4. Run `pnpm test`, `pnpm build`, and `pnpm lint` in `frontend/`; visually inspect desktop, tablet, and narrow mobile layouts (including 390 px) for overflow and control fit.
 5. Keyboard/accessibility-check semantic labels/grouping, visible focus, named controls, review error announcements, and touch target usability.

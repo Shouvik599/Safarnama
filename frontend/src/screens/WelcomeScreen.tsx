@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
+import { AuroraBackground } from '../components/AuroraBackground';
+import './WelcomeScreen.motion.css';
 
 interface WelcomeScreenProps {
   onStartPlanning: () => void;
@@ -11,6 +13,62 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStartPlanning,
   onSelectCuratedRoute,
 }) => {
+  const heroVisualRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const visual = heroVisualRef.current;
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 768px)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!visual || !canHover.matches || reducedMotion.matches) return;
+
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let frameId = 0;
+
+    const animatePointer = () => {
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
+      visual.style.setProperty('--safarnama-parallax-x', `${currentX.toFixed(2)}px`);
+      visual.style.setProperty('--safarnama-parallax-y', `${currentY.toFixed(2)}px`);
+
+      if (Math.abs(targetX - currentX) < 0.05 && Math.abs(targetY - currentY) < 0.05) {
+        currentX = targetX;
+        currentY = targetY;
+        visual.style.setProperty('--safarnama-parallax-x', `${currentX.toFixed(2)}px`);
+        visual.style.setProperty('--safarnama-parallax-y', `${currentY.toFixed(2)}px`);
+        frameId = 0;
+        return;
+      }
+      frameId = window.requestAnimationFrame(animatePointer);
+    };
+
+    const movePointer = (event: PointerEvent) => {
+      const bounds = visual.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+      targetX = Math.max(-1, Math.min(1, x * 2)) * 6;
+      targetY = Math.max(-1, Math.min(1, y * 2)) * 6;
+      if (!frameId) frameId = window.requestAnimationFrame(animatePointer);
+    };
+    const resetPointer = () => {
+      targetX = 0;
+      targetY = 0;
+      if (!frameId) frameId = window.requestAnimationFrame(animatePointer);
+    };
+
+    visual.addEventListener('pointermove', movePointer, { passive: true });
+    visual.addEventListener('pointerleave', resetPointer);
+    return () => {
+      visual.removeEventListener('pointermove', movePointer);
+      visual.removeEventListener('pointerleave', resetPointer);
+      if (frameId) window.cancelAnimationFrame(frameId);
+      visual.style.removeProperty('--safarnama-parallax-x');
+      visual.style.removeProperty('--safarnama-parallax-y');
+    };
+  }, []);
+
   return (
     <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
       {/* Top Header */}
@@ -26,11 +84,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         <div className="flex flex-col w-full">
           {/* Top Decorative Organic Ambient Background */}
           <div className="relative w-full overflow-hidden">
+            <AuroraBackground />
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[480px] bg-gradient-to-b from-primary-fixed/30 via-primary-fixed-dim/10 to-transparent blur-3xl pointer-events-none rounded-full" />
             <div className="absolute top-48 -left-32 w-80 h-80 bg-secondary-fixed/20 blur-3xl pointer-events-none rounded-full" />
 
             {/* HERO SECTION */}
-            <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-gutter lg:px-margin pt-8 pb-16 md:pt-14 md:pb-24">
+            <div className="relative z-10 max-w-[1280px] mx-auto px-margin-mobile md:px-gutter lg:px-margin pt-8 pb-16 md:pt-14 md:pb-24">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-x-10 items-center">
                 {/* Left Column: Copy & CTAs */}
                 <div className="lg:col-span-6 flex flex-col items-start space-y-6">
@@ -95,14 +154,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 </div>
 
                 {/* Right Column: Hero Visual Composition with Floating Overlays */}
-                <div className="lg:col-span-6 relative w-full flex justify-center">
+                <div ref={heroVisualRef} className="safarnama-hero-visual lg:col-span-6 relative w-full flex justify-center">
                   {/* Background Journey Path SVG Motif */}
                   <svg
-                    className="absolute -top-10 -right-8 w-72 h-72 text-primary-fixed-dim/40 pointer-events-none -z-0"
+                    className="safarnama-route-path absolute -top-10 -right-8 w-72 h-72 text-primary-fixed-dim/40 pointer-events-none -z-0"
                     fill="none"
                     viewBox="0 0 200 200"
                   >
-                    <path
+                    <path className="safarnama-route-stroke"
                       d="M20,160 C60,40 140,20 180,80 C210,120 120,180 80,140 C50,110 120,40 170,30"
                       stroke="currentColor"
                       strokeDasharray="4 6"
@@ -114,15 +173,17 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   {/* Main Visual Frame */}
                   <div className="relative w-full max-w-lg rounded-2xl p-2 bg-surface-container-low shadow-xl">
                     <div className="relative overflow-hidden rounded-xl aspect-[4/3] bg-surface-dim">
-                      <img
-                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                        alt="Flat lay of traveler notebook open to hand-drawn expedition routes and mountain sketches beside camera, brass compass, and postcards"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmScbGF6eqElMipak_JhGAvqoakhhMUdAw2XLiAlvWLov1Xv-8E1IbBFQGRGbDwUHWN-BFKBGtDWNJdrlGTV5HCpBp2Rn03NBtRVn8cik4-RypoQlWtOCkOAW0MQwvyjxp4zvNT1qiVDgHfQ5-LU0Nig8nGjy9hX9vH1doe183czC0m9ZxKRCafGFD4Dxb1AnTCT0nWrS3wUOOLjPBeBnAWnT37m28xQ63PB05GooRAFXiHqk78horjg"
-                      />
+                      <div className="safarnama-photo-drift safarnama-photo-depth">
+                        <img
+                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                          alt="Flat lay of traveler notebook open to hand-drawn expedition routes and mountain sketches beside camera, brass compass, and postcards"
+                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmScbGF6eqElMipak_JhGAvqoakhhMUdAw2XLiAlvWLov1Xv-8E1IbBFQGRGbDwUHWN-BFKBGtDWNJdrlGTV5HCpBp2Rn03NBtRVn8cik4-RypoQlWtOCkOAW0MQwvyjxp4zvNT1qiVDgHfQ5-LU0Nig8nGjy9hX9vH1doe183czC0m9ZxKRCafGFD4Dxb1AnTCT0nWrS3wUOOLjPBeBnAWnT37m28xQ63PB05GooRAFXiHqk78horjg=s2048"
+                        />
+                      </div>
                       {/* Photo warmth gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                       {/* Inset Tag */}
-                      <div className="absolute bottom-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2">
+                      <div className="safarnama-journal-tag absolute bottom-3 right-3 hidden sm:flex bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm items-center gap-2">
                         <span className="material-symbols-outlined text-primary-container text-[16px]">
                           menu_book
                         </span>
@@ -133,7 +194,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                     </div>
 
                     {/* Floating Context Card 1 (Top Right) */}
-                    <div className="absolute -top-5 -right-3 md:-right-6 bg-surface-container-lowest/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg flex items-center gap-3.5 max-w-[240px] border border-outline-variant/30">
+                    <div className="safarnama-kyoto-card absolute -top-5 -right-3 md:-right-6 bg-surface-container-lowest/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg flex items-center gap-3.5 max-w-[240px] border border-outline-variant/30">
                       <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary shrink-0">
                         <span className="material-symbols-outlined text-[22px]">calendar_month</span>
                       </div>
@@ -149,7 +210,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                     </div>
 
                     {/* Floating Context Card 2 (Bottom Left) */}
-                    <div className="absolute -bottom-6 -left-3 md:-left-6 bg-surface-container-lowest/95 backdrop-blur-md p-4 rounded-xl shadow-lg flex flex-col gap-2 max-w-[260px] border border-outline-variant/30">
+                    <div className="safarnama-smart-route-card absolute -bottom-6 -left-3 md:-left-6 bg-surface-container-lowest/95 backdrop-blur-md p-4 rounded-xl shadow-lg flex flex-col gap-2 max-w-[260px] border border-outline-variant/30">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
                           <span className="material-symbols-outlined text-primary-container text-[18px]">
