@@ -44,6 +44,9 @@ export interface DayPlan {
   weather_forecast?: {
     condition: string;
     temp_celsius: number;
+    temp_high_celsius?: number;
+    temp_low_celsius?: number;
+    precipitation_chance?: number;
     advisory?: string;
     icon?: string;
   };
@@ -53,7 +56,63 @@ export interface DayPlan {
     neighborhood: string;
     cost_inr: number;
     confirmed?: boolean;
+    check_in?: string;
+    amenities?: string[];
   };
+  metrics?: {
+    active_hours: number;
+    rest_hours: number;
+    walking_steps: number;
+    walking_km: number;
+    pacing_label: string;
+  };
+  featured_experience?: {
+    title: string;
+    subtitle: string;
+    time_window: string;
+    duration: string;
+    image_url: string;
+    image_alt?: string;
+    tags: string[];
+    why_included: string;
+    curator_tips: string[];
+    transit_connection?: string;
+  };
+  hourly_atmosphere?: {
+    time: string;
+    temp: string;
+    condition: string;
+    precipitation: string;
+    icon: string;
+  }[];
+  day_budget?: {
+    activities_inr: number;
+    meals_inr: number;
+    transit_inr: number;
+    stays_inr: number;
+    total_inr: number;
+  };
+  next_day_teaser?: {
+    day_number: number;
+    theme: string;
+    city: string;
+  };
+}
+
+export interface TransportMilestone {
+  time: string;
+  label: string;
+  location: string;
+  description: string;
+  icon?: string;
+  status?: 'completed' | 'active' | 'upcoming';
+}
+
+export interface IntermediateStation {
+  station: string;
+  time: string;
+  platform?: string;
+  notes?: string;
 }
 
 export interface TransportLeg {
@@ -68,6 +127,75 @@ export interface TransportLeg {
   arrival_time?: string;
   distance_km?: number;
   notes?: string;
+  service_name?: string;
+  carrier?: string;
+  equipment?: string;
+  seat_reservation?: string;
+  luggage_policy?: string;
+  pass_coverage?: string;
+  travel_date?: string;
+  fare_breakdown?: {
+    base_fare_inr: number;
+    seat_reservation_inr: number;
+    currency_local?: string;
+    total_local?: string;
+    status?: string;
+  };
+  milestones?: TransportMilestone[];
+  intermediate_stops?: IntermediateStation[];
+}
+
+export interface NeighborhoodWaypoint {
+  id: string;
+  name: string;
+  native_name?: string;
+  description: string;
+  recommended_time: string;
+  duration: string;
+  highlights: string[];
+  image_url: string;
+}
+
+export interface DestinationDetail {
+  name: string;
+  native_script: string;
+  region: string;
+  country: string;
+  stop_number: number;
+  total_stops: number;
+  nights: number;
+  stay_dates: string;
+  hero_image: string;
+  editorial_intro: string;
+  sanctuary_lodging_callout: string;
+  snapshot: {
+    recommended_stay: string;
+    seasonal_context: string;
+    weather_context: string;
+    currency_fx: string;
+    language: string;
+    timezone: string;
+  };
+  curator_selection: {
+    quote: string;
+    tags: string[];
+    active_discovery_hours: number;
+    active_ratio_percent: number;
+    leisure_ratio_percent: number;
+  };
+  neighborhoods: NeighborhoodWaypoint[];
+  mobility_guide: {
+    arrival_overview: string;
+    local_transit: string;
+    walking_notes: string;
+  };
+  next_stop?: {
+    destination: string;
+    transport_mode: string;
+    service_name: string;
+    duration: string;
+    leg_id?: string;
+  };
 }
 
 export interface HotelStay {

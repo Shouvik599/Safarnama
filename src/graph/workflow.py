@@ -247,10 +247,7 @@ def replan_workflow(
     if affected["logistics"]:
         log.info("Re-planning: Rerunning Logistics Node.")
         updated_logistics = process_logistics(
-            # pyrefly: ignore [unexpected-keyword]
-            state_or_context=updated_context,
-            # pyrefly: ignore [unexpected-keyword]
-            visa_verdict=updated_visa,
+            updated_context,
         )
     else:
         log.info("Re-planning: Reusing unaffected LogisticsPlan.")
@@ -260,8 +257,7 @@ def replan_workflow(
     if affected["experience"]:
         log.info("Re-planning: Rerunning Experience Node.")
         updated_experience = process_experience(
-            # pyrefly: ignore [unexpected-keyword]
-            state_or_context=updated_context,
+            updated_context,
             logistics_plan=updated_logistics,
         )
     else:

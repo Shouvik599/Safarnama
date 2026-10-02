@@ -108,10 +108,10 @@ describe('Safarnama Frontend — Batch 3 Planning Progress & Trip Overview', () 
     expect(viewItineraryBtn).toBeInTheDocument();
     fireEvent.click(viewItineraryBtn);
 
-    // Navigates to Day-by-Day Itinerary boundary
+    // Navigates to Day-by-Day Itinerary
     await waitFor(() => {
-      expect(screen.getByText(/Day-by-Day Itinerary/i)).toBeInTheDocument();
-      expect(screen.getByText(/implemented in Batch 4/i)).toBeInTheDocument();
+      expect(screen.getByText(/Journey Progression Rail/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Day 03/i).length).toBeGreaterThanOrEqual(1);
     });
     expect(window.location.pathname).toBe('/trip/itinerary');
   });

@@ -4,39 +4,57 @@
 
 ## Current Status
 
-**Safarnama Frontend — Batch 3 complete (Trip Planning Progress & Trip Overview Dossier).** Batch 2's review and confirm screen now cleanly hands off to the live multi-agent continuous synthesis engine at `/planner/progress` and the synthesized editorial dossier at `/trip/overview`. The application state, domain models, SSE stream client, and local persistence layer seamlessly preserve and render the complete `FinalItinerary` deliverable.
+**Safarnama Frontend — Batch 4 complete (Itinerary & Timeline: Screens 10, 11, 12, 13).** Batch 3's trip overview and dossier now seamlessly drill down into the master day-by-day itinerary roadmap (`/trip/itinerary`), deep-dive activity timeline (`/trip/day-detail`), cultural chapter destination anchor (`/trip/destination`), and synchronized intermodal transport guide (`/trip/transport`). All 4 screens feature Stitch-accurate designs, real interactive state with browser History API synchronization, deep-linking via query parameters (`?day=X`, `?name=City`, `?leg=leg-X`), and backward/forward navigation.
 
-1. **Batch 3 implementation**:
-   - **Screen 8 (Trip Planning Progress — `/planner/progress`)**:
-     - Continuous Synthesis Engine: 7-stage vertical timeline (*Understanding your trip*, *Checking travel logistics*, *Finding experiences*, *Checking weather*, *Calculating budget*, *Optimizing your journey*, *Your Safarnama is ready*) with live indicators, completed checks, elapsed run timer, and stage telemetry tags.
-     - Top Blueprint Banner: Origin/destination corridor progression, seasonal highlight badge, party description, duration, and dossier run badge (`#SF-8492`).
-     - Route Alignment & Telemetry Visualizer: Waypoint stays with night counts, scenic transit connectors, verified data tags, and editorial philosophy excerpt.
-     - Streaming & Fallback: Server-Sent Events (SSE) consumer connecting to `POST /api/v1/plan/stream` with realistic simulation fallback for development, offline, and hermetic testing environments. Clean abort/cancel returning to review with draft inputs preserved.
-   - **Screen 9 (Trip Overview Dossier — `/trip/overview`)**:
-     - Dossier Header & Meta: Run tag (`#SF-8492`), green departure readiness pulse, editorial title, summary, and quick metadata pills (origin, route corridor, duration, party, travel style).
-     - Cinematic Hero Showcase: Wide 21:9 visual cover banner with seasonal peak badge, waypoint spotlight, and confirmed reservation indicators.
-     - Curator's Note & Rhythm Index: Dual-column narrative layout featuring an editorial perspective blockquote, interest tags, and dynamic percentage bars for *Cultural Immersiveness* (94%) and *Transit Leisure Margin* (88%).
-     - Interactive Route Corridor: 3-column responsive destination cards featuring stop numbers, night counts, scenic rail tags, and waypoint images.
-     - Trip Snapshot Matrix: 6 structured cards summarizing cultural hubs, handcrafted experiences, bespoke stays, intermodal transport, culinary focus, and weather readiness.
-     - Budget Leeway Breakdown: Detailed tier cards for Stays (39%), Transit (26%), Experiences (14%), Dining (13%), and Contingency Leeway (8%) with favorable variance status.
-     - Highlights of the Journey: Curated experiential highlights with morning permits and unhurried pacing tags.
-     - Regional Microclimates & Packing: Forecast cards displaying temperatures, precipitation likelihood, daylight hours, and packing advisories.
-     - Navigation & Actions: Primary CTA (*View Full Itinerary* → `/trip/itinerary`), *Edit Route & Preferences* (returns to Step 1 preserving inputs), and *Export & Share Dossier* (clipboard sync).
+1. **Batch 4 implementation**:
+   - **Screen 10 (Day-by-Day Itinerary — `/trip/itinerary`)**:
+     - Sticky Context Header: Dossier back link (`← Dossier #SF-8492` → `/trip/overview`), breadcrumb path, action controls (`Optimize Cadence`, `Offline Dossier`, `Share`), and corridor summary micro-strip.
+     - Horizontal Journey Path Progression Rail (`ItineraryDayRail`): Horizontally scrolling interactive track with completed checkmark nodes, active saffron glowing halo with pulsating ring (`animate-ping`), upcoming nodes, and 1-click day switching.
+     - Day Hero Narrative Theme Card: Focus Itinerary eyebrow tag, Day title and theme headline, editorial narrative, 4 Bento metric badges (`DayBentoMetrics` for Active Rhythm, Pacing Buffer, Walking Footprint, Microclimate), and period filter tabs (`ALL`, `MORNING`, `AFTERNOON`, `EVENING`).
+     - 12-Column Grid (8 cols Left Timeline + 4 cols Right Sidecar):
+       - Morning Period (`The Sacred Dawn` / `06:30 – 11:30`): Activity cards (`ActivityTimelineCard`) with time windows, category badges, uncrowded indicators, access tips, and "Timeline Deep-Dive" CTAs.
+       - Afternoon Period (`Artisanal Pauses & Reflections` / `12:00 – 16:30`): Culinary pairing card (`DayMealCard` for lunch) and secondary cultural activity cards.
+       - Evening Period (`Twilight Lanterns & Canal Cadence` / `17:30 – 21:00`): Twilight stroll cards and dinner pairing card.
+       - Practical Sidecar: Sanctuary lodging anchor card with confirmed badge, Day 3 itemized spend breakdown card in INR, curator packing & microclimate advisory, and next day teaser with 1-click transition button.
+   - **Screen 11 (Day Detail / Activity Timeline — `/trip/day-detail`)**:
+     - Sub-Navigation & Breadcrumbs: `← Back to Full Itinerary` (`/trip/itinerary?day=X`), action buttons (`Optimize This Day`, `Modify Day`).
+     - Day Header & Narrative Dossier Banner: Overline badges (`Day 03 of 10 • Kyoto Historic Core` + `Autumn Kōyō Sanctuary`), curator stamp badge (`Curated Route Pacing: Artisanal & Meditative`), and 4 vital status tiles (Atmosphere, Pacing Rhythm, Physical Footprint, Sanctuary Base).
+     - Featured Anchor Experience Showcase: 16:9 cinematic photo banner, peak season badges, "Why Included in Your Safarnama" narrative, curated insider access tips (lighting, tatami shoe protocols, return trail), and transit connection walk time.
+     - Vertical Hour-by-Hour Timeline: Continuous vertical connector linking morning, afternoon, and evening entries with time windows, POI descriptions, costs, and weather substitution notices.
+     - Right Sidecar: Hourly microclimate atmosphere radar (06:00 to 21:00), sanctuary lodging details, day cost ledger table, next day handoff card, and regional transit link.
+   - **Screen 12 (Destination Details — `/trip/destination`)**:
+     - Sub-Header & Quick Switcher: `← Trip Overview` / `← Full Itinerary`, breadcrumbs, and interactive destination switcher tabs.
+     - Destination Hero Banner: High-resolution banner with gradient overlay, stop sequence badge (`Stop 02 of 03 • 4 Nights in Active Itinerary`), large destination name + native script kanji (`京都`), editorial intro, and sanctuary lodging callout.
+     - Destination Snapshot Matrix (`DestinationSnapshotGrid`): 6-card bento grid (Recommended Stay, Seasonal Window, Weather Context, Currency & FX, Language & Signage, Time Difference).
+     - Curator's Editorial Selection: Why curated blockquote, alignment tags, and Pacing Harmonizer card with active discovery gauge (5.5h daily discovery, 68% active ratio, 32% leisure margin).
+     - Curated Neighborhood Waypoints: 4 district cards (`Higashiyama Historic Core`, `Gion Shirakawa & Pontocho`, `Arashiyama & Sagano Grove`, `Fushimi & Southern Precincts`) with photos, recommended time windows, durations, and highlights.
+     - Practical Mobility & Transit Guide: Arrival protocol, local smart cards (Icoca/Suica) & subway lines, and walking advice.
+     - Next Stop Connector Card: Teaser card connecting to next stop (`Kanazawa via JR Thunderbird #17`) with 1-click CTA to Screen 13 (`/trip/transport`).
+   - **Screen 13 (Transport / Route Details — `/trip/transport`)**:
+     - Top Breadcrumbs & Segment Status Bar: Back link to itinerary, leg sequence badge (`Segment Batch #SF-8492` + `Sync: Seat Locks Confirmed`), and interactive leg switcher.
+     - Editorial Route Banner: Route title with direction arrow (`Kyoto Station ➔ Kanazawa Station`), scenic corridor synopsis, download travel pass CTA, and 4 route metric tiles (Travel Date, Corridor Distance 218.4 km, Duration 2h 10m, Curated Service `JR Thunderbird #17`).
+     - Synchronized Corridor Milestone Flow (`TransportMilestoneFlow`): 5-node horizontal milestone trajectory tracker (Sanctuary departure hotel, Station check-in & bento pick, Active express corridor passage, Terminus arrival at Tsuzumi-mon gate, Sanctuary check-in).
+     - Rolling Stock & Service Specifications: Carrier (`JR West`), equipment class (`683 Series Limited Express EMU`), seat reservation (`Car 01, Seats 4A & 4B Green Window`), hands-free luggage protocol (Yamato courier dispatch), and pass coverage (`JR Hokuriku Arch Pass`).
+     - Timetable & Intermediate Stations: Station call sequence (Kyoto ➔ Omi-Imazu ➔ Tsuruga ➔ Fukui ➔ Komatsu ➔ Kanazawa) with platforms and timestamps.
+     - Fare & Seat Breakdown: Itemized base fare, reserved seat fee, local JPY currency total, and pass inclusion status.
 2. **State & Persistence**:
-   - Canonical Domain Types: `FinalItinerary`, `DayPlan`, `ActivitySlot`, `DayMeal`, `HotelStay`, `TransportLeg`, `BudgetBreakdown`, `PlanningEvent`, `PlanRunState` in `frontend/src/types/itinerary.ts`.
-   - Context Integration: `TripPlanningContext` extended with `itinerary`, `setItinerary`, `planRunState`, `setPlanRunState`, `clearPlan`.
-   - Device-Local Persistence: LocalStorage key `safarnama.itinerary.v1` automatically preserves generated itineraries across direct URL re-entry, refreshes, and navigation.
-   - Dynamic Synthesizer: `synthesizeItineraryFromDraft()` converts user wizard draft state into a complete, balanced itinerary when offline.
+   - Extended Domain Types: `DayPlan` (enriched with `metrics`, `featured_experience`, `hourly_atmosphere`, `day_budget`, `next_day_teaser`), `TransportLeg` (enriched with `service_name`, `carrier`, `equipment`, `seat_reservation`, `luggage_policy`, `fare_breakdown`, `milestones`, `intermediate_stops`), `DestinationDetail`, `NeighborhoodWaypoint`, `TransportMilestone`, `IntermediateStation`.
+   - History & Query Parameter Synchronization: Deep-linking and popstate synchronization for `?day=X`, `?name=CityName`, and `?leg=leg-X` across all Batch 4 routes.
+   - Fixture & Dynamic Synthesis: `SAMPLE_HOKURIKU_ITINERARY` enriched with complete 10-day schedules and milestones; `synthesizeItineraryFromDraft()` extended to dynamically synthesize full daily schedules, metrics, and milestones for custom trips.
 3. **Verification**:
-   - Automated Suite: 30/30 tests passing (`flow.test.tsx` [25] + `batch3.test.tsx` [5]).
-   - Build & Types: `tsc -b && vite build` clean pass with zero errors.
-   - Linter: `oxlint` clean pass with 0 errors and 0 warnings across 38 files.
-   - Stitch Visual Verification: Aligned with Stitch designs `0dfa100bc4f3426a97fed4293a89ac1a` (Screen 8) and `4f5013a45060434197b913e2a825a76c` (Screen 9).
-4. **Next Batch**: Batch 4 owns the Day-by-Day Itinerary (`/trip/itinerary`), Day Detail / Activity Timeline, Destination Details, and Transport Details.
+   - Automated Suite: 36/36 tests passing (`flow.test.tsx` [25] + `batch3.test.tsx` [5] + `batch4.test.tsx` [6]).
+   - Build & Types: `tsc -b && vite build` clean pass with zero errors (built in 3.27s).
+   - Linter: `oxlint` clean pass with 0 errors and 0 warnings across 49 files.
+   - Stitch Visual Verification: Aligned with Stitch designs `7bb4541315b84267b2b8b6d8b983f08f` (Screen 10), `e5138e01e98e480db8f5332864e9682f` (Screen 11), `46caa57dd5b144519bd12907a939b87f` (Screen 12), and `734b8ab575734d7d9034ffbf14bdb4bd` (Screen 13).
+4. **Next Batch (Batch 5 Handoff)**: Batch 5 owns Stays, Dining & Experiences:
+   - Screen 14: Hotel / Accommodation Details (consumes `HotelStay` and `DayPlan.stay`).
+   - Screen 15: Restaurant / Food Experience Details (consumes `DayMeal` and `DayPlan.meals`).
+   - Screen 16: Attraction / Experience Details (consumes `ActivitySlot` and `PointOfInterest`).
+   - Screen 17: Map / Journey Route (consumes `trip_context.destinations` and `logistics_plan.transport_legs`).
 
 ## Current implementation phase
 
-Frontend Batch 3 — Planning Progress & Trip Overview Dossier (Completed). Ready for Batch 4 (Itinerary & Timeline).
+Frontend Batch 4 — Itinerary & Timeline (Completed). Ready for Batch 5 (Stays, Dining & Experiences).
 
 ## Completed functionality
 
@@ -728,14 +746,52 @@ Frontend Batch 1 (Screens 1–3) is **100% complete, verified via 10 Vitest/Reac
    - 0 oxlint warnings/errors across 38 files.
    - Stitch visual fidelity verified against Stitch IDs `0dfa100bc4f3426a97fed4293a89ac1a` and `4f5013a45060434197b913e2a825a76c`.
 
+## Frontend Batch 4: Itinerary & Timeline (Completed & Verified)
+
+### Implementation Summary:
+1. **Screen 10: Day-by-Day Itinerary (`/trip/itinerary`)**:
+   - Master chronological roadmap displaying trip days on a horizontal progression rail with morning, afternoon, and evening activity cards, culinary pairings, and a practical sidecar (lodging anchor, day spend tracker, weather advice).
+   - Dynamic day switching, active day tabs, and responsive layout.
+   - Connected "Optimize Cadence" button interacting with backend replan service.
+2. **Screen 11: Day Detail / Activity Timeline (`/trip/day-detail`)**:
+   - Deep-dive single-day diary showcasing the featured anchor experience (with 16:9 photography and "Why Included" narrative), vital stats strip (rhythm, walking footprint, sanctuary base), chronological timeline with access guidance, and an hourly atmosphere breakdown.
+   - Connected "Optimize Day Schedule" action.
+3. **Screen 12: Destination Details (`/trip/destination`)**:
+   - Cultural chapter anchor for a specific destination stop, featuring local script title, stop sequence badge, 6-card destination snapshot matrix, curator preference alignment note with pacing harmonizer sparkline, curated neighborhood waypoints, and local transit guidance.
+4. **Screen 13: Transport / Route Details (`/trip/transport`)**:
+   - Synchronized intermodal route guide for inter-city travel legs, featuring a 5-checkpoint milestone trajectory flow (hotel departure, station check-in, express train journey, terminus arrival, hotel drop), service equipment specs, seat class reservations, luggage dispatch rules, intermediate station timetable, and fare breakdown.
+5. **Backend Integration (`POST /api/v1/plan/replan`)**:
+   - Live dev proxy configured in `frontend/vite.config.ts` mapping `/api` to `http://localhost:8000`.
+   - Fixed `src/graph/workflow.py` (`replan_workflow`) call signature bug where `process_logistics` and `process_experience` received invalid keyword arguments.
+   - Built `frontend/src/services/itineraryOptimizationService.ts` calling `/api/v1/plan/replan` with 6.5s timeout and automatic fallback to deterministic cadence smoothing.
+6. **Backward Flow from Batch 3**:
+   - Screen 8 (`/planner/progress`) and Screen 9 (`/trip/overview`) link directly into Screen 10 (`/trip/itinerary`), Screen 12 (`/trip/destination`), and Screen 13 (`/trip/transport`).
+   - Breadcrumbs across all Batch 4 screens seamlessly navigate back to Screen 9 (`/trip/overview`) or Screen 10 (`/trip/itinerary`).
+7. **Forward Handoff to Batch 5**:
+   - Registered routes `/trip/stays` (Screen 14), `/trip/dining` (Screen 15), `/trip/experience` (Screen 16), and `/trip/map` (Screen 17).
+   - Built `frontend/src/screens/Batch5HandoffScreen.tsx` as staging handoff screen with context metadata and safe return routes.
+   - Batch 4 activity cards, meal cards, lodging cards, and map buttons wire cleanly into the respective handoff routes.
+8. **Verification**:
+   - 38/38 Vitest tests passing (`batch4.test.tsx` [8] + `batch3.test.tsx` [5] + `flow.test.tsx` [25]).
+   - Clean production build (`tsc -b && vite build`) in 3.69s.
+   - Zero linter errors/warnings (`oxlint`).
+   - Stitch visual fidelity matched against IDs:
+     - Screen 10: `7bb4541315b84267b2b8b6d8b983f08f`
+     - Screen 11: `e5138e01e98e480db8f5332864e9682f`
+     - Screen 12: `46caa57dd5b144519bd12907a939b87f`
+     - Screen 13: `734b8ab575734d7d9034ffbf14bdb4bd`
+
+---
+
 ### Next Recommended Batch:
 
-**Batch 4 — Itinerary & Timeline**
-Screens 10–13:
-- Screen 10: Day-by-Day Itinerary (`/trip/itinerary`)
-- Screen 11: Day Detail / Activity Timeline
-- Screen 12: Destination Details
-- Screen 13: Transport / Route Details
+**Batch 5 — Stays, Dining & Experiences**
+Screens 14–17:
+- Screen 14: Hotel / Accommodation Details (`/trip/stays`)
+- Screen 15: Restaurant / Food Experience (`/trip/dining`)
+- Screen 16: Attraction / Experience Details (`/trip/experience`)
+- Screen 17: Map / Journey Route (`/trip/map`)
+
 
 
 

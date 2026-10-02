@@ -8,6 +8,9 @@ interface TripOverviewScreenProps {
   onNavigateItinerary: () => void;
   onNavigateEditTrip: () => void;
   onNavigateOptimize?: () => void;
+  onNavigateDestination?: (destinationName: string) => void;
+  onNavigateTransport?: (legId?: string) => void;
+  onNavigateDayDetail?: (dayNumber: number) => void;
 }
 
 export const TripOverviewScreen: React.FC<TripOverviewScreenProps> = ({
@@ -15,6 +18,9 @@ export const TripOverviewScreen: React.FC<TripOverviewScreenProps> = ({
   onNavigateItinerary,
   onNavigateEditTrip,
   onNavigateOptimize,
+  onNavigateDestination,
+  onNavigateTransport,
+  onNavigateDayDetail,
 }) => {
   const { itinerary, tripDetails, destinations, preferences, budget } = useTripPlanning();
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -365,7 +371,8 @@ export const TripOverviewScreen: React.FC<TripOverviewScreenProps> = ({
                 return (
                   <div
                     key={destName}
-                    className="flex flex-col p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/30 group"
+                    onClick={() => onNavigateDestination?.(destName)}
+                    className="flex flex-col p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all border border-outline-variant/30 group cursor-pointer"
                   >
                     <div className="flex items-center justify-between pb-space-sm">
                       <div className="flex items-center gap-space-xs">
@@ -373,7 +380,7 @@ export const TripOverviewScreen: React.FC<TripOverviewScreenProps> = ({
                           0{index + 1}
                         </span>
                         <div>
-                          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold group-hover:text-primary transition-colors">
                             {destName}
                           </h3>
                           <span className="font-label-caption text-label-caption text-on-surface-variant">
@@ -400,7 +407,13 @@ export const TripOverviewScreen: React.FC<TripOverviewScreenProps> = ({
                         : `Authentic discovery of ${destName} featuring unhurried morning trails and curated neighborhood dining.`}
                     </p>
 
-                    <div className="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant bg-surface-container-low p-space-sm rounded-xl border border-outline-variant/20">
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigateTransport?.(legMatch?.id);
+                      }}
+                      className="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant bg-surface-container-low p-space-sm rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors"
+                    >
                       <div className="flex items-center gap-1 font-label-caption text-label-caption">
                         <span className="material-symbols-outlined text-[16px] text-primary" aria-hidden="true">
                           train
@@ -626,7 +639,8 @@ export const TripOverviewScreen: React.FC<TripOverviewScreenProps> = ({
                 {experience_plan.highlights.map((highlight, hIndex) => (
                   <div
                     key={`highlight-${hIndex}`}
-                    className="flex flex-col rounded-2xl bg-surface-container-lowest shadow-sm overflow-hidden group hover:shadow-md transition-all border border-outline-variant/30"
+                    onClick={() => onNavigateDayDetail?.(highlight.day)}
+                    className="flex flex-col rounded-2xl bg-surface-container-lowest shadow-sm overflow-hidden group hover:shadow-md transition-all border border-outline-variant/30 cursor-pointer"
                   >
                     <div className="relative w-full h-52 bg-surface-container overflow-hidden">
                       <img
