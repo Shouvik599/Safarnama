@@ -7,6 +7,7 @@ import { PlannerStepLayout } from './PlannerStepLayout';
 interface ReviewScreenProps {
   onNavigateHome: () => void;
   onNavigateStep: (step: number) => void;
+  onConfirmPlan?: () => void;
 }
 
 const formatInr = (amount: number) =>
@@ -44,7 +45,11 @@ const interestLabels: Record<string, string> = {
   SPIRITUAL: 'Spiritual places',
 };
 
-export const ReviewScreen: React.FC<ReviewScreenProps> = ({ onNavigateHome, onNavigateStep }) => {
+export const ReviewScreen: React.FC<ReviewScreenProps> = ({
+  onNavigateHome,
+  onNavigateStep,
+  onConfirmPlan,
+}) => {
   const { tripDetails, destinations, preferences, budget } = useTripPlanning();
   const [showValidation, setShowValidation] = useState(false);
   const [handoffMessage, setHandoffMessage] = useState('');
@@ -59,7 +64,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ onNavigateHome, onNa
       return;
     }
     setHandoffMessage(
-      `Your trip request is validated and saved on this device. Planning will be available in Batch 3. No plan has been submitted. (${request.destinations.length} stops)`
+      `Your trip request is validated and saved on this device. Ready to initiate live planning stream or continue editing. No plan has been submitted yet. (${request.destinations.length} stops)`
     );
   };
 
@@ -168,7 +173,27 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ onNavigateHome, onNa
           <p className="mt-4 border-t border-outline-variant/40 pt-3 text-sm leading-6 text-on-surface-variant">This is your target, not a live quote. Category estimates will be provided when planning is available.</p>
         </section>
 
-        {handoffMessage && <p role="status" className="rounded-md border border-secondary/40 bg-secondary-fixed/30 p-4 text-sm font-medium text-on-secondary-fixed-variant">{handoffMessage}</p>}
+        {handoffMessage && (
+          <div className="flex flex-col gap-3 rounded-md border border-secondary/40 bg-secondary-fixed/30 p-4">
+            <p role="status" className="text-sm font-medium text-on-secondary-fixed-variant">
+              {handoffMessage}
+            </p>
+            {onConfirmPlan && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={onConfirmPlan}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-on-primary shadow-sm hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary cursor-pointer"
+                >
+                  <span>Start Live Planning Journey</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+                    auto_awesome
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex flex-col-reverse gap-3 border-t border-outline-variant/40 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" onClick={() => onNavigateStep(4)} className="min-h-12 rounded-md px-4 font-semibold text-on-surface-variant hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
             <span aria-hidden="true" className="material-symbols-outlined mr-1 align-middle">arrow_back</span>Back to budget

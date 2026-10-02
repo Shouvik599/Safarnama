@@ -13,14 +13,14 @@
 * [x] 7. Trip Planner — Review & Confirm
 
 ## Batch 3: Planning Progress & Overview
-* [ ] 8. Trip Planning Progress
-* [ ] 9. Trip Overview
+* [x] 8. Trip Planning Progress
+* [x] 9. Trip Overview
 
 ## Batch 4: Itinerary & Timeline
-* [ ] 10. Day-by-Day Itinerary
-* [ ] 11. Day Detail / Activity Timeline
-* [ ] 12. Destination Details
-* [ ] 13. Transport / Route Details
+* [x] 10. Day-by-Day Itinerary
+* [x] 11. Day Detail / Activity Timeline
+* [x] 12. Destination Details
+* [x] 13. Transport / Route Details
 
 ## Batch 5: Stays, Dining & Experiences
 * [ ] 14. Hotel / Accommodation
@@ -40,4 +40,4 @@
 * [ ] 24. Profile / Preferences
 * [ ] 25. Settings
 * [ ] 26. Help / Information
-* [ ] 27. Error / Planning Problem
+* [ ] 27. Error / Planning Problem

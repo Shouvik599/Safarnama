@@ -1391,10 +1391,36 @@ Implemented Screens 4–6 completing the wizard flow, with URL-addressable route
 - **Screen 6 (Review & Confirm)** (`/planner/review`):
   - Ordered stops/nights, origin/destination, travelers/dates, preferences, budget, section edit routes, full-draft validation, and backend-shaped `PlanRequestDraft` mapper.
   - Infant counts surfaced as unsupported by the current request contract instead of dropped.
-  - Explicit Batch 3 boundary presentation (no planning API call yet).
+  - Explicit Batch 3 boundary presentation at the time of implementation (superseded by §22.8: confirmation now launches `/planner/progress`).
 - **Routing & Persistence**: History API routes for all 6 screens with back/forward synchronization; versioned browser-local storage restores draft across direct loads, refreshes, and navigation.
 - **Attraction Catalog**: Tavily source snippets plus Gemini structured extraction; canonical catalog preserves evidence and per-city status; compact frontend mirror feeds the picker.
 - **Verification**: 24 automated Vitest tests passing (`flow.test.tsx`), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors. Browser-verified navigation, refresh restoration, keyboard radio behavior, no page errors, and no horizontal overflow at 390 px or 768 px.
+
+## 22.8 Batch 3: Planning Progress & Trip Overview (Completed)
+
+Implemented Screens 8–9, connecting Batch 2's review confirmation to the live planning engine and rendering the synthesized `FinalItinerary` deliverable:
+
+- **Screen 8 (Trip Planning Progress)** (`/planner/progress`):
+  - **Continuous Synthesis Engine**: 7-stage vertical timeline (*Understanding your trip*, *Checking travel logistics*, *Finding experiences*, *Checking weather*, *Calculating budget*, *Optimizing your journey*, *Your Safarnama is ready*) with live indicators, completed checks, elapsed run timer, and stage telemetry tags.
+  - **Blueprint Banner**: Origin/destination corridor progression, seasonal highlight badge, party description, duration, and dossier run badge (`#SF-8492`).
+  - **Route Alignment & Telemetry Visualizer**: Waypoint stays with night counts, scenic transit connectors, verified data tags, and editorial philosophy excerpt.
+  - **Streaming & Fallback**: SSE consumer for `POST /api/v1/plan/stream` with realistic simulation fallback (`simulatePlanningStream`) for development, offline, and hermetic testing environments; clean abort/cancel returns to review with draft inputs preserved.
+- **Screen 9 (Trip Overview Dossier)** (`/trip/overview`):
+  - **Dossier Header & Meta**: Run tag, green departure readiness pulse, editorial title/summary, and quick metadata pills (origin, route corridor, duration, party, travel style).
+  - **Cinematic Hero Showcase**: 21:9 visual cover with seasonal peak badge, waypoint spotlight, and confirmed reservation indicators.
+  - **Curator's Note & Rhythm Index**: Editorial blockquote, interest tags, and dynamic percentage bars for *Cultural Immersiveness* (94%) and *Transit Leisure Margin* (88%).
+  - **Interactive Route Corridor**: 3-column responsive destination cards with stop numbers, night counts, scenic rail tags, and waypoint images.
+  - **Trip Snapshot Matrix**: 6 structured cards summarizing cultural hubs, handcrafted experiences, bespoke stays, intermodal transport, culinary focus, and weather readiness.
+  - **Budget Leeway Breakdown**: Tier cards for Stays (39%), Transit (26%), Experiences (14%), Dining (13%), and Contingency Leeway (8%) with favorable variance status.
+  - **Highlights & Microclimates**: Curated experiential highlights with morning permits and unhurried pacing tags; forecast cards with temperatures, precipitation likelihood, daylight hours, and packing advisories.
+  - **Navigation & Actions**: *View Full Itinerary* → `/trip/itinerary` (Batch 4 boundary), *Edit Route & Preferences* (returns to Step 1 preserving inputs), and *Export & Share Dossier* (clipboard sync).
+- **State & Persistence**:
+  - Canonical domain types in `frontend/src/types/itinerary.ts`: `FinalItinerary`, `DayPlan`, `ActivitySlot`, `DayMeal`, `HotelStay`, `TransportLeg`, `BudgetBreakdown`, `PlanningEvent`, `PlanRunState`.
+  - `TripPlanningContext` extended with `itinerary`, `setItinerary`, `planRunState`, `setPlanRunState`, and `clearPlan`.
+  - LocalStorage key `safarnama.itinerary.v1` preserves generated itineraries across direct URL re-entry, refreshes, and navigation.
+  - Offline fallback synthesizer `synthesizeItineraryFromDraft()` converts wizard draft state into a complete itinerary.
+- **Verification**: 30 automated Vitest tests passing (`flow.test.tsx` [25] + `batch3.test.tsx` [5]), TypeScript build clean (`pnpm build`), and 0 oxlint warnings/errors across 38 files. Visual fidelity verified against Stitch designs `0dfa100bc4f3426a97fed4293a89ac1a` (Screen 8) and `4f5013a45060434197b913e2a825a76c` (Screen 9).
+- **Next**: Batch 4 (Screens 10–13: Day-by-Day Itinerary `/trip/itinerary`, Day Detail / Activity Timeline, Destination Details, Transport Details).
 
 ---
 

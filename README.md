@@ -8,13 +8,13 @@
 
 ```text
 Status: In Active Development
-Current Phase: Phase 18 — Frontend (Batch 2 Complete)
-Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete), Phase 17 (API Streaming — Real-time LangGraph SSE Event Emission & Endpoints Complete), Phase 18 (Frontend Batch 1 & 2: Welcome, Trip Details, Destinations, Preferences, Budget, Review & Confirm with Interactive Controls, Static Destination Auto-Population, Dynamic Route Seeding, URL-Addressable Routes & Device-Local Draft Persistence Complete)
-Test Suite: 572 Python unit tests + 24 Frontend unit/flow tests passing (100% offline, zero network reliance in tests)
+Current Phase: Phase 18 — Frontend (Batch 3 Complete)
+Current Milestone: Phase 3 (8/8 Tools Complete), Phase 4 (FastAPI Layer & SSE Streaming Complete), Phase 5 (Domain Models Complete), Phase 6 (Intake Complete), Phase 7 (Visa Complete), Phase 8 (Logistics Complete), Phase 9 (Experience Complete), Phase 10 (Budget Engine Complete), Phase 11 (Optimizer Complete), Phase 12 (LangGraph Orchestration Complete), Phase 13 (First Complete Vertical Slice Complete), Phase 14 (International Vertical Slice Complete), Transport Layer Enhancements (SerpApi Google Flights, Seasonal Multipliers, Deep Linking Complete), Phase 15 (Flexible Dates Complete), Phase 16 (Budget Conflict & Human Decision Flow, Selective Re-planning & API Complete), Phase 17 (API Streaming — Real-time LangGraph SSE Event Emission & Endpoints Complete), Phase 18 (Frontend Batch 1 & 2: Welcome, Trip Details, Destinations, Preferences, Budget, Review & Confirm with Interactive Controls, Static Destination Auto-Population, Dynamic Route Seeding, URL-Addressable Routes & Device-Local Draft Persistence; Batch 3: Trip Planning Progress `/planner/progress` SSE Lifecycle & Trip Overview Dossier `/trip/overview` Complete)
+Test Suite: 587 Python unit tests + 30 Frontend unit/flow tests passing (100% offline, zero network reliance in tests)
 Code Quality: 100% compliant with Ruff and Oxlint
 ```
 
-Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, complete domestic and international vertical slices (`POST /api/v1/plan`), flexible date optimization (`DateMode.FLEXIBLE`, `FIND_BEST`), human-in-the-loop budget conflict resolution with selective re-planning (`replan_workflow` and `POST /api/v1/plan/replan`), real-time planning progress streaming via Server-Sent Events (`src/graph/streaming.py` and `POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), **Frontend Batch 1** (`frontend/`: Welcome, Trip Details, and Destinations with full interactive controls, static destination auto-population across all 250 countries and 36 Indian states/UTs, and dynamic route seeding), and **Frontend Batch 2** (Preferences, Budget, Review & Confirm screens with URL-addressable routes, device-local draft validation, and backend-shaped `PlanRequestDraft` mapper).
+Safarnama is being built in small, verified, test-driven phases. The project has completed static data ingestion, static data access layer, the external tool layer (all 8 tools), the FastAPI API layer, the core domain models, the intake planning node, the date optimization node, the visa planning node, the logistics planning node, the experience planning node, the deterministic budget engine, the optimizer planning node, the LangGraph StateGraph orchestration workflow, complete domestic and international vertical slices (`POST /api/v1/plan`), flexible date optimization (`DateMode.FLEXIBLE`, `FIND_BEST`), human-in-the-loop budget conflict resolution with selective re-planning (`replan_workflow` and `POST /api/v1/plan/replan`), real-time planning progress streaming via Server-Sent Events (`src/graph/streaming.py` and `POST /api/v1/plan/stream`, `GET /api/v1/plan/stream`, `POST /api/v1/plan/replan/stream`), **Frontend Batch 1** (`frontend/`: Welcome, Trip Details, and Destinations with full interactive controls, static destination auto-population across all 250 countries and 36 Indian states/UTs, and dynamic route seeding), **Frontend Batch 2** (Preferences, Budget, Review & Confirm screens with URL-addressable routes, device-local draft validation, and backend-shaped `PlanRequestDraft` mapper), and **Frontend Batch 3** (Trip Planning Progress `/planner/progress` consuming the live `POST /api/v1/plan/stream` SSE synthesis engine, plus the synthesized Trip Overview Dossier `/trip/overview` with device-local `FinalItinerary` persistence).
 
 | Phase        | Description                                                                                             | Status       |
 | --------------| ---------------------------------------------------------------------------------------------------------| --------------|
@@ -36,7 +36,7 @@ Safarnama is being built in small, verified, test-driven phases. The project has
 | **Phase 15** | Flexible Dates (Candidate date window optimization, multi-factor scoring)                                | **Complete** |
 | **Phase 16** | Budget Conflict & Human Decision Flow (Interactive trade-off resolution, re-planning API)               | **Complete** |
 | **Phase 17** | API Streaming (Real-time SSE event emission from LangGraph & dual POST/GET endpoints)                   | **Complete** |
-| **Phase 18** | Frontend (Batch 1 & 2: Welcome, Trip Details, Destinations, Preferences, Budget, Review & Confirm)      | **Batch 2 Complete** |
+| **Phase 18** | Frontend (Batches 1–3: Welcome, Trip Details, Destinations, Preferences, Budget, Review & Confirm, Planning Progress, Trip Overview) | **Batch 3 Complete** |
 | **Phase 19** | End-to-End Test Matrix (Full regression and test scenarios)                                             | Planned      |
 | **Phase 20** | Production Hardening (Observability, rate limits, deployment)                                           | Planned      |
 
@@ -174,15 +174,26 @@ Generic conversational AI chatbots fail at this task because they:
   - **Screen 6 (Review & Confirm)**:
     - Ordered stops/nights, origin/destination, travelers/dates, preferences, budget, section edit routes, full-draft validation, and backend-shaped `PlanRequestDraft` mapper.
     - Infant counts surfaced as unsupported by the current request contract instead of dropped.
-    - Explicit Batch 3 boundary presentation (no planning API call yet).
-  - **URL-Addressable Routes & Persistence**: History API routes for all 6 screens with back/forward synchronization; versioned browser-local storage restores draft across direct loads, refreshes, and navigation.
+    - Confirmation validates the full draft and launches the Batch 3 planning flow at `/planner/progress`.
+  - **Screen 8: Trip Planning Progress (`/planner/progress`)**:
+    - Continuous synthesis engine: 7-stage vertical timeline (*Understanding your trip*, *Checking travel logistics*, *Finding experiences*, *Checking weather*, *Calculating budget*, *Optimizing your journey*, *Your Safarnama is ready*) with live indicators, completed checks, elapsed run timer, and stage telemetry tags.
+    - Blueprint banner with origin/destination corridor progression, seasonal highlight badge, party description, duration, and dossier run badge (`#SF-8492`).
+    - Route alignment & telemetry visualizer: waypoint stays with night counts, scenic transit connectors, verified data tags, and editorial philosophy excerpt.
+    - SSE consumer connecting to `POST /api/v1/plan/stream` with realistic simulation fallback (`simulatePlanningStream`) for development, offline, and hermetic testing environments, plus clean abort/cancel returning to review with draft inputs preserved.
+  - **Screen 9: Trip Overview Dossier (`/trip/overview`)**:
+    - Dossier header and meta (run tag, departure readiness pulse, editorial title, summary, and quick metadata pills), cinematic 21:9 hero showcase, Curator's Note, and Pacing & Rhythm Index gauges (*Cultural Immersiveness* 94%, *Transit Leisure Margin* 88%).
+    - Interactive 3-column route corridor with stop numbers, night counts, scenic rail tags, and waypoint imagery.
+    - Trip snapshot matrix (6 cards), budget leeway breakdown (Stays 39%, Transit 26%, Experiences 14%, Dining 13%, Contingency 8%), highlights gallery, and regional microclimate/packing forecast cards.
+    - Navigation & actions: *View Full Itinerary* → `/trip/itinerary` (Batch 4 boundary), *Edit Route & Preferences* (returns to Step 1 preserving inputs), and *Export & Share Dossier* (clipboard sync).
+  - **URL-Addressable Routes & Persistence**: History API routes for all 8 screens (6 wizard screens, `/planner/progress`, `/trip/overview`) with back/forward synchronization; versioned browser-local storage restores draft across direct loads, refreshes, and navigation.
+  - **Itinerary State & Device-Local Persistence**: Canonical `FinalItinerary` domain types (`FinalItinerary`, `DayPlan`, `ActivitySlot`, `DayMeal`, `HotelStay`, `TransportLeg`, `BudgetBreakdown`, `PlanningEvent`, `PlanRunState`) in `frontend/src/types/itinerary.ts`; `TripPlanningContext` extended with `itinerary`, `planRunState`, and `clearPlan`; localStorage key `safarnama.itinerary.v1` preserves generated itineraries across refreshes, direct URL re-entry, and navigation; `synthesizeItineraryFromDraft()` provides a dynamic offline synthesizer.
 - **Dual Verification Testing Architecture**:
-  - **Hermetic Offline Test Harness**: 572+ backend unit tests running completely offline (`SAFARNAMA_USE_FIXTURES=true`) + 24 frontend Vitest component & flow tests (`flow.test.tsx`).
+  - **Hermetic Offline Test Harness**: 587+ backend unit tests running completely offline (`SAFARNAMA_USE_FIXTURES=true`) + 30 frontend Vitest component & flow tests (`flow.test.tsx` [25] + `batch3.test.tsx` [5]).
   - **Live Network Integration Verification**: Automated 8-stage live verification suite (`scripts/verify_live_nodes.py`) validating real-world API connectivity, authentication, live schema compatibility, and graceful fallbacks across all planning nodes.
 
 ### Planned Capabilities (Future Phases)
 
-- **Frontend Batch 3** (Progress route, `/api/v1/plan/stream` lifecycle, progress/warnings/errors, completed itinerary/overview) — *Phase 18 Continued*
+- **Frontend Batch 4** (Day-by-Day Itinerary `/trip/itinerary`, Day Detail / Activity Timeline, Destination Details, Transport Details) — *Phase 18 Continued*
 - **End-to-End Test Matrix & Hardening** — *Phases 19–20*
 
 ---
@@ -264,7 +275,7 @@ Generic conversational AI chatbots fail at this task because they:
 ### Current Implementation vs Planned Components
 
 ```text
-IMPLEMENTED & VERIFIED (Phases 0–17 + Frontend Batch 1–2)
+IMPLEMENTED & VERIFIED (Phases 0–17 + Frontend Batch 1–3)
 ┌─────────────────────────────────────────────────────────────┐
 │ src/api/                                                    │
 │ - FastAPI endpoints, CORS & SSE streaming                   │
@@ -298,14 +309,15 @@ IMPLEMENTED & VERIFIED (Phases 0–17 + Frontend Batch 1–2)
 │ frontend/ (Vite + React 19 + TypeScript + Tailwind + pnpm)  │
 │ - Batch 1: Welcome, Trip Details, Destinations (Screens 1-3)│
 │ - Batch 2: Preferences, Budget, Review & Confirm (Screens 4-6)│
-│ - URL-addressable routes & device-local draft persistence   │
+│ - Batch 3: Planning Progress & Trip Overview (Screens 8-9)  │
+│ - Draft + itinerary persistence (safarnama.itinerary.v1)     │
 └─────────────────────────────────────────────────────────────┘
 
 PLANNED (Upcoming Phases)
 ┌─────────────────────────────────┐
-│ Frontend Batch 3                 │
-│ - Progress route & SSE lifecycle│
-│ - Itinerary overview/results     │
+│ Frontend Batch 4                │
+│ - Day-by-Day Itinerary & Timeline│
+│ - Destination & Transport Details│
 ├─────────────────────────────────┤
 │ End-to-End Test Matrix (Phase 19)│
 ├─────────────────────────────────┤
@@ -361,13 +373,20 @@ Safarnama/
 │       ├── visa_rules.json   # 199 base visa rules for Indian passport holders
 │       └── visa_rules_enriched.json # 199 multi-option enriched visa records
 ├── project_docs/             # Canonical project specifications & architectural guides
-│   ├── architecture.md       # Target system architecture and node specifications
-│   ├── design.md             # Visual identity and UI design tokens
-│   ├── instructions.md       # Master project setup & guidelines
-│   ├── memory.md             # Implementation progress snapshot and handoff record
-│   ├── phases.md             # Granular phase-by-phase implementation roadmap
-│   ├── prd.md                # Product Requirements Document
-│   └── rules.md              # Mandatory engineering and AI assistant rules
+│   ├── 00-product/           # Product definitions
+│   │   ├── architecture.md   # Target system architecture and node specifications
+│   │   ├── design.md         # Visual identity and UI design tokens
+│   │   └── prd.md            # Product Requirements Document
+│   ├── 01-planning/          # Implementation roadmap & frontend batches
+│   │   ├── phases.md         # Granular phase-by-phase implementation roadmap
+│   │   ├── frontend_batches.md        # Screen generation batch checklist
+│   │   ├── frontend_batch_develop.md  # Batch execution playbook
+│   │   └── frontend_batch_plans/      # Per-batch implementation plans
+│   ├── 02-prompts/           # Reusable agent prompt templates
+│   └── 03-reference/         # Reference material
+│       ├── memory.md         # Implementation progress snapshot and handoff record
+│       ├── rules.md          # Mandatory engineering and AI assistant rules
+│       └── attraction_catalog.md # Source-backed attraction catalog
 ├── scripts/                  # On-demand static data ingestion and enrichment scripts
 │   ├── enrich_visa_rules.py  # Gemini + Tavily on-demand visa rule enrichment
 │   ├── fetch_airports.py     # Ingests airports from ourairports-data
@@ -379,7 +398,7 @@ Safarnama/
 │   │   ├── app.py            # FastAPI app factory with CORS & exception handlers
 │   │   ├── models.py         # API Request/Response schemas (Estimate, PlanPreview, etc.)
 │   │   └── routes.py         # API routes (health, tools/status, estimate, preview, SSE)
-│   ├── graph/                # LangGraph state graph definitions (Phase 7 scaffold)
+│   ├── graph/                # LangGraph state, edges, workflow & SSE streaming (Phases 12 & 17)
 │   ├── models/               # Canonical Pydantic v2 domain models (Phases 1–5)
 │   │   ├── airport.py        # Airport model
 │   │   ├── budget.py         # CostBreakdown, ContingencyConfig, BudgetVariance, BudgetBreakdown
@@ -388,11 +407,15 @@ Safarnama/
 │   │   ├── logistics.py      # TransportLeg, HotelStay, LogisticsPlan
 │   │   ├── trip.py           # TripParty, TripDates, TripBudget, FoodPreferences, TripContext
 │   │   └── visa.py           # BaseVisaRule, VisaOption, EnrichedVisaRecord, VisaVerdict
-│   ├── nodes/                # LangGraph agent planning nodes (Phases 6–8)
+│   ├── nodes/                # LangGraph agent planning nodes (Phases 6–16)
 │   │   ├── __init__.py       # Exports intake_node, visa_node, logistics_node, etc.
 │   │   ├── intake_node.py    # Phase 6: Sanitization, gateway resolution, scope reconciliation
 │   │   ├── logistics_node.py # Phase 8: Transport legs & hotel stays planning, room estimation
-│   │   └── visa_node.py      # Phase 7: Static baseline + live policy reconciliation & verdict
+│   │   ├── visa_node.py      # Phase 7: Static baseline + live policy reconciliation & verdict
+│   │   ├── budget_node.py    # Phase 10: Deterministic budget engine
+│   │   ├── optimizer_node.py # Phase 11: Tiered optimization & trade-offs
+│   │   ├── date_node.py      # Phase 15: Flexible date window optimization
+│   │   └── synthesizer_node.py # Phase 13: Final itinerary assembly
 │   ├── prompts/              # Isolated system prompts and prompt templates
 │   │   ├── estimator_prompts.py # Prompts for LLM fallback estimator
 │   │   └── visa_prompts.py   # Prompts for visa enrichment & live verification
@@ -411,30 +434,41 @@ Safarnama/
 │   │   ├── components/       # Reusable UI components (Header, Footer, Stepper, etc.)
 │   │   ├── context/          # TripPlanningContext state management
 │   │   ├── data/             # Static datasets (countries, India places, attractions)
-│   │   ├── screens/          # 6 wizard screens (Welcome → Review)
-│   │   ├── test/             # Vitest component & flow tests (24 tests)
+│   │   ├── screens/          # 8 screens (Welcome → Planning Progress → Trip Overview)
+│   │   ├── test/             # Vitest component & flow tests (30 tests)
 │   │   └── types/            # TypeScript type definitions
 │   └── package.json          # pnpm-managed dependencies
 └── tests/                    # Automated test suite
     ├── conftest.py           # Shared pytest fixtures
     ├── integration/          # Integration test suite (Phase 11 scaffold)
-    └── unit/                 # 572 passing offline unit tests
+    └── unit/                 # 587 passing offline unit tests
         ├── test_api.py       # API endpoint, validation & SSE streaming tests
+        ├── test_api_streaming.py # 12 Phase 17 SSE streaming tests
+        ├── test_attractions.py # Attraction catalog extraction tests
+        ├── test_budget_node.py # 20 Phase 10 deterministic budget engine tests
         ├── test_calculator.py
+        ├── test_date_optimizer.py # 19 Phase 15 flexible date tests
         ├── test_domain_models.py # 89 tests for trip, itinerary, logistics, visa, budget
         ├── test_enrich_visa_rules.py
+        ├── test_experience_node.py # 13 Phase 9 experience planning tests
         ├── test_fallback_estimator.py
         ├── test_fetch_airports.py
         ├── test_fetch_country_profiles.py
+        ├── test_fetch_india_places.py # 5 Indian geographic ingestion tests
         ├── test_fetch_visa_rules.py
         ├── test_forex.py
+        ├── test_graph.py     # 19 Phase 12 LangGraph orchestration tests
         ├── test_hotels.py
+        ├── test_human_decision_flow.py # 15 Phase 16 re-planning tests
         ├── test_intake_node.py # 21 tests for intake node, resolution, scope enforcement
+        ├── test_international_slice.py # 8 Phase 14 international slice tests
         ├── test_logistics_node.py # 22 tests for logistics planning, rooms, and routes
+        ├── test_optimizer_node.py # 18 Phase 11 optimizer & guardrail tests
         ├── test_places.py
         ├── test_project_foundation.py
         ├── test_static_data.py
         ├── test_transport.py
+        ├── test_vertical_slice.py # 9 Phase 13 domestic vertical slice tests
         ├── test_visa_node.py # 20 tests for visa node, semantic LLM reconciliation, static baseline
         ├── test_weather.py
         └── test_web_search.py
@@ -444,7 +478,7 @@ Safarnama/
 
 ## 8. Development Phases & Roadmap
 
-Safarnama uses an incremental delivery roadmap defined in `project_docs/phases.md`. Each phase must be fully implemented, tested, and verified before the next begins.
+Safarnama uses an incremental delivery roadmap defined in `project_docs/01-planning/phases.md`. Each phase must be fully implemented, tested, and verified before the next begins.
 
 ```text
 Phase 0: Project Foundation [COMPLETED]
@@ -483,7 +517,7 @@ Phase 16: Budget Conflict & Human Decision Flow [COMPLETED: Interactive Re-plann
       ↓
 Phase 17: API Streaming [COMPLETED: Real-time LangGraph SSE Events]
       ↓
-Phase 18: Frontend [COMPLETED: Batch 1 (Screens 1-3) + Batch 2 (Screens 4-6)]
+Phase 18: Frontend [BATCHES 1–3 COMPLETE: Welcome, Trip Details, Destinations, Preferences, Budget, Review & Confirm, Planning Progress, Trip Overview — Batch 4 Next]
       ↓
 Phase 19: End-to-End Test Matrix [PLANNED]
       ↓
@@ -540,10 +574,27 @@ Phase 20: Production Hardening [PLANNED]
 - **Phase 9 (Experience Functionality — Complete)**:
   - `src/nodes/experience_node.py`: Daily activity and dining planning engine (`experience_node`, `process_experience`), pacing calibration (`RELAXED`: 1, `BALANCED`: 2, `PACKED`: 3 slots/day), weather-responsive indoor substitutions with transparent traveler notes, must-visit fulfillment tracking, hotel and booking URL association from `LogisticsPlan`, and party-scaled deterministic cost aggregation.
   - 13 comprehensive unit tests in `tests/unit/test_experience_node.py`.
+- **Phases 10–12 (Budget Engine, Optimizer & LangGraph Orchestration — Complete)**:
+  - Deterministic `Decimal` budget engine with dynamic contingency and 5-tier variance classification (`src/nodes/budget_node.py`, 20 tests in `tests/unit/test_budget_node.py`).
+  - Tiered optimizer with hard quality guardrails, trade-off alternatives, and re-planning proposals (`src/nodes/optimizer_node.py`, 18 tests in `tests/unit/test_optimizer_node.py`).
+  - Compiled `StateGraph` with parallel planning branches, deterministic warning/error reducers, and selective re-planning (`src/graph/`, 19 tests in `tests/unit/test_graph.py`).
+- **Phases 13–14 (Domestic & International Vertical Slices — Complete)**:
+  - End-to-end `POST /api/v1/plan` itinerary synthesis into immutable `FinalItinerary`, auto scope detection, deterministic visa fee integration, and Schengen single-visa optimization (`tests/unit/test_vertical_slice.py`, `tests/unit/test_international_slice.py`).
+- **Phase 15 (Flexible Dates — Complete)**:
+  - `date_optimizer` node generating `EXACT`, `FLEXIBLE`, and `FIND_BEST` candidate windows with multi-factor pricing/weather/convenience scoring (`src/nodes/date_node.py`, 19 tests in `tests/unit/test_date_optimizer.py`).
+- **Phase 16 (Budget Conflict & Human Decision Flow — Complete)**:
+  - 4-tier budget conflict resolution with human trade-off decisions and component-isolated selective re-planning via `POST /api/v1/plan/replan` (`tests/unit/test_human_decision_flow.py`).
+- **Phase 17 (API Streaming — Complete)**:
+  - `src/graph/streaming.py` emitting milestone `PlanningEvent`s from LangGraph `astream_events(..., version="v2")` with `POST`/`GET /api/v1/plan/stream` endpoints (`tests/unit/test_api_streaming.py`).
+- **Frontend Batch 3 (Phase 18 — Complete)**:
+  - Trip Planning Progress (`/planner/progress`): 7-stage continuous synthesis timeline consuming `POST /api/v1/plan/stream` with simulation fallback, route/telemetry visualizer, elapsed timer, and cancel controls.
+  - Trip Overview Dossier (`/trip/overview`): hero showcase, Curator's Note, Pacing & Rhythm Index, route corridor, snapshot matrix, budget leeway breakdown, and microclimate/packing cards.
+  - State & persistence: `FinalItinerary` domain types in `frontend/src/types/itinerary.ts`, `TripPlanningContext` extensions, and `safarnama.itinerary.v1` localStorage persistence.
+  - 30 frontend tests passing (`frontend/src/test/flow.test.tsx` [25] + `batch3.test.tsx` [5]).
 
 ### Immediate Next Milestone
 
-- **Phase 18 — Frontend Batch 3**: Progress route, `/api/v1/plan/stream` lifecycle, progress/warnings/errors display, and completed itinerary/overview reveal.
+- **Phase 18 — Frontend Batch 4**: Day-by-Day Itinerary (`/trip/itinerary`), Day Detail / Activity Timeline, Destination Details, and Transport Details (Screens 10–13).
 
 ---
 
@@ -630,6 +681,7 @@ Safarnama currently provides:
 2. The **Immutable Domain Modeling Layer** (`src/models/`) defining contracts for trip context, itineraries, logistics, visas, and budgets.
 3. The **External Travel Tools Suite** (`src/tools/`) with all 8 multi-tier adapters and offline fixtures.
 4. The **Static Data Ingestion Suite** (`scripts/`) for on-demand dataset ingestion and AI-assisted visa rule enrichment.
+5. The **React Web Client** (`frontend/`) implementing the 8-screen planning wizard, live `/planner/progress` SSE consumption, and the `/trip/overview` dossier.
 
 ### Starting the FastAPI Server
 
@@ -765,7 +817,7 @@ Safarnama adheres to a **fixture-first testing philosophy**. All unit tests must
 ### Executing Tests
 
 ```bash
-# Run the entire test suite (572 passing tests)
+# Run the entire test suite (587 passing tests)
 uv run pytest
 
 # Run tests with verbose output
@@ -901,7 +953,7 @@ Financial calculations follow strict rules defined in `src/tools/calculator.py`:
 
 ---
 
-## 19. Frontend Web Application (Batch 2 Complete)
+## 19. Frontend Web Application (Batch 3 Complete)
 
 The Safarnama web client lives in `frontend/`, constructed as an editorial travel planning interface faithfully aligned with the approved Stitch project **`Safarnama`** (`projects/12901504223215830628`).
 
@@ -911,8 +963,8 @@ The Safarnama web client lives in `frontend/`, constructed as an editorial trave
 - **Typography & Icons**: Google Fonts (`Plus Jakarta Sans` for geometric structural headings, `Inter` for utilitarian micro-legibility), Google Material Symbols Outlined
 - **Color Identity**: Light-mode editorial canvas (`#FFFDF8`), elevated card surfaces (`#FFFFFF`), Safarnama Saffron (`#E87524`), and Deep Maroon accents (`#7A2E2E`)
 - **State Management**: Centralized `TripPlanningContext` with full bidirectional state retention across navigation steps
-- **Routing**: URL-addressable History API routes (`/planner/preferences`, `/planner/budget`, `/planner/review`) with back/forward synchronization
-- **Persistence**: Versioned browser-local storage restoring draft across direct loads, refreshes, and navigation
+- **Routing**: URL-addressable History API routes (`/planner/trip-details`, `/planner/destinations`, `/planner/preferences`, `/planner/budget`, `/planner/review`, `/planner/progress`, `/trip/overview`) with back/forward synchronization; `/trip/itinerary` is reserved for Batch 4 behind an explicit boundary state
+- **Persistence**: Versioned browser-local storage restoring the wizard draft across direct loads, refreshes, and navigation, plus localStorage key `safarnama.itinerary.v1` preserving the generated `FinalItinerary` dossier
 
 ### Batch 1 Implemented Screens:
 1. **Screen 1: Welcome / Landing Screen**
@@ -948,7 +1000,18 @@ The Safarnama web client lives in `frontend/`, constructed as an editorial trave
 6. **Screen 6: Review & Confirm** (`/planner/review`)
    - Ordered stops/nights, origin/destination, travelers/dates, preferences, budget, section edit routes, full-draft validation, and backend-shaped `PlanRequestDraft` mapper.
    - Infant counts surfaced as unsupported by the current request contract instead of dropped.
-   - Explicit Batch 3 boundary presentation (no planning API call yet).
+   - Confirmation hands off to the Batch 3 planning flow (`/planner/progress`).
+
+### Batch 3 Implemented Screens:
+- **Screen 8: Trip Planning Progress** (`/planner/progress`)
+   - 7-stage continuous synthesis timeline with live indicators, completed checks, elapsed run timer, and stage telemetry tags.
+   - Real-time SSE consumer for `POST /api/v1/plan/stream` with `simulatePlanningStream` fallback for offline/dev/testing, plus clean abort/cancel preserving draft inputs.
+   - Blueprint banner (corridor progression, seasonal badge, party, duration, dossier run badge), route alignment & telemetry visualizer, and `View Full Itinerary` handoff to `/trip/overview`.
+- **Screen 9: Trip Overview Dossier** (`/trip/overview`)
+   - Editorial dossier header (run tag, departure readiness pulse, metadata pills), cinematic 21:9 hero, Curator's Note, and Pacing & Rhythm Index gauges.
+   - 3-column route corridor cards, 6-card trip snapshot matrix, budget leeway breakdown (Stays/Transit/Experiences/Dining/Contingency), highlights gallery, and regional microclimate & packing forecasts.
+   - Actions: *View Full Itinerary* (`/trip/itinerary`, Batch 4 boundary), *Edit Route & Preferences* (draft-preserving), and *Export & Share Dossier*.
+   - `FinalItinerary` state from `frontend/src/types/itinerary.ts` rendered via `TripPlanningContext` extensions with offline `synthesizeItineraryFromDraft()` fallback.
 
 ### Running Frontend Locally:
 ```bash
@@ -961,7 +1024,7 @@ The application will be live at `http://localhost:5173/`.
 ### Running Tests & Linting:
 ```bash
 cd frontend
-pnpm test -- --run   # 24 unit/flow tests in Vitest
+pnpm test -- --run   # 30 unit/flow tests in Vitest
 pnpm build           # TypeScript typecheck & production bundle
 pnpm lint            # Oxlint static analysis
 ```
@@ -982,7 +1045,7 @@ When contributing code or modifying this repository:
    - Implement one capability or tool at a time.
    - Write comprehensive unit tests with offline mock fixtures.
    - Run `uv run pytest` and `uv run ruff check .` before committing.
-   - Document changes in `project_docs/memory.md`.
+   - Document changes in `project_docs/03-reference/memory.md`.
 4. **Preserve Architectural Invariants**:
    - Never use floating-point math for currencies.
    - Keep import root as `src.*` (configured in `pyproject.toml`).
@@ -996,16 +1059,16 @@ If you are an AI assistant (Claude Code, Cursor, Copilot, Codex, Antigravity) pi
 
 1. **Read Project Documentation First**:
    Before modifying or adding code, inspect:
-   - `project_docs/memory.md` — The living implementation status and current task handoff.
-   - `project_docs/prd.md` — Intended product requirements.
-   - `project_docs/architecture.md` — Target system architecture.
-   - `project_docs/rules.md` — Engineering constraints and principles.
-   - `project_docs/phases.md` — Granular implementation roadmap.
-   - `project_docs/design.md` — Visual guidelines and color tokens.
+   - `project_docs/03-reference/memory.md` — The living implementation status and current task handoff.
+   - `project_docs/00-product/prd.md` — Intended product requirements.
+   - `project_docs/00-product/architecture.md` — Target system architecture.
+   - `project_docs/03-reference/rules.md` — Engineering constraints and principles.
+   - `project_docs/01-planning/phases.md` — Granular implementation roadmap.
+   - `project_docs/00-product/design.md` — Visual guidelines and color tokens.
 2. **Inspect Existing Code**:
    Do not assume documented features are implemented. Check `src/` and `tests/` directly.
 3. **Follow the Active Phase**:
-   Identify the current phase in `project_docs/memory.md`. Work only on the requested task. Do not implement future phases without explicit instructions.
+   Identify the current phase in `project_docs/03-reference/memory.md`. Work only on the requested task. Do not implement future phases without explicit instructions.
 4. **Verify Your Work**:
    Always run:
    ```bash
@@ -1014,7 +1077,7 @@ If you are an AI assistant (Claude Code, Cursor, Copilot, Codex, Antigravity) pi
    uv run ruff format --check .
    ```
 5. **Update Memory**:
-   Before completing your turn, update `project_docs/memory.md` with:
+   Before completing your turn, update `project_docs/03-reference/memory.md` with:
    - Completed functionality
    - Test counts and results
    - Known limitations or open issues
@@ -1024,7 +1087,7 @@ If you are an AI assistant (Claude Code, Cursor, Copilot, Codex, Antigravity) pi
 
 ## 22. Visual & Design Identity
 
-The visual foundation for Safarnama is detailed in `project_docs/design.md`:
+The visual foundation for Safarnama is detailed in `project_docs/00-product/design.md`:
 
 - **Design Vision**: Modern Indian travel companion with a warm sense of place, blending contemporary digital travel journal aesthetics with Indian cultural warmth.
 - **Theme**: Light theme canvas optimized for reading dense itineraries, schedule cards, and budget breakdowns.

@@ -6,7 +6,9 @@ import type {
   TripBudgetDraft,
 } from '../types/trip';
 import { TripPlanningContext } from './TripPlanningContextDef';
+import type { FinalItinerary, PlanRunState } from '../types/itinerary';
 import { PRECONFIGURED_CIRCUITS } from '../data/locations';
+import { getMustVisitOptions } from '../data/mustVisitOptions';
 import {
   ALL_CURATED_DESTINATIONS,
   resolveDestinationData,
@@ -27,7 +29,19 @@ const refreshStoredStopImages = (stops: RouteStop[]): RouteStop[] =>
       : stop;
   });
 
+const retainMustVisitsForRoute = (
+  mustVisits: string[],
+  tripDetails: TripDetailsState,
+  stops: RouteStop[]
+): string[] => {
+  const availablePlaces = new Set(
+    getMustVisitOptions(tripDetails, stops).map((option) => option.name.toLocaleLowerCase())
+  );
+  return mustVisits.filter((place) => availablePlaces.has(place.trim().toLocaleLowerCase()));
+};
+
 const DRAFT_STORAGE_KEY = 'safarnama.trip-draft.v1';
+const ITINERARY_STORAGE_KEY = 'safarnama.itinerary.v1';
 
 interface StoredTripDraft {
   tripDetails?: TripDetailsState;
@@ -40,6 +54,15 @@ const readStoredDraft = (): StoredTripDraft | null => {
   try {
     const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY);
     return stored ? (JSON.parse(stored) as StoredTripDraft) : null;
+  } catch {
+    return null;
+  }
+};
+
+const readStoredItinerary = (): FinalItinerary | null => {
+  try {
+    const stored = window.localStorage.getItem(ITINERARY_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as FinalItinerary) : null;
   } catch {
     return null;
   }
@@ -94,16 +117,54 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       : JSON.parse(JSON.stringify(PRECONFIGURED_CIRCUITS[0].defaultStops))
   );
   const [preferences, setPreferences] = useState<PlannerPreferences>(
-    () => storedDraft?.preferences ?? {
-      travelStyle: 'COMFORTABLE',
-      pace: 'BALANCED',
-      activityPreferences: ['HISTORY_HERITAGE', 'NATURE', 'FOOD_EXPERIENCE'],
-      mustVisits: [],
+    () => {
+      const initialPreferences = storedDraft?.preferences ?? {
+        travelStyle: 'COMFORTABLE' as const,
+        pace: 'BALANCED' as const,
+        activityPreferences: ['HISTORY_HERITAGE', 'NATURE', 'FOOD_EXPERIENCE'] as PlannerPreferences['activityPreferences'],
+        mustVisits: [],
+      };
+      return {
+        ...initialPreferences,
+        mustVisits: retainMustVisitsForRoute(initialPreferences.mustVisits, tripDetails, destinations),
+      };
     }
   );
   const [budget, setBudget] = useState<TripBudgetDraft>(
     () => storedDraft?.budget ?? { budgetMode: 'TOTAL', budgetInr: 60000 }
   );
+  const [itinerary, setItineraryState] = useState<FinalItinerary | null>(readStoredItinerary);
+  const [planRunState, setPlanRunState] = useState<PlanRunState>({
+    status: 'idle',
+    currentStage: 'intake',
+    progressPercent: 0,
+    elapsedSeconds: 0,
+    events: [],
+  });
+
+  const setItinerary = (itin: FinalItinerary | null) => {
+    setItineraryState(itin);
+    try {
+      if (itin) {
+        window.localStorage.setItem(ITINERARY_STORAGE_KEY, JSON.stringify(itin));
+      } else {
+        window.localStorage.removeItem(ITINERARY_STORAGE_KEY);
+      }
+    } catch {
+      // ignore storage error
+    }
+  };
+
+  const clearPlan = () => {
+    setItinerary(null);
+    setPlanRunState({
+      status: 'idle',
+      currentStage: 'intake',
+      progressPercent: 0,
+      elapsedSeconds: 0,
+      events: [],
+    });
+  };
 
   useEffect(() => {
     try {
@@ -233,8 +294,8 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const depIso = formatLocalIso(departure);
     const retIso = formatLocalIso(returnD);
 
-    setTripDetails((prev) => ({
-      ...prev,
+    const nextTripDetails: TripDetailsState = {
+      ...tripDetails,
       scope: destItem.scope,
       destination: destItem.name,
       destinations: parts,
@@ -245,9 +306,20 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       returnDateIso: retIso,
       departureLegInfo: `${departure.getFullYear()} • Morning leg`,
       returnLegInfo: `${returnD.getFullYear()} • Evening leg`,
+    };
+
+    setTripDetails((prev) => ({
+      ...prev,
+      ...nextTripDetails,
     }));
 
     setDestinations(destItem.defaultStops);
+    setPreferences((previous) => {
+      const mustVisits = retainMustVisitsForRoute(previous.mustVisits, nextTripDetails, destItem.defaultStops);
+      return mustVisits.length === previous.mustVisits.length
+        ? previous
+        : { ...previous, mustVisits };
+    });
   };
 
   const seedCircuit = (circuitId: string) => {
@@ -283,6 +355,7 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
       mustVisits: [],
     });
     setBudget({ budgetMode: 'TOTAL', budgetInr: 60000 });
+    clearPlan();
   };
 
   return (
@@ -304,6 +377,11 @@ export const TripPlanningProvider: React.FC<{ children: React.ReactNode }> = ({ 
         seedCircuit,
         seedDestination,
         resetAll,
+        itinerary,
+        setItinerary,
+        planRunState,
+        setPlanRunState,
+        clearPlan,
       }}
     >
       {children}
